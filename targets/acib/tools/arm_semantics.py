@@ -10,9 +10,11 @@ memory mutations, and ordered peripheral MMIO transactions.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import struct
 import sys
@@ -51,12 +53,24 @@ STACK_TOP = 0x1001BD00
 STOP_PC   = 0x000FF000
 SCRATCH   = 0x1002E000  # Scratch test buffer above 0x1002D2C4 inside mapped SRAM
 
+AUTO_DIFF_REGIONS: tuple[tuple[int, int], ...] = (
+    (0x10000000, 0x0001AF80),  # RAM_DATA + RAM_BSS below stacks
+    (0x1001BD80, 0x00011544),  # RAM_BSS above MSP stack .. 0x1002D2C4
+    (0x1002E000, 0x00008000),  # 32 KB structured test scratch arena
+    (0x20000000, 0x00004000),  # SoC shared SRAM slice
+    (0x4D280000, 0x00001000),  # Shared MAC<->PHY Mailbox SRAM
+)
+
 ARG_REGS = (UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3)
 
 MMIO_RANGES = (
+    (0x42030000, 0x4209FFFF),  # Coex / IPC MMIO (0x42034000, 0x42080000, 0x42090000)
     (0x42440000, 0x4244FFFF),  # ACI / RTKPMGR
     (0x4D154000, 0x4D154FFF),  # W3 PHY Sequencer & Doorbells
-    (0x520DC000, 0x522DBFFF),  # Chip Cfg, BT Modem, 1 MHz Timer, EvTrig, RF 0x52205000
+    (0x520D0000, 0x522DFFFF),  # Chip Cfg, BT Modem, 1 MHz Timer, EvTrig, LC MAC 0x52200000
+    (0x52600000, 0x526BFFFF),  # RF / Radio Sequencer MMIO (0x52610000..0x526A0000)
+    (0x529C0000, 0x529CFFFF),  # ULLA ADMA MMIO
+    (0x52F00000, 0x52F0FFFF),  # Platform MMIO
     (0xE0001000, 0xE000FFFF),  # ARMv7-M DWT, NVIC, SCB, MPU
 )
 
@@ -138,25 +152,40 @@ def _count_printf_specs(fmt: str) -> int:
 
 
 class ArmDiffMachine:
-    def __init__(self, *, is_raw: bool, raw_bytes: bytes, elf_bytes: bytes) -> None:
+    def __init__(
+        self,
+        *,
+        is_raw: bool,
+        raw_bytes: bytes,
+        elf_bytes: bytes,
+        extra_stubs: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.is_raw = is_raw
+        self.extra_stubs = list(extra_stubs or [])
         self.cpu = Uc(UC_ARCH_ARM, UC_MODE_THUMB | UC_MODE_MCLASS)
         self.cpu.ctl_set_cpu_model(UC_CPU_ARM_CORTEX_M4)
 
         for base, size in (
             (0x00000000, 0x00100000),  # 1 MB ROM + STOP_PC page
-            (0x10000000, 0x00030000),  # 192 KB SRAM + test scratch
+            (0x10000000, 0x00040000),  # 256 KB SRAM + test scratch arena
+            (0x20000000, 0x00010000),  # SoC shared SRAM slice
+            (0x42030000, 0x00070000),  # Coex / IPC MMIO
             (0x42440000, 0x00010000),  # ACI / RTKPMGR MMIO
             (0x4D154000, 0x00001000),  # W3 PHY Sequencer MMIO
             (0x4D280000, 0x00001000),  # Shared MAC<->PHY Mailbox SRAM
-            (0x520DC000, 0x00200000),  # 0x520DC000 .. 0x522DBFFF MMIO
+            (0x520D0000, 0x00210000),  # 0x520D0000 .. 0x522DFFFF MMIO
+            (0x52600000, 0x000C0000),  # 0x52600000 .. 0x526BFFFF RF MMIO
+            (0x529C0000, 0x00010000),  # ULLA ADMA MMIO
+            (0x52F00000, 0x00010000),  # Platform MMIO
             (0xE0000000, 0x00010000),  # ARMv7-M DWT & SCS MMIO
         ):
             self.cpu.mem_map(base, size)
 
         self.symbols: dict[str, int] = {}
+        self.text_bounds: tuple[int, int] = (0, 0)
         self.base_ram_data = raw_bytes[0xF9860 : 0xF9860 + 0xAC1E]
-        self._zero_bss_and_scratch = b"\x00" * (0x30000 - 0xAC1E)
+        self._zero_bss_and_scratch = b"\x00" * (0x40000 - 0xAC1E)
+        self._zero_soc_shm = b"\x00" * 0x4000
         self._zero_mbox = b"\x00" * 0x1000
 
         if is_raw:
@@ -168,6 +197,10 @@ class ArmDiffMachine:
                 for seg in elf.iter_segments():
                     if seg["p_type"] == "PT_LOAD" and seg["p_filesz"] > 0:
                         self.cpu.mem_write(seg["p_vaddr"], seg.data())
+                text_sec = elf.get_section_by_name(".text")
+                if text_sec is not None:
+                    t_start = int(text_sec["sh_addr"])
+                    self.text_bounds = (t_start, t_start + int(text_sec["sh_size"]))
                 symtab = elf.get_section_by_name(".symtab")
                 assert symtab is not None
                 for sym in symtab.iter_symbols():
@@ -196,13 +229,20 @@ class ArmDiffMachine:
 
         # Attach exact entry-address hooks to pending_c link stubs for callee/arg verification.
         self._stub_by_addr: dict[int, tuple[str, int | str]] = {}
-        for raw_rva, sym_name, abi_spec in PENDING_STUB_SPECS:
+        all_stub_specs: list[tuple[int, str, int | str]] = list(PENDING_STUB_SPECS)
+        for es in self.extra_stubs:
+            es_rva = int(es["rva"], 16) if isinstance(es["rva"], str) else int(es["rva"])
+            all_stub_specs.append((es_rva, str(es["symbol"]), es.get("arity", 0)))
+
+        for raw_rva, sym_name, abi_spec in all_stub_specs:
             if is_raw:
                 hook_addr = raw_rva & ~1
             else:
                 if sym_name not in self.symbols:
                     continue
                 hook_addr = self.symbols[sym_name] & ~1
+            if hook_addr in self._stub_by_addr:
+                continue
             self._stub_by_addr[hook_addr] = (sym_name, abi_spec)
             self.cpu.hook_add(
                 UC_HOOK_CODE,
@@ -330,6 +370,20 @@ class ArmDiffMachine:
             self.patch_code(rva, ret_r0)
         self.patch_code(0xE713C, ret_r2)
         self.patch_code(0xEA86E, ea86e)
+        for es in self.extra_stubs:
+            es_rva = int(es["rva"], 16) if isinstance(es["rva"], str) else int(es["rva"])
+            kind = es.get("ret_kind", "ret0")
+            if kind == "ret1":
+                self.patch_code(es_rva & ~1, ret1)
+            elif kind == "ret2":
+                self.patch_code(es_rva & ~1, ret2)
+            elif kind == "ret_r0":
+                self.patch_code(es_rva & ~1, ret_r0)
+            else:
+                self.patch_code(es_rva & ~1, ret0)
+
+    def snapshot_auto_regions(self) -> list[bytes]:
+        return [bytes(self.cpu.mem_read(addr, length)) for addr, length in AUTO_DIFF_REGIONS]
 
     def reset_state(self) -> None:
         for addr, orig in reversed(self.patched_rom):
@@ -339,6 +393,7 @@ class ArmDiffMachine:
         self.pending_w1c_4d154c64 = 0
         self.cpu.mem_write(0x10000000, self.base_ram_data)
         self.cpu.mem_write(0x1000AC1E, self._zero_bss_and_scratch)
+        self.cpu.mem_write(0x20000000, self._zero_soc_shm)
         self.cpu.mem_write(0x4D280000, self._zero_mbox)
         for addr in self.touched_mmio:
             self.cpu.mem_write(addr, b"\x00\x00\x00\x00")
@@ -1154,196 +1209,336 @@ def build_cases() -> list[dict[str, Any]]:
     return cases
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--elf", type=Path, required=True)
-    parser.add_argument("--raw", type=Path, required=True)
-    parser.add_argument("--ledger", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=None)
-    args = parser.parse_args()
+def _make_default_arena_blob() -> bytes:
+    """Deterministic 16 KB scratch arena (0x1002E000..0x10031FFF) with valid nested pointers."""
+    buf = bytearray(0x4000)
+    # Blocks 0..3 at +0x0000, +0x0800, +0x1000, +0x1800 hold struct/packet headers
+    # with valid nested 32-bit pointers into sub-blocks at +0x2000..+0x3C00.
+    for blk in range(4):
+        base_off = blk * 0x800
+        sub_ptr0 = 0x10030000 + blk * 0x400
+        sub_ptr1 = 0x10031000 + blk * 0x400
+        # Populate words: mix of valid sub-pointers and distinct non-zero scalar fields
+        struct.pack_into(
+            "<8I",
+            buf,
+            base_off,
+            sub_ptr0,
+            sub_ptr1,
+            0x00020001 + blk,
+            0x00100004 + blk * 3,
+            sub_ptr0 + 0x80,
+            sub_ptr1 + 0x80,
+            0x00000012 + blk * 5,
+            0x00000003 + blk,
+        )
+        for i in range(0x20, 0x800):
+            buf[base_off + i] = ((i * 13 + blk * 29 + 7) & 0x7F) | (0x80 if (i & 7) == 5 else 0)
+    # Populate sub-blocks (+0x2000..+0x3FFF) with realistic non-zero payload bytes
+    for i in range(0x2000, 0x4000):
+        buf[i] = (i * 17 + 0x23) & 0xFF
+    # Ensure NUL terminators every 64 bytes in +0x3800..+0x3FFF for C-string safety
+    for i in range(0x383F, 0x4000, 64):
+        buf[i] = 0
+    return bytes(buf)
 
-    raw_bytes = args.raw.read_bytes()
-    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
-    if raw_sha != EXPECTED_RAW_SHA256:
-        print(f"ERROR: raw acib SHA-256 mismatch: {raw_sha}", file=sys.stderr)
-        return 1
 
-    elf_bytes = args.elf.read_bytes()
-    ledger = json.loads(args.ledger.read_text(encoding="utf-8"))
+DEFAULT_ARENA_BLOB = _make_default_arena_blob()
 
-    sym_to_rva: dict[str, int] = {}
-    sym_to_size: dict[str, int] = {}
+
+def _apply_declarative_setup(m: ArmDiffMachine, vspec: dict[str, Any]) -> None:
+    arena = vspec.get("arena")
+    if arena == "default":
+        m.write_bytes(SCRATCH, DEFAULT_ARENA_BLOB)
+    elif arena == "alt":
+        # Variant arena with distinct values & high bits set
+        alt = bytes((b ^ 0x5A) for b in DEFAULT_ARENA_BLOB[:0x2000]) + DEFAULT_ARENA_BLOB[0x2000:]
+        m.write_bytes(SCRATCH, alt)
+        # Re-restore valid nested pointers at +0x0000..+0x181F
+        for blk in range(4):
+            base = SCRATCH + blk * 0x800
+            m.write_u32(base + 0x00, 0x10030200 + blk * 0x400)
+            m.write_u32(base + 0x04, 0x10031200 + blk * 0x400)
+            m.write_u32(base + 0x10, 0x10030280 + blk * 0x400)
+            m.write_u32(base + 0x14, 0x10031280 + blk * 0x400)
+
+    for addr_raw, hex_s in vspec.get("mem_hex", ()):
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.write_bytes(addr, bytes.fromhex(hex_s))
+    for addr_raw, val in vspec.get("mem_u32", ()):
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.write_u32(addr, int(val))
+    for addr_raw, val in vspec.get("mem_u16", ()):
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.write_u16(addr, int(val))
+    for addr_raw, val in vspec.get("mem_u8", ()):
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.write_u8(addr, int(val))
+    for addr_raw, val in vspec.get("mmio_u32", ()):
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.write_mmio_u32(addr, int(val))
+    for addr_raw, plan_map in vspec.get("mmio_plan", {}).items():
+        addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)
+        m.read_plan[addr] = {int(k): int(v) for k, v in plan_map.items()}
+    if vspec.get("w1c_4d154c64"):
+        m.w1c_4d154c64 = True
+
+
+def load_p2_specs(p2_path: Path | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if p2_path is None or not p2_path.is_file():
+        return [], []
+    doc = json.loads(p2_path.read_text(encoding="utf-8"))
+    extra_stubs = list(doc.get("extra_pending_stubs", []))
+    cases: list[dict[str, Any]] = []
+    for fentry in doc.get("functions", []):
+        c_sym = fentry["c_symbol"]
+        suite = fentry.get("suite", "p2_reconstructed")
+        check_r0 = bool(fentry.get("check_r0", True))
+        check_r1 = bool(fentry.get("check_r1", False))
+        stub_pending = bool(fentry.get("stub_pending", False))
+        stop_at_halt = bool(fentry.get("stop_at_halt", False))
+        for idx, vec in enumerate(fentry.get("vectors", [])):
+            vid = vec.get("id", f"v{idx}")
+            watch_list = [
+                (int(a, 16) if isinstance(a, str) else int(a), int(ln))
+                for a, ln in vec.get("watch", ())
+            ]
+            cases.append({
+                "suite": suite,
+                "case_id": f"{c_sym}_{vid}",
+                "c_symbol": c_sym,
+                "args": [int(x, 16) if isinstance(x, str) else int(x) for x in vec.get("args", ())],
+                "setup": None,
+                "decl_setup": vec,
+                "watch": watch_list,
+                "auto_mem_diff": bool(vec.get("auto_mem_diff", True)),
+                "check_r0": bool(vec.get("check_r0", check_r0)),
+                "check_r1": bool(vec.get("check_r1", check_r1)),
+                "primask": int(vec.get("primask", 0)),
+                "basepri": int(vec.get("basepri", 0)),
+                "ipsr": int(vec.get("ipsr", 0)),
+                "sp": int(vec.get("sp", STACK_TOP)),
+                "stub_pending": bool(vec.get("stub_pending", stub_pending)),
+                "stop_at_halt": bool(vec.get("stop_at_halt", stop_at_halt)),
+            })
+    return extra_stubs, cases
+
+
+# Worker-local state for multi-core ProcessPoolExecutor
+_W_RAW_BYTES: bytes = b""
+_W_RAW_M: ArmDiffMachine | None = None
+_W_ELF_M: ArmDiffMachine | None = None
+_W_MD: cs.Cs | None = None
+_W_SYM_TO_RVA: dict[str, int] = {}
+_W_SYM_TO_SIZE: dict[str, int] = {}
+_W_SPECS_BY_SYM: dict[str, list[dict[str, Any]]] = {}
+
+
+def _init_worker(
+    elf_path: str,
+    raw_path: str,
+    ledger_path: str,
+    p2_path_str: str,
+) -> None:
+    global _W_RAW_BYTES, _W_RAW_M, _W_ELF_M, _W_MD
+    global _W_SYM_TO_RVA, _W_SYM_TO_SIZE, _W_SPECS_BY_SYM
+
+    _W_RAW_BYTES = Path(raw_path).read_bytes()
+    elf_bytes = Path(elf_path).read_bytes()
+    ledger = json.loads(Path(ledger_path).read_text(encoding="utf-8"))
+
+    _W_SYM_TO_RVA = {}
+    _W_SYM_TO_SIZE = {}
     for fn in ledger["functions"]:
         if fn["status"] == "reconstructed_c" and "c_symbol" in fn:
-            sym_to_rva[fn["c_symbol"]] = int(fn["rva"], 16)
-            sym_to_size[fn["c_symbol"]] = int(fn["size"])
+            _W_SYM_TO_RVA[fn["c_symbol"]] = int(fn["rva"], 16)
+            _W_SYM_TO_SIZE[fn["c_symbol"]] = int(fn["size"])
 
-    raw_m = ArmDiffMachine(is_raw=True, raw_bytes=raw_bytes, elf_bytes=elf_bytes)
-    elf_m = ArmDiffMachine(is_raw=False, raw_bytes=raw_bytes, elf_bytes=elf_bytes)
+    p2_path = Path(p2_path_str) if p2_path_str else None
+    extra_stubs, p2_cases = load_p2_specs(p2_path)
+    all_cases = build_cases() + p2_cases
 
-    md = cs.Cs(cs.CS_ARCH_ARM, cs.CS_MODE_THUMB | cs.CS_MODE_MCLASS)
+    _W_SPECS_BY_SYM = {}
+    for sp in all_cases:
+        _W_SPECS_BY_SYM.setdefault(sp["c_symbol"], []).append(sp)
 
-    cases = build_cases()
-    results: list[dict[str, Any]] = []
-    suite_stats: dict[str, dict[str, int]] = {}
-    divergences = 0
-    exercised_syms: set[str] = set()
-    cases_by_sym: dict[str, list[tuple[dict[str, Any], dict[str, Any], list[bytes]]]] = {}
+    _W_RAW_M = ArmDiffMachine(
+        is_raw=True, raw_bytes=_W_RAW_BYTES, elf_bytes=elf_bytes, extra_stubs=extra_stubs
+    )
+    _W_ELF_M = ArmDiffMachine(
+        is_raw=False, raw_bytes=_W_RAW_BYTES, elf_bytes=elf_bytes, extra_stubs=extra_stubs
+    )
+    _W_MD = cs.Cs(cs.CS_ARCH_ARM, cs.CS_MODE_THUMB | cs.CS_MODE_MCLASS)
 
-    for spec in cases:
-        suite = spec["suite"]
-        case_id = spec["case_id"]
-        c_sym = spec["c_symbol"]
-        exercised_syms.add(c_sym)
 
-        if c_sym not in sym_to_rva:
-            raise KeyError(f"{c_sym} not marked reconstructed_c in ledger.json")
-        if c_sym not in elf_m.symbols:
-            raise KeyError(f"{c_sym} missing from acib.elf symbol table")
+def _prepare_machine(m: ArmDiffMachine, spec: dict[str, Any], c_sym: str, *, is_raw: bool) -> None:
+    m.reset_state()
+    if spec["stub_pending"]:
+        if is_raw:
+            m.install_pending_link_stubs()
+        m.track_stub_calls = True
+        if c_sym not in ("acib_panic_null", "acib_panic_code_line", "acib_panic_code_group", "rtk_abort_panic"):
+            m.panic_null_varargs = 1
+    if spec.get("setup") is not None:
+        spec["setup"](m)
+    if spec.get("decl_setup") is not None:
+        _apply_declarative_setup(m, spec["decl_setup"])
 
-        raw_rva = sym_to_rva[c_sym]
-        elf_vma = elf_m.symbols[c_sym] & ~1
 
-        # Disassemble first instruction of both raw ROM and rebuilt ELF via Capstone
-        raw_insns = list(md.disasm(raw_bytes[raw_rva : raw_rva + 8], raw_rva, count=1))
-        elf_insns = list(md.disasm(elf_m.read_bytes(elf_vma, 8), elf_vma, count=1))
-        disasm_ok = len(raw_insns) == 1 and len(elf_insns) == 1
+def _run_symbol_batch(sym_batch: list[str]) -> dict[str, Any]:
+    assert _W_RAW_M is not None and _W_ELF_M is not None and _W_MD is not None
+    raw_m = _W_RAW_M
+    elf_m = _W_ELF_M
+    md = _W_MD
 
-        raw_m.reset_state()
-        elf_m.reset_state()
-        if spec["stub_pending"]:
-            raw_m.install_pending_link_stubs()
-            raw_m.track_stub_calls = True
-            elf_m.track_stub_calls = True
-            if c_sym not in ("acib_panic_null", "acib_panic_code_line", "acib_panic_code_group", "rtk_abort_panic"):
-                raw_m.panic_null_varargs = 1
-                elf_m.panic_null_varargs = 1
-        if spec["setup"] is not None:
-            spec["setup"](raw_m)
-            spec["setup"](elf_m)
-
-        raw_until = 0x06CFF4 if spec["stop_at_halt"] else STOP_PC
-        elf_until = (elf_m.symbols["sub_6CFF4"] & ~1) if spec["stop_at_halt"] else STOP_PC
-
-        raw_out = raw_m.run_call(
-            raw_rva,
-            spec["args"],
-            primask=spec["primask"],
-            basepri=spec["basepri"],
-            ipsr=spec["ipsr"],
-            sp=spec["sp"],
-            until_pc=raw_until,
-        )
-        elf_out = elf_m.run_call(
-            elf_vma,
-            spec["args"],
-            primask=spec["primask"],
-            basepri=spec["basepri"],
-            ipsr=spec["ipsr"],
-            sp=spec["sp"],
-            until_pc=elf_until,
-        )
-
-        mismatches: list[str] = []
-        if not disasm_ok:
-            mismatches.append("capstone_disasm_failed")
-        if spec["check_r0"] and raw_out["r0"] != elf_out["r0"]:
-            mismatches.append(f"r0 raw=0x{raw_out['r0']:08x} elf=0x{elf_out['r0']:08x}")
-        if spec["check_r1"] and raw_out["r1"] != elf_out["r1"]:
-            mismatches.append(f"r1 raw=0x{raw_out['r1']:08x} elf=0x{elf_out['r1']:08x}")
-        if raw_out["primask"] != elf_out["primask"]:
-            mismatches.append(f"primask raw={raw_out['primask']} elf={elf_out['primask']}")
-        if raw_out["basepri"] != elf_out["basepri"]:
-            mismatches.append(f"basepri raw=0x{raw_out['basepri']:x} elf=0x{elf_out['basepri']:x}")
-        if raw_out["transactions"] != elf_out["transactions"]:
-            mismatches.append(
-                f"mmio_tx raw({len(raw_out['transactions'])})={raw_out['transactions'][:6]} "
-                f"!= elf({len(elf_out['transactions'])})={elf_out['transactions'][:6]}"
-            )
-        if spec["stub_pending"] and raw_out["stub_calls"] != elf_out["stub_calls"]:
-            mismatches.append(
-                f"stub_calls raw({len(raw_out['stub_calls'])})={raw_out['stub_calls']} "
-                f"!= elf({len(elf_out['stub_calls'])})={elf_out['stub_calls']}"
-            )
-
-        raw_watch_blobs: list[bytes] = []
-        for w_addr, w_len in spec["watch"]:
-            rb = raw_m.read_bytes(w_addr, w_len)
-            eb = elf_m.read_bytes(w_addr, w_len)
-            raw_watch_blobs.append(rb)
-            if rb != eb:
-                mismatches.append(
-                    f"mem[0x{w_addr:08x}+0x{w_len:x}] raw={rb.hex()[:32]} != elf={eb.hex()[:32]}"
-                )
-
-        cases_by_sym.setdefault(c_sym, []).append((spec, raw_out, raw_watch_blobs))
-
-        ok = len(mismatches) == 0
-        if not ok:
-            divergences += 1
-            print(f"DIVERGENCE [{suite}/{case_id}] ({c_sym} @ 0x{raw_rva:06x}): {mismatches}",
-                  file=sys.stderr)
-
-        st = suite_stats.setdefault(suite, {"cases": 0, "divergences": 0})
-        st["cases"] += 1
-        if not ok:
-            st["divergences"] += 1
-
-        results.append({
-            "suite": suite,
-            "case_id": case_id,
-            "c_symbol": c_sym,
-            "raw_rva": hex(raw_rva),
-            "elf_vma": hex(elf_vma),
-            "mmio_transactions": len(raw_out["transactions"]),
-            "stub_calls": len(raw_out["stub_calls"]),
-            "watched_regions": len(spec["watch"]),
-            "passed": ok,
-            "mismatches": mismatches,
-        })
-
-    untested_syms = sorted(set(sym_to_rva) - exercised_syms)
-    if untested_syms:
-        print(
-            f"ERROR: {len(untested_syms)} reconstructed_c functions lack Unicorn coverage: {untested_syms}",
-            file=sys.stderr,
-        )
-
-    # 3-stub mutation audit across all reconstructed_c functions to prevent vacuous passes.
     stubs = (
         ("bx_lr", bytes.fromhex("7047")),
         ("ret_0", bytes.fromhex("00207047")),
         ("ret_1", bytes.fromhex("01207047")),
     )
-    stub_survivors: list[dict[str, str]] = []
-    literal_raw_stub_identities: list[dict[str, str]] = []
-    stub_trials = 0
-    for c_sym, raw_rva in sorted(sym_to_rva.items(), key=lambda kv: kv[1]):
-        if c_sym not in cases_by_sym:
+
+    batch_results: list[dict[str, Any]] = []
+    batch_survivors: list[dict[str, str]] = []
+    batch_identities: list[dict[str, str]] = []
+    batch_trials = 0
+    batch_divergences = 0
+
+    t_lo, t_hi = elf_m.text_bounds
+
+    for c_sym in sym_batch:
+        specs = _W_SPECS_BY_SYM.get(c_sym, [])
+        if not specs:
             continue
+        if c_sym not in _W_SYM_TO_RVA:
+            raise KeyError(f"{c_sym} not marked reconstructed_c in ledger.json")
+        if c_sym not in elf_m.symbols:
+            raise KeyError(f"{c_sym} missing from acib.elf symbol table")
+
+        raw_rva = _W_SYM_TO_RVA[c_sym]
         elf_vma = elf_m.symbols[c_sym] & ~1
-        raw_fn_bytes = raw_bytes[raw_rva : raw_rva + sym_to_size[c_sym]]
+
+        # Enforce that reconstructed_c executes compiled ELF .text (or pinned SysTick_Handler)
+        in_valid_elf_code = (t_lo <= elf_vma < t_hi) or (c_sym == "SysTick_Handler" and elf_vma == 0x000E58F0)
+
+        raw_insns = list(md.disasm(_W_RAW_BYTES[raw_rva : raw_rva + 8], raw_rva, count=1))
+        elf_insns = list(md.disasm(elf_m.read_bytes(elf_vma, 8), elf_vma, count=1))
+        disasm_ok = len(raw_insns) == 1 and len(elf_insns) == 1 and in_valid_elf_code
+
+        sym_exec_records: list[tuple[dict[str, Any], dict[str, Any], list[bytes], list[bytes] | None]] = []
+
+        for spec in specs:
+            suite = spec["suite"]
+            case_id = spec["case_id"]
+            auto_mem = bool(spec.get("auto_mem_diff", False))
+
+            _prepare_machine(raw_m, spec, c_sym, is_raw=True)
+            _prepare_machine(elf_m, spec, c_sym, is_raw=False)
+
+            raw_until = 0x06CFF4 if spec["stop_at_halt"] else STOP_PC
+            elf_until = (elf_m.symbols["sub_6CFF4"] & ~1) if spec["stop_at_halt"] else STOP_PC
+
+            raw_out = raw_m.run_call(
+                raw_rva,
+                spec["args"],
+                primask=spec["primask"],
+                basepri=spec["basepri"],
+                ipsr=spec["ipsr"],
+                sp=spec["sp"],
+                until_pc=raw_until,
+            )
+            elf_out = elf_m.run_call(
+                elf_vma,
+                spec["args"],
+                primask=spec["primask"],
+                basepri=spec["basepri"],
+                ipsr=spec["ipsr"],
+                sp=spec["sp"],
+                until_pc=elf_until,
+            )
+
+            mismatches: list[str] = []
+            if not disasm_ok:
+                mismatches.append("capstone_or_elf_text_vma_failed")
+            if spec["check_r0"] and raw_out["r0"] != elf_out["r0"]:
+                mismatches.append(f"r0 raw=0x{raw_out['r0']:08x} elf=0x{elf_out['r0']:08x}")
+            if spec["check_r1"] and raw_out["r1"] != elf_out["r1"]:
+                mismatches.append(f"r1 raw=0x{raw_out['r1']:08x} elf=0x{elf_out['r1']:08x}")
+            if raw_out["primask"] != elf_out["primask"]:
+                mismatches.append(f"primask raw={raw_out['primask']} elf={elf_out['primask']}")
+            if raw_out["basepri"] != elf_out["basepri"]:
+                mismatches.append(f"basepri raw=0x{raw_out['basepri']:x} elf=0x{elf_out['basepri']:x}")
+            if raw_out["transactions"] != elf_out["transactions"]:
+                mismatches.append(
+                    f"mmio_tx raw({len(raw_out['transactions'])})={raw_out['transactions'][:6]} "
+                    f"!= elf({len(elf_out['transactions'])})={elf_out['transactions'][:6]}"
+                )
+            if spec["stub_pending"] and raw_out["stub_calls"] != elf_out["stub_calls"]:
+                mismatches.append(
+                    f"stub_calls raw({len(raw_out['stub_calls'])})={raw_out['stub_calls']} "
+                    f"!= elf({len(elf_out['stub_calls'])})={elf_out['stub_calls']}"
+                )
+
+            raw_watch_blobs: list[bytes] = []
+            for w_addr, w_len in spec["watch"]:
+                rb = raw_m.read_bytes(w_addr, w_len)
+                eb = elf_m.read_bytes(w_addr, w_len)
+                raw_watch_blobs.append(rb)
+                if rb != eb:
+                    mismatches.append(
+                        f"mem[0x{w_addr:08x}+0x{w_len:x}] raw={rb.hex()[:32]} != elf={eb.hex()[:32]}"
+                    )
+
+            raw_auto_blobs: list[bytes] | None = None
+            if auto_mem:
+                raw_auto_blobs = raw_m.snapshot_auto_regions()
+                elf_auto_blobs = elf_m.snapshot_auto_regions()
+                for (r_base, _r_len), rb, eb in zip(AUTO_DIFF_REGIONS, raw_auto_blobs, elf_auto_blobs):
+                    if rb != eb:
+                        # Pinpoint first differing byte offset
+                        diff_off = next(i for i, (x, y) in enumerate(zip(rb, eb)) if x != y)
+                        d_addr = r_base + diff_off
+                        mismatches.append(
+                            f"auto_mem[0x{d_addr:08x}] raw={rb[diff_off:diff_off+8].hex()} "
+                            f"!= elf={eb[diff_off:diff_off+8].hex()}"
+                        )
+                        break
+
+            sym_exec_records.append((spec, raw_out, raw_watch_blobs, raw_auto_blobs))
+
+            ok = len(mismatches) == 0
+            if not ok:
+                batch_divergences += 1
+
+            batch_results.append({
+                "suite": suite,
+                "case_id": case_id,
+                "c_symbol": c_sym,
+                "raw_rva": hex(raw_rva),
+                "elf_vma": hex(elf_vma),
+                "mmio_transactions": len(raw_out["transactions"]),
+                "stub_calls": len(raw_out["stub_calls"]),
+                "watched_regions": len(spec["watch"]) + (len(AUTO_DIFF_REGIONS) if auto_mem else 0),
+                "passed": ok,
+                "mismatches": mismatches,
+            })
+
+        # 3-stub mutation audit for c_sym
+        raw_fn_bytes = _W_RAW_BYTES[raw_rva : raw_rva + _W_SYM_TO_SIZE[c_sym]]
         for stub_name, stub_bytes in stubs:
             if raw_fn_bytes == stub_bytes:
-                literal_raw_stub_identities.append({
+                batch_identities.append({
                     "c_symbol": c_sym,
                     "raw_rva": hex(raw_rva),
                     "raw_hex": raw_fn_bytes.hex(),
                     "stub": stub_name,
                 })
                 continue
-            stub_trials += 1
+            batch_trials += 1
             killed = False
             orig_elf_code = elf_m.read_bytes(elf_vma, len(stub_bytes))
             try:
-                for spec, raw_out, raw_watch_blobs in cases_by_sym[c_sym]:
-                    elf_m.reset_state()
-                    if spec["stub_pending"]:
-                        elf_m.track_stub_calls = True
-                        if c_sym not in ("acib_panic_null", "acib_panic_code_line", "acib_panic_code_group", "rtk_abort_panic"):
-                            elf_m.panic_null_varargs = 1
-                    if spec["setup"] is not None:
-                        spec["setup"](elf_m)
+                for spec, raw_out, raw_watch_blobs, raw_auto_blobs in sym_exec_records:
+                    _prepare_machine(elf_m, spec, c_sym, is_raw=False)
                     elf_m.cpu.mem_write(elf_vma, stub_bytes)
                     elf_m.cpu.ctl_remove_cache(0, 0x00100000)
                     elf_until = (elf_m.symbols["sub_6CFF4"] & ~1) if spec["stop_at_halt"] else STOP_PC
@@ -1379,20 +1574,139 @@ def main() -> int:
                             break
                     if killed:
                         break
+
+                    if raw_auto_blobs is not None:
+                        mut_auto = elf_m.snapshot_auto_regions()
+                        if mut_auto != raw_auto_blobs:
+                            killed = True
+                            break
             finally:
                 elf_m.cpu.mem_write(elf_vma, orig_elf_code)
                 elf_m.cpu.ctl_remove_cache(0, 0x00100000)
 
             if not killed:
-                stub_survivors.append({
+                batch_survivors.append({
                     "c_symbol": c_sym,
                     "raw_rva": hex(raw_rva),
                     "stub": stub_name,
                 })
-                print(
-                    f"STUB SURVIVOR: {c_sym} @ 0x{raw_rva:06x} survived {stub_name}",
-                    file=sys.stderr,
-                )
+
+    return {
+        "results": batch_results,
+        "survivors": batch_survivors,
+        "identities": batch_identities,
+        "trials": batch_trials,
+        "divergences": batch_divergences,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--elf", type=Path, required=True)
+    parser.add_argument("--raw", type=Path, required=True)
+    parser.add_argument("--ledger", type=Path, required=True)
+    parser.add_argument("--p2-vectors", type=Path, default=None)
+    parser.add_argument("--jobs", type=int, default=min(os.cpu_count() or 8, 12))
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+
+    raw_bytes = args.raw.read_bytes()
+    raw_sha = hashlib.sha256(raw_bytes).hexdigest()
+    if raw_sha != EXPECTED_RAW_SHA256:
+        print(f"ERROR: raw acib SHA-256 mismatch: {raw_sha}", file=sys.stderr)
+        return 1
+
+    ledger = json.loads(args.ledger.read_text(encoding="utf-8"))
+    sym_to_rva: dict[str, int] = {}
+    for fn in ledger["functions"]:
+        if fn["status"] == "reconstructed_c" and "c_symbol" in fn:
+            sym_to_rva[fn["c_symbol"]] = int(fn["rva"], 16)
+
+    p2_path = args.p2_vectors
+    if p2_path is None:
+        default_p2 = args.ledger.parent / "p2_vectors.json"
+        if default_p2.is_file():
+            p2_path = default_p2
+
+    _, p2_cases = load_p2_specs(p2_path)
+    all_cases = build_cases() + p2_cases
+
+    exercised_syms: set[str] = set()
+    ordered_syms: list[str] = []
+    for sp in all_cases:
+        csym = sp["c_symbol"]
+        if csym not in sym_to_rva:
+            raise KeyError(f"{csym} not marked reconstructed_c in ledger.json")
+        if csym not in exercised_syms:
+            exercised_syms.add(csym)
+            ordered_syms.append(csym)
+
+    ordered_syms.sort(key=lambda s: sym_to_rva[s])
+
+    untested_syms = sorted(set(sym_to_rva) - exercised_syms)
+    if untested_syms:
+        print(
+            f"ERROR: {len(untested_syms)} reconstructed_c functions lack Unicorn coverage: {untested_syms[:20]}",
+            file=sys.stderr,
+        )
+
+    n_workers = max(1, min(args.jobs, len(ordered_syms)))
+    # Partition ordered_syms into ~3x n_workers chunks for balanced load
+    n_chunks = max(1, min(len(ordered_syms), n_workers * 3))
+    chunks: list[list[str]] = [[] for _ in range(n_chunks)]
+    for idx, s in enumerate(ordered_syms):
+        chunks[idx % n_chunks].append(s)
+    chunks = [c for c in chunks if c]
+
+    results: list[dict[str, Any]] = []
+    stub_survivors: list[dict[str, str]] = []
+    literal_raw_stub_identities: list[dict[str, str]] = []
+    stub_trials = 0
+    divergences = 0
+
+    elf_str = str(args.elf.resolve())
+    raw_str = str(args.raw.resolve())
+    led_str = str(args.ledger.resolve())
+    p2_str = str(p2_path.resolve()) if p2_path is not None and p2_path.is_file() else ""
+
+    if n_workers == 1 or len(ordered_syms) <= 20:
+        _init_worker(elf_str, raw_str, led_str, p2_str)
+        batch_outs = [_run_symbol_batch(ch) for ch in chunks]
+    else:
+        with ProcessPoolExecutor(
+            max_workers=n_workers,
+            initializer=_init_worker,
+            initargs=(elf_str, raw_str, led_str, p2_str),
+        ) as pool:
+            batch_outs = list(pool.map(_run_symbol_batch, chunks))
+
+    for bo in batch_outs:
+        results.extend(bo["results"])
+        stub_survivors.extend(bo["survivors"])
+        literal_raw_stub_identities.extend(bo["identities"])
+        stub_trials += bo["trials"]
+        divergences += bo["divergences"]
+
+    results.sort(key=lambda r: (int(r["raw_rva"], 16), r["case_id"]))
+    stub_survivors.sort(key=lambda r: (int(r["raw_rva"], 16), r["stub"]))
+    literal_raw_stub_identities.sort(key=lambda r: (int(r["raw_rva"], 16), r["stub"]))
+
+    suite_stats: dict[str, dict[str, int]] = {}
+    for res in results:
+        st = suite_stats.setdefault(res["suite"], {"cases": 0, "divergences": 0})
+        st["cases"] += 1
+        if not res["passed"]:
+            st["divergences"] += 1
+            print(
+                f"DIVERGENCE [{res['suite']}/{res['case_id']}] ({res['c_symbol']} @ {res['raw_rva']}): {res['mismatches']}",
+                file=sys.stderr,
+            )
+
+    for surv in stub_survivors[:30]:
+        print(
+            f"STUB SURVIVOR: {surv['c_symbol']} @ {surv['raw_rva']} survived {surv['stub']}",
+            file=sys.stderr,
+        )
 
     passed_all = (
         divergences == 0
@@ -1404,6 +1718,7 @@ def main() -> int:
     report = {
         "target": "acib",
         "engine": "unicorn-armv7em-cortex-m4",
+        "workers": n_workers,
         "case_count": len(results),
         "functions_exercised": len(exercised_syms),
         "ledger_reconstructed_c": len(sym_to_rva),
@@ -1435,7 +1750,7 @@ def main() -> int:
     print(
         f"arm_semantics: PASS ({len(results)}/{len(results)} Unicorn ARMv7E-M differential cases, "
         f"{len(exercised_syms)}/{len(sym_to_rva)} reconstructed C functions, 0 divergences, "
-        f"0/{stub_trials} stub-mutation survivors)"
+        f"0/{stub_trials} stub-mutation survivors, {n_workers} workers)"
     )
     return 0
 

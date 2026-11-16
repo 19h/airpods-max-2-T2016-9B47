@@ -25,9 +25,12 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import multiprocessing as mp
+import os
 from pathlib import Path
 import struct
 import sys
+from typing import Any
 
 ROM_RODATA = (0x13090, 0x17590)
 RAM_DATA_VMA, RAM_DATA_FILE, RAM_DATA_LEN = 0x20000000, 0x20000, 0xBA4
@@ -77,7 +80,50 @@ def elf_function_addrs(elf_path: Path) -> dict[int, str]:
     return out
 
 
-def stub_mutation_audit(root: Path, elf_path: Path, ref_path: Path, raw: bytes, rec: list[dict]) -> tuple[dict, list[str]]:
+_MUT_PAIR: Any = None
+_MUT_SPECS_BY_RVA: dict[int, list[tuple[Any, ...]]] = {}
+_MUT_INITIAL_DETECTED: dict[int, set[str]] = {}
+_MUT_ACTIVE_PATCH: dict[str, Any] = {"addr": None, "stub": None}
+
+
+def _test_rva_mutations(rva: int) -> tuple[int, set[str]]:
+    assert _MUT_PAIR is not None
+    killed = set(_MUT_INITIAL_DETECTED.get(rva, set()))
+    specs = _MUT_SPECS_BY_RVA.get(rva, [])
+    for spec in specs:
+        if len(killed) == len(STUBS):
+            break
+        elf_sym = spec[3]
+        sym_va = _MUT_PAIR.sym_addr(elf_sym)
+        for sname, sbytes in STUBS.items():
+            if sname in killed:
+                continue
+            _MUT_ACTIVE_PATCH["addr"] = sym_va
+            _MUT_ACTIVE_PATCH["stub"] = sbytes
+            try:
+                mut_spec = list(spec)
+                mut_spec[8] = 0  # mutate_candidate_r0 = 0
+                mut_res = _MUT_PAIR._exec_diff_case(*mut_spec)
+                if not mut_res["matched"]:
+                    killed.add(sname)
+            except Exception:
+                killed.add(sname)
+            finally:
+                _MUT_ACTIVE_PATCH["addr"] = None
+                _MUT_ACTIVE_PATCH["stub"] = None
+    return rva, killed
+
+
+def stub_mutation_audit(
+    root: Path,
+    elf_path: Path,
+    ref_path: Path,
+    raw: bytes,
+    rec: list[dict],
+    matched_by_rva: dict[int, set[str]],
+) -> tuple[dict, list[str]]:
+    global _MUT_PAIR, _MUT_SPECS_BY_RVA, _MUT_INITIAL_DETECTED
+
     spec = importlib.util.spec_from_file_location("arm_sem", root / "tools/arm_semantics.py")
     assert spec is not None and spec.loader is not None
     arm_sem = importlib.util.module_from_spec(spec)
@@ -99,71 +145,44 @@ def stub_mutation_audit(root: Path, elf_path: Path, ref_path: Path, raw: bytes, 
                     "stub": sname,
                 })
 
-    active_patch: dict[str, int | bytes | None] = {"addr": None, "stub": None}
     orig_make_vm = arm_sem.CortexM4Pair._make_vm
-    orig_run = arm_sem.CortexM4Pair.run_diff_case
 
     def patched_make_vm(self, is_elf: bool):
         uc = orig_make_vm(self, is_elf)
-        if is_elf and active_patch["addr"] is not None:
-            uc.mem_write(int(active_patch["addr"]), bytes(active_patch["stub"]))  # type: ignore[arg-type]
+        if is_elf and _MUT_ACTIVE_PATCH["addr"] is not None:
+            uc.mem_write(int(_MUT_ACTIVE_PATCH["addr"]), bytes(_MUT_ACTIVE_PATCH["stub"]))
         return uc
 
-    def patched_run(
-        self,
-        suite: str,
-        name: str,
-        raw_rva: int,
-        elf_sym: str,
-        setup_fn,
-        compare_regions=None,
-        check_r0: bool = True,
-        check_r1: bool = False,
-        mutate_candidate_r0: int = 0,
-    ):
-        if raw_rva not in rec_by_rva or len(detected[raw_rva]) == len(STUBS):
-            # Already proved all 3 stubs fail on earlier cases for this RVA; skip redundant VM runs.
-            return {
-                "suite": suite,
-                "case": name,
-                "raw_rva": hex(raw_rva),
-                "elf_symbol": elf_sym,
-                "elf_addr": hex(self.sym_addr(elf_sym)),
-                "raw_r0": "0x0",
-                "elf_r0": "0x0",
-                "matched": True,
-                "mismatches": [],
-            }
-        base = orig_run(
-            self, suite, name, raw_rva, elf_sym, setup_fn,
-            compare_regions, check_r0, check_r1, mutate_candidate_r0,
-        )
-        if base["matched"]:
-            sym_va = self.sym_addr(elf_sym)
-            for sname, sbytes in STUBS.items():
-                if sname in detected[raw_rva]:
-                    continue
-                active_patch["addr"] = sym_va
-                active_patch["stub"] = sbytes
-                try:
-                    mut_res = orig_run(
-                        self, suite, name, raw_rva, elf_sym, setup_fn,
-                        compare_regions, check_r0, check_r1, 0,
-                    )
-                    if not mut_res["matched"]:
-                        detected[raw_rva].add(sname)
-                except Exception:
-                    detected[raw_rva].add(sname)
-                finally:
-                    active_patch["addr"] = None
-                    active_patch["stub"] = None
-        return base
-
     arm_sem.CortexM4Pair._make_vm = patched_make_vm
-    arm_sem.CortexM4Pair.run_diff_case = patched_run
 
     pair = arm_sem.CortexM4Pair(elf_path, ref_path)
+    pair.deferred_specs = []
     arm_sem.build_test_suites(pair)
+    all_specs = pair.deferred_specs
+    pair.deferred_specs = None
+
+    specs_by_rva: dict[int, list[tuple[Any, ...]]] = {rva: [] for rva in rec_by_rva}
+    for sp in all_specs:
+        rva = int(sp[2])
+        case_name = str(sp[1])
+        if rva in specs_by_rva and case_name in matched_by_rva.get(rva, set()):
+            specs_by_rva[rva].append(sp)
+
+    _MUT_PAIR = pair
+    _MUT_SPECS_BY_RVA = specs_by_rva
+    _MUT_INITIAL_DETECTED = detected
+
+    target_rvas = sorted(rec_by_rva.keys())
+    ncpu = min(12, max(1, os.cpu_count() or 1))
+    if ncpu <= 1 or len(target_rvas) < 16:
+        for rva in target_rvas:
+            _, killed = _test_rva_mutations(rva)
+            detected[rva] = killed
+    else:
+        ctx = mp.get_context("fork")
+        with ctx.Pool(processes=ncpu) as pool:
+            for rva, killed in pool.map(_test_rva_mutations, target_rvas, chunksize=8):
+                detected[rva] = killed
 
     failures: list[str] = []
     undefeated: list[dict[str, object]] = []
@@ -226,7 +245,9 @@ def main() -> int:
     if n_ret:
         errors.append(f"{n_ret} retained_native entries but no byte-identical native code is carried")
 
-    stub_summary, stub_errors = stub_mutation_audit(root, args.elf.resolve(), args.reference.resolve(), raw, rec)
+    stub_summary, stub_errors = stub_mutation_audit(
+        root, args.elf.resolve(), args.reference.resolve(), raw, rec, matched
+    )
     errors.extend(stub_errors)
 
     audit = code_pointer_audit(raw, inv, led, elf_function_addrs(args.elf))

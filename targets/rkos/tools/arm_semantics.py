@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing as mp
+import os
 from pathlib import Path
 import struct
 import sys
@@ -18,7 +20,17 @@ from typing import Any, Callable
 
 from capstone import CS_ARCH_ARM, CS_MODE_MCLASS, CS_MODE_THUMB, Cs
 from elftools.elf.elffile import ELFFile
-from unicorn import UC_ARCH_ARM, UC_MODE_MCLASS, UC_MODE_THUMB, Uc
+from unicorn import (
+    UC_ARCH_ARM,
+    UC_HOOK_CODE,
+    UC_HOOK_MEM_READ,
+    UC_HOOK_MEM_WRITE,
+    UC_MEM_READ,
+    UC_MEM_WRITE,
+    UC_MODE_MCLASS,
+    UC_MODE_THUMB,
+    Uc,
+)
 from unicorn.arm_const import (
     UC_ARM_REG_BASEPRI,
     UC_ARM_REG_C1_C0_2,
@@ -40,6 +52,10 @@ from unicorn.arm_const import (
 ROM_BASE = 0x00000000
 ROM_MAP_SIZE = 0x00020000
 STOP_ADDR = 0x0001F000  # Thumb stop sentinel (`nop; nop`)
+MMIO_BOOT_BASE = 0x00800000
+MMIO_BOOT_SIZE = 0x00004000
+SRAM_TRAMP_BASE = 0x01000000
+SRAM_TRAMP_SIZE = 0x00004000
 SCRATCH_BASE = 0x02000000
 SCRATCH_SIZE = 0x00010000
 SRAM_BASE = 0x20000000
@@ -47,15 +63,45 @@ SRAM_MAP_SIZE = 0x00030000
 HOST_STACK_TOP = 0x2002F000
 MMIO_LO_BASE = 0x40000000
 MMIO_LO_SIZE = 0x00420000
+MMIO_HI_BASE = 0x42200000
+MMIO_HI_SIZE = 0x00260000
 SCS_BASE = 0xE000E000
 SCS_SIZE = 0x00002000
+
+MMIO_APERTURES: tuple[tuple[int, int], ...] = (
+    (MMIO_BOOT_BASE, MMIO_BOOT_BASE + MMIO_BOOT_SIZE),
+    (MMIO_LO_BASE, MMIO_LO_BASE + MMIO_LO_SIZE),
+    (MMIO_HI_BASE, MMIO_HI_BASE + MMIO_HI_SIZE),
+    (SCS_BASE, SCS_BASE + SCS_SIZE),
+)
+
+
+def _read_cstr_bounded(uc: Uc, addr: int, max_len: int = 64) -> str:
+    if addr == 0:
+        return "<NULL>"
+    try:
+        raw = bytes(uc.mem_read(addr, max_len))
+    except Exception:
+        return f"<PTR:{hex(addr)}>"
+    end = raw.find(b"\x00")
+    if end != -1:
+        raw = raw[:end]
+    return raw.decode("latin1", errors="replace")
 
 
 class CortexM4Pair:
     def __init__(self, elf_path: Path, raw_path: Path) -> None:
+        self.elf_path = elf_path
+        self.raw_path = raw_path
         self.raw_bytes = raw_path.read_bytes()
         self.rom_raw = self.raw_bytes[0x0:0x17590]
         self.data_raw = self.raw_bytes[0x20000:0x20BA4]
+
+        ledger_path = Path(__file__).resolve().parent.parent / "verification/ledger.json"
+        led = json.loads(ledger_path.read_text(encoding="utf-8"))
+        self.pending_rvas: set[int] = {
+            int(f["rva"], 16) for f in led["functions"] if f["classification"] == "pending_c"
+        }
 
         self.elf_segments: list[tuple[int, bytes]] = []
         self.symbols: dict[str, int] = {}
@@ -72,6 +118,7 @@ class CortexM4Pair:
                     self.symbols[sym.name] = int(sym["st_value"])
 
         self.cs = Cs(CS_ARCH_ARM, CS_MODE_THUMB | CS_MODE_MCLASS)
+        self.deferred_specs: list[tuple[Any, ...]] | None = None
 
     def sym_addr(self, name: str) -> int:
         if name not in self.symbols:
@@ -90,9 +137,12 @@ class CortexM4Pair:
         uc = Uc(UC_ARCH_ARM, UC_MODE_THUMB | UC_MODE_MCLASS)
         uc.ctl_set_cpu_model(UC_CPU_ARM_CORTEX_M4)
         uc.mem_map(ROM_BASE, ROM_MAP_SIZE)
+        uc.mem_map(MMIO_BOOT_BASE, MMIO_BOOT_SIZE)
+        uc.mem_map(SRAM_TRAMP_BASE, SRAM_TRAMP_SIZE)
         uc.mem_map(SCRATCH_BASE, SCRATCH_SIZE)
         uc.mem_map(SRAM_BASE, SRAM_MAP_SIZE)
         uc.mem_map(MMIO_LO_BASE, MMIO_LO_SIZE)
+        uc.mem_map(MMIO_HI_BASE, MMIO_HI_SIZE)
         uc.mem_map(SCS_BASE, SCS_SIZE)
 
         if is_elf:
@@ -152,7 +202,80 @@ class CortexM4Pair:
             )
         return uc.reg_read(UC_ARM_REG_R0), uc.reg_read(UC_ARM_REG_R1)
 
-    def run_diff_case(
+    def _install_hooks(
+        self,
+        uc: Uc,
+        is_elf: bool,
+        raw_rva: int,
+        check_mmio_writes: bool,
+        mmio_read_seq: dict[int, list[int]] | None,
+        trap_pending: list[tuple[int, str, int | None]] | None,
+    ) -> tuple[list[tuple[int, int, int]], list[tuple[Any, ...]]]:
+        mmio_writes: list[tuple[int, int, int]] = []
+        stub_calls: list[tuple[Any, ...]] = []
+
+        if check_mmio_writes:
+            def _on_mmio_write(_uc: Uc, _access: int, address: int, size: int, value: int, _data: Any) -> None:
+                mask = (1 << (8 * size)) - 1
+                mmio_writes.append((address, size, value & mask))
+
+            for lo, hi in MMIO_APERTURES:
+                uc.hook_add(UC_HOOK_MEM_WRITE, _on_mmio_write, begin=lo, end=hi - 1)
+
+        if mmio_read_seq:
+            cursors: dict[int, int] = {a: 0 for a in mmio_read_seq}
+            for addr, seq in mmio_read_seq.items():
+                if seq:
+                    uc.mem_write(addr, struct.pack("<I", seq[0] & 0xFFFFFFFF))
+
+            def _on_mmio_read(uc_in: Uc, _access: int, address: int, _size: int, _value: int, _data: Any) -> None:
+                seq = mmio_read_seq.get(address)
+                if seq:
+                    idx = cursors[address] + 1
+                    cursors[address] = idx
+                    if idx < len(seq):
+                        uc_in.mem_write(address, struct.pack("<I", seq[idx] & 0xFFFFFFFF))
+
+            for lo, hi in MMIO_APERTURES:
+                uc.hook_add(UC_HOOK_MEM_READ, _on_mmio_read, begin=lo, end=hi - 1)
+
+        if trap_pending:
+            trap_map: dict[int, tuple[int, int | None, bool]] = {}
+            for pend_rva, pend_sym, ret_val in trap_pending:
+                if pend_rva == raw_rva or pend_rva not in self.pending_rvas:
+                    raise RuntimeError(
+                        f"trap_pending is strictly restricted to pending_c callees; got {hex(pend_rva)}"
+                    )
+                hook_pc = (self.sym_addr(pend_sym) if is_elf else pend_rva) & ~1
+                # Capture string arg0 for panic/log pending callees
+                capture_str = pend_rva in (0x3EE0, 0x3F04, 0x5592, 0x55B0, 0x11DB8)
+                trap_map[hook_pc] = (pend_rva, ret_val, capture_str)
+
+            def _on_code(uc_in: Uc, address: int, _size: int, _data: Any) -> None:
+                entry = trap_map.get(address & ~1)
+                if entry is None:
+                    return
+                pend_rva, ret_val, capture_str = entry
+                r0 = uc_in.reg_read(UC_ARM_REG_R0) & 0xFFFFFFFF
+                r1 = uc_in.reg_read(UC_ARM_REG_R1) & 0xFFFFFFFF
+                r2 = uc_in.reg_read(UC_ARM_REG_R2) & 0xFFFFFFFF
+                r3 = uc_in.reg_read(UC_ARM_REG_R3) & 0xFFFFFFFF
+                if capture_str:
+                    stub_calls.append((hex(pend_rva), _read_cstr_bounded(uc_in, r0), r1))
+                else:
+                    stub_calls.append((hex(pend_rva), r0, r1, r2, r3))
+                if ret_val is None:
+                    uc_in.reg_write(UC_ARM_REG_PC, STOP_ADDR | 1)
+                else:
+                    lr = uc_in.reg_read(UC_ARM_REG_LR)
+                    uc_in.reg_write(UC_ARM_REG_R0, ret_val & 0xFFFFFFFF)
+                    uc_in.reg_write(UC_ARM_REG_PC, lr)
+
+            uc.hook_add(UC_HOOK_CODE, _on_code, begin=ROM_BASE, end=ROM_MAP_SIZE - 1)
+
+        return mmio_writes, stub_calls
+
+    def _exec_diff_case(
         self,
         suite: str,
         name: str,
@@ -163,6 +286,10 @@ class CortexM4Pair:
         check_r0: bool = True,
         check_r1: bool = False,
         mutate_candidate_r0: int = 0,
+        check_mmio_writes: bool = False,
+        mmio_read_seq: dict[int, list[int]] | None = None,
+        check_sysregs: bool = False,
+        trap_pending: list[tuple[int, str, int | None]] | None = None,
     ) -> dict[str, Any]:
         elf_addr = self.sym_addr(elf_sym)
         uc_raw = self._make_vm(is_elf=False)
@@ -173,15 +300,38 @@ class CortexM4Pair:
         args_raw = setup_fn(uc_raw)
         args_elf = setup_fn(uc_elf)
 
+        raw_mmio_w, raw_stubs = self._install_hooks(
+            uc_raw, False, raw_rva, check_mmio_writes, mmio_read_seq, trap_pending
+        )
+        elf_mmio_w, elf_stubs = self._install_hooks(
+            uc_elf, True, raw_rva, check_mmio_writes, mmio_read_seq, trap_pending
+        )
+
         raw_r0, raw_r1 = self.call_fn(uc_raw, raw_rva, args_raw)
         elf_r0, elf_r1 = self.call_fn(uc_elf, elf_addr, args_elf)
         elf_r0 ^= mutate_candidate_r0
 
         mismatches: list[str] = []
-        if check_r0 and raw_r0 != elf_r0:
-            mismatches.append(f"R0 raw={hex(raw_r0)} vs elf={hex(elf_r0)}")
-        if check_r1 and raw_r1 != elf_r1:
-            mismatches.append(f"R1 raw={hex(raw_r1)} vs elf={hex(elf_r1)}")
+        if trap_pending and raw_stubs:
+            # When a noreturn pending trap fired, verify exact stub call sequence & args!
+            if raw_stubs != elf_stubs:
+                mismatches.append(f"stub_calls raw={raw_stubs} vs elf={elf_stubs}")
+        else:
+            if trap_pending and raw_stubs != elf_stubs:
+                mismatches.append(f"stub_calls raw={raw_stubs} vs elf={elf_stubs}")
+            if check_r0 and raw_r0 != elf_r0:
+                mismatches.append(f"R0 raw={hex(raw_r0)} vs elf={hex(elf_r0)}")
+            if check_r1 and raw_r1 != elf_r1:
+                mismatches.append(f"R1 raw={hex(raw_r1)} vs elf={hex(elf_r1)}")
+
+        if check_mmio_writes and raw_mmio_w != elf_mmio_w:
+            mismatches.append(f"mmio_writes raw={raw_mmio_w[:4]} vs elf={elf_mmio_w[:4]}")
+
+        if check_sysregs:
+            raw_sr = (uc_raw.reg_read(UC_ARM_REG_BASEPRI), uc_raw.reg_read(UC_ARM_REG_PRIMASK))
+            elf_sr = (uc_elf.reg_read(UC_ARM_REG_BASEPRI), uc_elf.reg_read(UC_ARM_REG_PRIMASK))
+            if raw_sr != elf_sr:
+                mismatches.append(f"sysregs(basepri,primask) raw={raw_sr} vs elf={elf_sr}")
 
         for r_addr, r_len in (compare_regions or []):
             b_raw = bytes(uc_raw.mem_read(r_addr, r_len))
@@ -203,6 +353,36 @@ class CortexM4Pair:
             "matched": len(mismatches) == 0,
             "mismatches": mismatches,
         }
+
+    def run_diff_case(
+        self,
+        suite: str,
+        name: str,
+        raw_rva: int,
+        elf_sym: str,
+        setup_fn: Callable[[Uc], list[int]],
+        compare_regions: list[tuple[int, int]] | None = None,
+        check_r0: bool = True,
+        check_r1: bool = False,
+        mutate_candidate_r0: int = 0,
+        check_mmio_writes: bool = False,
+        mmio_read_seq: dict[int, list[int]] | None = None,
+        check_sysregs: bool = False,
+        trap_pending: list[tuple[int, str, int | None]] | None = None,
+    ) -> dict[str, Any]:
+        if self.deferred_specs is not None:
+            idx = len(self.deferred_specs)
+            self.deferred_specs.append((
+                suite, name, raw_rva, elf_sym, setup_fn, compare_regions,
+                check_r0, check_r1, mutate_candidate_r0, check_mmio_writes,
+                mmio_read_seq, check_sysregs, trap_pending,
+            ))
+            return {"_deferred_idx": idx, "suite": suite, "case": name, "raw_rva": hex(raw_rva), "elf_symbol": elf_sym}
+        return self._exec_diff_case(
+            suite, name, raw_rva, elf_sym, setup_fn, compare_regions,
+            check_r0, check_r1, mutate_candidate_r0, check_mmio_writes,
+            mmio_read_seq, check_sysregs, trap_pending,
+        )
 
 
 def build_test_suites(pair: CortexM4Pair) -> list[dict[str, Any]]:
@@ -679,10 +859,29 @@ def build_test_suites(pair: CortexM4Pair) -> list[dict[str, Any]]:
 
 
     # --- Suite 8: Per-claim coverage (one or more direct cases for every reconstructed_c claim) ---
-    def safe(suite: str, name: str, rva: int, sym: str, setup: Callable[[Uc], list[int]],
-             regions: list[tuple[int, int]] | None = None, check_r0: bool = True) -> None:
+    def safe(
+        suite: str,
+        name: str,
+        rva: int,
+        sym: str,
+        setup: Callable[[Uc], list[int]],
+        regions: list[tuple[int, int]] | None = None,
+        check_r0: bool = True,
+        check_r1: bool = False,
+        check_mmio_writes: bool = False,
+        mmio_read_seq: dict[int, list[int]] | None = None,
+        check_sysregs: bool = False,
+        trap_pending: list[tuple[int, str, int | None]] | None = None,
+    ) -> None:
         try:
-            add(pair.run_diff_case(suite, name, rva, sym, setup, regions, check_r0=check_r0))
+            add(pair.run_diff_case(
+                suite, name, rva, sym, setup, regions,
+                check_r0=check_r0, check_r1=check_r1,
+                check_mmio_writes=check_mmio_writes,
+                mmio_read_seq=mmio_read_seq,
+                check_sysregs=check_sysregs,
+                trap_pending=trap_pending,
+            ))
         except Exception as exc:  # crashes count as divergences, never as passes
             add({"suite": suite, "case": name, "raw_rva": hex(rva), "elf_symbol": sym, "elf_addr": "?",
                  "raw_r0": "?", "elf_r0": "?", "matched": False, "mismatches": [f"exception: {exc}"]})
@@ -906,6 +1105,65 @@ def build_test_suites(pair: CortexM4Pair) -> list[dict[str, Any]]:
     return results
 
 
+_WORKER_PAIR: CortexM4Pair | None = None
+_WORKER_SPECS: list[tuple[Any, ...]] = []
+
+
+def _run_spec_idx(idx: int) -> tuple[int, dict[str, Any]]:
+    assert _WORKER_PAIR is not None
+    spec = _WORKER_SPECS[idx]
+    try:
+        res = _WORKER_PAIR._exec_diff_case(*spec)
+    except Exception as exc:
+        res = {
+            "suite": spec[0],
+            "case": spec[1],
+            "raw_rva": hex(spec[2]),
+            "elf_symbol": spec[3],
+            "elf_addr": "?",
+            "raw_r0": "?",
+            "elf_r0": "?",
+            "matched": False,
+            "mismatches": [f"exception: {exc}"],
+        }
+    return idx, res
+
+
+def execute_suites_parallel(pair: CortexM4Pair) -> list[dict[str, Any]]:
+    global _WORKER_PAIR, _WORKER_SPECS
+    pair.deferred_specs = []
+    placeholders = build_test_suites(pair)
+    specs = pair.deferred_specs
+    pair.deferred_specs = None
+
+    ncpu = min(12, max(1, os.cpu_count() or 1))
+    if ncpu <= 1 or len(specs) < 32:
+        exec_map = {}
+        for idx, spec in enumerate(specs):
+            try:
+                exec_map[idx] = pair._exec_diff_case(*spec)
+            except Exception as exc:
+                exec_map[idx] = {
+                    "suite": spec[0], "case": spec[1], "raw_rva": hex(spec[2]),
+                    "elf_symbol": spec[3], "elf_addr": "?", "raw_r0": "?", "elf_r0": "?",
+                    "matched": False, "mismatches": [f"exception: {exc}"],
+                }
+    else:
+        _WORKER_PAIR = pair
+        _WORKER_SPECS = specs
+        ctx = mp.get_context("fork")
+        with ctx.Pool(processes=ncpu) as pool:
+            exec_map = dict(pool.map(_run_spec_idx, range(len(specs)), chunksize=16))
+
+    out: list[dict[str, Any]] = []
+    for item in placeholders:
+        if "_deferred_idx" in item:
+            out.append(exec_map[int(item["_deferred_idx"])])
+        else:
+            out.append(item)
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--elf", type=Path, required=True, help="Path to rkos.elf")
@@ -918,7 +1176,7 @@ def main() -> int:
     raw_insn = pair.verify_thumb_prologue(is_elf=False, addr=0x11DC8)
     elf_insn = pair.verify_thumb_prologue(is_elf=True, addr=pair.sym_addr("rkos_sha256_compress"))
 
-    cases = build_test_suites(pair)
+    cases = execute_suites_parallel(pair)
     # Divergences on functions the ledger classifies as pending_c (C shim only) are
     # recorded as evidence for the demotion, not as failures. Any divergence on a
     # reconstructed_c claim fails here and again in tools/verify_claims.py.

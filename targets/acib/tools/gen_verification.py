@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import struct
 import uuid
 from pathlib import Path
@@ -13,6 +14,13 @@ ACIB_DIR = Path(__file__).resolve().parents[1]
 RAW_IMAGE = ACIB_DIR.parents[2] / "acib"
 IDA_EXPORT_DIR = Path("/tmp/acib-ida")
 VERIF_DIR = ACIB_DIR / "verification"
+
+PROVENANCE_FN_RE = re.compile(
+    r"/\*\s*@provenance\s+RVA\s+(0x[0-9a-fA-F]+)\s+([A-Za-z0-9_.$?]+)\s*\*/\s*"
+    r"(?:ACIB_[A-Z0-9_]+(?:\([^)]*\))?\s+)*"
+    r"(?:[A-Za-z_][A-Za-z0-9_*\s]*?\s+\*?)([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+    re.MULTILINE,
+)
 
 RETAINED_NATIVE: dict[int, tuple[str, str]] = {
     0x0E4A94: (
@@ -304,10 +312,24 @@ def main() -> int:
 
     fn_by_rva = {int(f["start"], 16): f for f in functions}
 
-    overlap = set(RETAINED_NATIVE) & set(RECONSTRUCTED_C)
+    reconstructed_all = dict(RECONSTRUCTED_C)
+    for src_file in sorted((ACIB_DIR / "src").rglob("*.c")):
+        rel_src = str(src_file.relative_to(ACIB_DIR))
+        txt = src_file.read_text(encoding="utf-8")
+        for m in PROVENANCE_FN_RE.finditer(txt):
+            rva = int(m.group(1), 16)
+            c_sym = m.group(3)
+            if rva in reconstructed_all and reconstructed_all[rva] != (rel_src, c_sym):
+                raise RuntimeError(
+                    f"Conflicting @provenance for 0x{rva:06x}: "
+                    f"{reconstructed_all[rva]} vs {(rel_src, c_sym)}"
+                )
+            reconstructed_all[rva] = (rel_src, c_sym)
+
+    overlap = set(RETAINED_NATIVE) & set(reconstructed_all)
     if overlap:
-        raise RuntimeError(f"Overlap between RETAINED_NATIVE and RECONSTRUCTED_C: {overlap}")
-    for rva in list(RETAINED_NATIVE) + list(RECONSTRUCTED_C):
+        raise RuntimeError(f"Overlap between RETAINED_NATIVE and reconstructed_all: {overlap}")
+    for rva in list(RETAINED_NATIVE) + list(reconstructed_all):
         if rva not in fn_by_rva:
             raise RuntimeError(f"RVA 0x{rva:x} missing from IDB functions.json")
 
@@ -389,8 +411,8 @@ def main() -> int:
                 "user_named": bool(f.get("user_named")),
             }
         )
-        if rva in RECONSTRUCTED_C:
-            src_file, c_symbol = RECONSTRUCTED_C[rva]
+        if rva in reconstructed_all:
+            src_file, c_symbol = reconstructed_all[rva]
             ledger_functions.append(
                 {
                     "rva": f"0x{rva:x}",
@@ -487,6 +509,10 @@ def main() -> int:
     sec_vtor_code_ptrs = count_odd_rom_code_ptrs(raw[0x400:0x640])
     ram_data_code_ptrs = count_odd_rom_code_ptrs(raw[0xF9860:0x10447E])
 
+    n_rec = len(reconstructed_all)
+    n_ret = len(RETAINED_NATIVE)
+    n_pend = len(ledger_functions) - n_rec - n_ret
+
     ledger = {
         "target": "acib",
         "binary_sha256": sha256,
@@ -494,7 +520,7 @@ def main() -> int:
             "CPU is ARMv7E-M soft-float (-target armv7em-none-eabi -mcpu=cortex-m4 -mfloat-abi=soft): zero VFP/FP instructions exist in acib; ROM 0xe50b8..0xe564b provides software IEEE-754 double routines and exception veneers save integer r4-r11+lr only.",
             "External loader (uarp/fwsg host loader) maps __TEXT (file 0x0..0xf984c -> VMA 0x0..0xf984c) and __DATA (file 0xf9860..0x10447e -> VMA 0x10000000..0x1000ac1e) directly before releasing Reset_Handler; Reset_Handler zeroes .bss (0x1000ac40..0x1002d2c4).",
             "MAC<->PHY IPC shares 4 KB mailbox SRAM at 0x4d280000 (MPU Region 5) and W3 PHY sequencer registers at 0x4d154000 (0x4d154038 SEQ_RF_CTRL, 0x4d154c64 PHY->MAC W1C status, 0x4d154c68 MAC->PHY doorbell) directly with phyb.",
-            "Only functions reimplemented in idiomatic, warning-free C11 with @provenance tags and passing Unicorn differential + stub-mutation checks are marked reconstructed_c (120); only byte-exact unedited instruction slices verified against raw acib by verify_load_image.py are marked retained_native (1: NMI_Handler @ 0xe4a94, 114 B); all unported functions and relocated ASM entry veneers remain pending_c (9,796).",
+            f"Only functions reimplemented in idiomatic, warning-free C11 with @provenance tags and passing Unicorn differential + stub-mutation checks are marked reconstructed_c ({n_rec:,}); only byte-exact unedited instruction slices verified against raw acib by verify_load_image.py are marked retained_native ({n_ret}: NMI_Handler @ 0xe4a94, 114 B); all unported functions and relocated ASM entry veneers remain pending_c ({n_pend:,}).",
         ],
         "known_deviations": {
             "relocated_entry_veneers": {
@@ -522,9 +548,9 @@ def main() -> int:
         },
         "summary": {
             "total_functions": len(ledger_functions),
-            "reconstructed_c": len(RECONSTRUCTED_C),
-            "retained_native": len(RETAINED_NATIVE),
-            "pending_c": len(ledger_functions) - len(RECONSTRUCTED_C) - len(RETAINED_NATIVE),
+            "reconstructed_c": n_rec,
+            "retained_native": n_ret,
+            "pending_c": n_pend,
         },
         "functions": ledger_functions,
     }
@@ -534,9 +560,9 @@ def main() -> int:
     (VERIF_DIR / "ledger.json").write_text(json.dumps(ledger, indent=2) + "\n")
     print(
         f"Wrote inventory.json ({len(inv_functions)} functions, {len(strings)} strings) "
-        f"and ledger.json (reconstructed_c={len(RECONSTRUCTED_C)}, "
-        f"retained_native={len(RETAINED_NATIVE)}, "
-        f"pending_c={ledger['summary']['pending_c']})"
+        f"and ledger.json (reconstructed_c={n_rec}, "
+        f"retained_native={n_ret}, "
+        f"pending_c={n_pend})"
     )
     return 0
 

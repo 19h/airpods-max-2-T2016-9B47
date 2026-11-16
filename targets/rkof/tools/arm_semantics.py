@@ -17,7 +17,9 @@ verifying exact architectural equivalence across:
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import json
+import os
 import struct
 import sys
 from dataclasses import dataclass, field
@@ -33,9 +35,9 @@ ROM_SIZE = 0x00200000
 SCRATCH_RTSI_PAGE = 0x00800000
 SCRATCH_RTSI_SIZE = 0x00001000
 SRAM_BASE = 0x20000000
-SRAM_SIZE = 0x000E0000
+SRAM_SIZE = 0x00100000
 TEST_RAM_BASE = 0x20100000
-TEST_RAM_SIZE = 0x00040000
+TEST_RAM_SIZE = 0x00100000
 REMAP_BASE = 0x4000C000
 REMAP_SIZE = 0x00001000
 UART_BASE = 0x42019000
@@ -49,6 +51,11 @@ SCS_SIZE = 0x00002000
 
 INITIAL_SP = 0x2010F000
 STOP_ADDR = 0x2010FE00
+STACK_LOCAL_LO = INITIAL_SP - 0x4000
+STACK_LOCAL_HI = INITIAL_SP + 0x0100
+MMIO_DYN_LO = 0x40000000
+MMIO_DYN_HI = 0x60000000
+ZERO_PAGE = b"\x00" * 0x1000
 
 
 def f32_bits(val: float) -> int:
@@ -97,6 +104,8 @@ class DiffCase:
     r3: int = 0
     s0_bits: int | None = None
     d0_bits: int | None = None
+    s_regs: dict[int, int] = field(default_factory=dict)
+    d_regs: dict[int, int] = field(default_factory=dict)
     primask: int = 0
     basepri: int = 0
     stop_pc: int | None = None
@@ -106,11 +115,16 @@ class DiffCase:
     check_r1: bool = False
     check_s0: bool = False
     check_d0: bool = False
+    check_s_regs: tuple[int, ...] = ()
+    check_d_regs: tuple[int, ...] = ()
     check_special_regs: bool = False
+    check_all_writes: bool = False
+    check_mmio_trace: bool = False
     mem_writes: list[tuple[int, bytes]] = field(default_factory=list)
     compare_ranges: list[tuple[int, int]] = field(default_factory=list)
     stubs: list[StubHook] = field(default_factory=list)
     stack_args: list[int] = field(default_factory=list)
+    mmio_read_seq: dict[int, list[int]] = field(default_factory=dict)
 
 
 def load_elf_segments_and_symbols(
@@ -132,40 +146,427 @@ def load_elf_segments_and_symbols(
     return segments, symbols
 
 
-def create_vm(is_elf: bool, raw: bytes, elf_segs: list[tuple[int, bytes]]) -> uc.Uc:
-    mu = uc.Uc(uc.UC_ARCH_ARM, uc.UC_MODE_THUMB | uc.UC_MODE_MCLASS)
-    apertures = [
-        (ROM_BASE, ROM_SIZE),
-        (SCRATCH_RTSI_PAGE, SCRATCH_RTSI_SIZE),
-        (SRAM_BASE, SRAM_SIZE),
-        (TEST_RAM_BASE, TEST_RAM_SIZE),
-        (REMAP_BASE, REMAP_SIZE),
-        (UART_BASE, UART_SIZE),
-        (PMGR_BASE, PMGR_SIZE),
-        (W3_ALL_BASE, W3_ALL_SIZE),
-        (SCS_BASE, SCS_SIZE),
-    ]
-    for base, size in apertures:
-        mu.mem_map(base, size)
+class FastVM:
+    """
+    Reusable Cortex-M4F Unicorn VM with exact 4KB dirty-page rollback,
+    dynamic SoC MMIO aperture mapping (0x40000000..0x5FFFFFFF), full non-stack
+    RAM/MMIO write capture, and MMIO R/W trace recording.
 
-    if is_elf:
-        for vaddr, data in elf_segs:
-            mu.mem_write(vaddr, data)
-    else:
-        mu.mem_write(ROM_BASE, raw[:0x1F389A])
-        mu.mem_write(SRAM_BASE, raw[0x200000 : 0x200000 + 0xF138])
+    Integrity invariant: when `is_elf=True`, ONLY `rkof.elf` PT_LOAD segments
+    are loaded into ROM/SRAM — raw `rkof` code is NEVER mapped into the ELF VM.
+    """
 
-    # Enable Cortex-M4F FPU coprocessors CP10/CP11
-    mu.mem_write(0xE000ED88, pack_u32(0x00F00000))
-    if hasattr(ac, "UC_ARM_REG_FPEXC"):
+    def __init__(
+        self,
+        is_elf: bool,
+        raw: bytes,
+        elf_segs: list[tuple[int, bytes]],
+        elf_syms: dict[str, int],
+    ) -> None:
+        self.is_elf = is_elf
+        self.elf_syms = elf_syms
+        self.mu = uc.Uc(uc.UC_ARCH_ARM, uc.UC_MODE_THUMB | uc.UC_MODE_MCLASS)
+
+        self.mapped_4k: set[int] = set()
+        self.base_pages: dict[int, bytes] = {}
+        self.dirty_pages: set[int] = set()
+        self.ctx: dict[str, Any] = {
+            "active": False,
+            "check_all_writes": False,
+            "check_mmio_trace": False,
+            "written_lines": set(),
+            "mmio_trace": [],
+            "mmio_seq": {},
+            "mmio_idx": {},
+        }
+
+        self._map_region(ROM_BASE, ROM_SIZE, uc.UC_PROT_READ | uc.UC_PROT_EXEC)
+        for base, size in (
+            (SCRATCH_RTSI_PAGE, SCRATCH_RTSI_SIZE),
+            (SRAM_BASE, SRAM_SIZE),
+            (TEST_RAM_BASE, TEST_RAM_SIZE),
+            (REMAP_BASE, REMAP_SIZE),
+            (UART_BASE, UART_SIZE),
+            (PMGR_BASE, PMGR_SIZE),
+            (W3_ALL_BASE, W3_ALL_SIZE),
+            (SCS_BASE, SCS_SIZE),
+        ):
+            self._map_region(base, size, uc.UC_PROT_ALL)
+
+        init_blobs: list[tuple[int, bytes]] = []
+        if is_elf:
+            init_blobs.extend(elf_segs)
+        else:
+            init_blobs.append((ROM_BASE, raw[:0x1F389A]))
+            init_blobs.append((SRAM_BASE, raw[0x200000 : 0x200000 + 0xF138]))
+        init_blobs.append((0xE000ED88, pack_u32(0x00F00000)))
+        init_blobs.append((STOP_ADDR, bytes.fromhex("00bf00bf")))
+
+        page_Mut: dict[int, bytearray] = {}
+        for vaddr, blob in init_blobs:
+            self.mu.mem_write(vaddr, blob)
+            end = vaddr + len(blob)
+            p = vaddr & ~0xFFF
+            while p < end:
+                buf = page_Mut.get(p)
+                if buf is None:
+                    buf = bytearray(ZERO_PAGE)
+                    page_Mut[p] = buf
+                lo = max(vaddr, p)
+                hi = min(end, p + 0x1000)
+                buf[lo - p : hi - p] = blob[lo - vaddr : hi - vaddr]
+                p += 0x1000
+        self.base_pages = {p: bytes(b) for p, b in page_Mut.items()}
+
+        if hasattr(ac, "UC_ARM_REG_FPEXC"):
+            try:
+                self.mu.reg_write(ac.UC_ARM_REG_FPEXC, 0x40000000)
+            except uc.UcError:
+                pass
+
+        self.mu.hook_add(
+            uc.UC_HOOK_MEM_READ_UNMAPPED | uc.UC_HOOK_MEM_WRITE_UNMAPPED,
+            self._on_unmapped,
+        )
+        self.mu.hook_add(uc.UC_HOOK_MEM_WRITE, self._on_mem_write)
+        self.mu.hook_add(
+            uc.UC_HOOK_MEM_READ,
+            self._on_mmio_read,
+            begin=MMIO_DYN_LO,
+            end=MMIO_DYN_HI - 1,
+        )
+
+    def _map_region(self, base: int, size: int, perms: int) -> None:
+        self.mu.mem_map(base, size, perms)
+        for p in range(base, base + size, 0x1000):
+            self.mapped_4k.add(p)
+
+    def _mark_span_dirty(self, addr: int, length: int) -> None:
+        if length <= 0:
+            return
+        p = addr & ~0xFFF
+        end_p = (addr + length - 1) & ~0xFFF
+        while p <= end_p:
+            if not (MMIO_DYN_LO <= p < MMIO_DYN_HI and p not in self.mapped_4k):
+                self.dirty_pages.add(p)
+            else:
+                self._ensure_mmio_mapped(p)
+                self.dirty_pages.add(p)
+            p += 0x1000
+
+    def _ensure_mmio_mapped(self, addr: int) -> bool:
+        if not (MMIO_DYN_LO <= addr < MMIO_DYN_HI):
+            return False
+        base64 = addr & ~0xFFFF
+        p = base64
+        end = base64 + 0x10000
+        while p < end:
+            if p not in self.mapped_4k:
+                run_start = p
+                while p < end and p not in self.mapped_4k:
+                    self.mapped_4k.add(p)
+                    p += 0x1000
+                self.mu.mem_map(run_start, p - run_start, uc.UC_PROT_ALL)
+            else:
+                p += 0x1000
+        return True
+
+    def _on_unmapped(
+        self, _uc_obj: uc.Uc, _access: int, address: int, _size: int, _value: int, _user: Any
+    ) -> bool:
+        return self._ensure_mmio_mapped(address)
+
+    def _on_mem_write(
+        self, _uc_obj: uc.Uc, _access: int, address: int, size: int, value: int, _user: Any
+    ) -> None:
+        p0 = address & ~0xFFF
+        p1 = (address + size - 1) & ~0xFFF
+        self.dirty_pages.add(p0)
+        if p1 != p0:
+            self.dirty_pages.add(p1)
+        ctx = self.ctx
+        if not ctx["active"]:
+            return
+        if ctx["check_all_writes"] and not (STACK_LOCAL_LO <= address < STACK_LOCAL_HI):
+            l0 = address & ~0x3F
+            l1 = (address + size - 1) & ~0x3F
+            wl = ctx["written_lines"]
+            wl.add(l0)
+            if l1 != l0:
+                wl.add(l1)
+        if ctx["check_mmio_trace"] and MMIO_DYN_LO <= address < MMIO_DYN_HI:
+            mask = (1 << (size * 8)) - 1
+            ctx["mmio_trace"].append(("W", address, size, value & mask))
+
+    def _on_mmio_read(
+        self, uc_obj: uc.Uc, _access: int, address: int, size: int, _value: int, _user: Any
+    ) -> None:
+        ctx = self.ctx
+        if not ctx["active"]:
+            return
+        if ctx["check_mmio_trace"]:
+            raw_b = bytes(uc_obj.mem_read(address, size))
+            val = int.from_bytes(raw_b, "little")
+            ctx["mmio_trace"].append(("R", address, size, val))
+        seq = ctx["mmio_seq"].get(address)
+        if seq is not None:
+            nxt_idx = ctx["mmio_idx"].get(address, 0) + 1
+            ctx["mmio_idx"][address] = nxt_idx
+            nxt_val = seq[nxt_idx] if nxt_idx < len(seq) else seq[-1]
+            uc_obj.mem_write(address, pack_u32(nxt_val))
+            self.dirty_pages.add(address & ~0xFFF)
+
+    def baseline_64b(self, line_addr: int, mem_writes: list[tuple[int, bytes]]) -> bytes:
+        p = line_addr & ~0xFFF
+        off = line_addr - p
+        base = bytearray(self.base_pages.get(p, ZERO_PAGE)[off : off + 64])
+        for w_addr, payload in mem_writes:
+            w_end = w_addr + len(payload)
+            lo = max(line_addr, w_addr)
+            hi = min(line_addr + 64, w_end)
+            if lo < hi:
+                base[lo - line_addr : hi - line_addr] = payload[lo - w_addr : hi - w_addr]
+        return bytes(base)
+
+    def rollback(self) -> None:
+        if not self.dirty_pages:
+            return
+        mu = self.mu
+        bp = self.base_pages
+        for p in self.dirty_pages:
+            mu.mem_write(p, bp.get(p, ZERO_PAGE))
+        self.dirty_pages.clear()
+
+    def run_case(
+        self,
+        case: DiffCase,
+        patch_bytes: tuple[int, bytes] | None = None,
+    ) -> dict[str, Any]:
+        mu = self.mu
+        code_hook_handle = None
         try:
-            mu.reg_write(ac.UC_ARM_REG_FPEXC, 0x40000000)
-        except uc.UcError:
-            pass
+            for addr, payload in case.mem_writes:
+                self._mark_span_dirty(addr, len(payload))
+                mu.mem_write(addr, payload)
 
-    # Place `nop` at STOP_ADDR
-    mu.mem_write(STOP_ADDR, bytes.fromhex("00bf00bf"))
-    return mu
+            for mm_addr, seq in case.mmio_read_seq.items():
+                if seq:
+                    self._mark_span_dirty(mm_addr, 4)
+                    mu.mem_write(mm_addr, pack_u32(seq[0]))
+
+            if patch_bytes is not None:
+                p_addr, p_blob = patch_bytes
+                self._mark_span_dirty(p_addr, len(p_blob))
+                mu.mem_write(p_addr, p_blob)
+
+            sp = INITIAL_SP
+            if case.stack_args:
+                stack_blob = pack_u32(*case.stack_args)
+                sp -= (len(stack_blob) + 7) & ~7
+                self._mark_span_dirty(sp, len(stack_blob))
+                mu.mem_write(sp, stack_blob)
+
+            callees = {
+                ac.UC_ARM_REG_R4: 0x44440004,
+                ac.UC_ARM_REG_R5: 0x55550005,
+                ac.UC_ARM_REG_R6: 0x66660006,
+                ac.UC_ARM_REG_R7: 0x77770007,
+                ac.UC_ARM_REG_R8: 0x88880008,
+                ac.UC_ARM_REG_R9: 0x99990009,
+                ac.UC_ARM_REG_R10: 0xAAAA000A,
+                ac.UC_ARM_REG_R11: 0xBBBB000B,
+            }
+            for reg_id, sentinel in callees.items():
+                mu.reg_write(reg_id, sentinel)
+
+            mu.reg_write(ac.UC_ARM_REG_R12, 0)
+            mu.reg_write(ac.UC_ARM_REG_SP, sp)
+            mu.reg_write(ac.UC_ARM_REG_MSP, sp)
+            mu.reg_write(ac.UC_ARM_REG_LR, STOP_ADDR | 1)
+            mu.reg_write(ac.UC_ARM_REG_APSR, 0)
+            mu.reg_write(ac.UC_ARM_REG_FPSCR, 0)
+            mu.reg_write(ac.UC_ARM_REG_FAULTMASK, 0)
+            mu.reg_write(ac.UC_ARM_REG_CONTROL, 0)
+            mu.reg_write(ac.UC_ARM_REG_R0, case.r0 & 0xFFFFFFFF)
+            mu.reg_write(ac.UC_ARM_REG_R1, case.r1 & 0xFFFFFFFF)
+            mu.reg_write(ac.UC_ARM_REG_R2, case.r2 & 0xFFFFFFFF)
+            mu.reg_write(ac.UC_ARM_REG_R3, case.r3 & 0xFFFFFFFF)
+            mu.reg_write(ac.UC_ARM_REG_PRIMASK, case.primask)
+            mu.reg_write(ac.UC_ARM_REG_BASEPRI, case.basepri)
+
+            for s_idx in range(16):
+                mu.reg_write(ac.UC_ARM_REG_S0 + s_idx, 0)
+            for s_idx in range(16, 32):
+                mu.reg_write(ac.UC_ARM_REG_S0 + s_idx, 0x3F800000 + s_idx)
+
+            if case.s0_bits is not None:
+                mu.reg_write(ac.UC_ARM_REG_S0, case.s0_bits & 0xFFFFFFFF)
+            for s_idx, bits in case.s_regs.items():
+                mu.reg_write(ac.UC_ARM_REG_S0 + int(s_idx), bits & 0xFFFFFFFF)
+            if case.d0_bits is not None:
+                mu.reg_write(ac.UC_ARM_REG_D0, case.d0_bits & 0xFFFFFFFFFFFFFFFF)
+            for d_idx, bits in case.d_regs.items():
+                mu.reg_write(ac.UC_ARM_REG_D0 + int(d_idx), bits & 0xFFFFFFFFFFFFFFFF)
+
+            trace: list[tuple[Any, ...]] = []
+            hook_map: dict[int, StubHook] = {}
+            has_py_cb = False
+            for stub in case.stubs:
+                if stub.on_call is not None:
+                    has_py_cb = True
+                if self.is_elf and stub.elf_sym:
+                    target_pc = self.elf_syms[stub.elf_sym] & ~1
+                else:
+                    target_pc = stub.ref_addr & ~1
+                hook_map[target_pc] = stub
+
+            stopped_by_hook = {"flag": False}
+
+            if hook_map or case.stop_on_wfi:
+
+                def _code_hook(
+                    uc_obj: uc.Uc, address: int, _size: int, _user_data: Any
+                ) -> None:
+                    pc_even = address & ~1
+                    if (
+                        case.stop_on_wfi
+                        and bytes(uc_obj.mem_read(pc_even, 2)) == b"\x30\xbf"
+                    ):
+                        trace.append(("wfi",))
+                        stopped_by_hook["flag"] = True
+                        uc_obj.emu_stop()
+                        return
+
+                    stub = hook_map.get(pc_even)
+                    if stub is None:
+                        return
+                    arg_regs = [
+                        uc_obj.reg_read(ac.UC_ARM_REG_R0),
+                        uc_obj.reg_read(ac.UC_ARM_REG_R1),
+                        uc_obj.reg_read(ac.UC_ARM_REG_R2),
+                        uc_obj.reg_read(ac.UC_ARM_REG_R3),
+                    ]
+                    rec_items: list[Any] = [stub.name]
+                    for idx in range(stub.record_args):
+                        if idx in stub.cstr_args:
+                            rec_items.append(read_guest_cstr(uc_obj, arg_regs[idx]))
+                        else:
+                            rec_items.append(arg_regs[idx])
+                    trace.append(tuple(rec_items))
+
+                    ret_val = stub.ret_r0
+                    if stub.on_call is not None:
+                        override = stub.on_call(uc_obj, trace)
+                        if override is not None:
+                            ret_val = override
+
+                    if stub.stop_on_call:
+                        stopped_by_hook["flag"] = True
+                        uc_obj.emu_stop()
+                        return
+
+                    uc_obj.reg_write(ac.UC_ARM_REG_R0, ret_val & 0xFFFFFFFF)
+                    lr_val = uc_obj.reg_read(ac.UC_ARM_REG_LR)
+                    uc_obj.reg_write(ac.UC_ARM_REG_PC, lr_val | 1)
+
+                code_hook_handle = mu.hook_add(uc.UC_HOOK_CODE, _code_hook)
+
+            if has_py_cb:
+                # Python stub callbacks may write guest scratch/output ranges via uc_obj.mem_write
+                self._mark_span_dirty(0x20100000, 0x10000)
+                for c_addr, c_len in case.compare_ranges:
+                    self._mark_span_dirty(c_addr, c_len)
+
+            written_lines: set[int] = set()
+            mmio_trace: list[tuple[Any, ...]] = []
+            self.ctx = {
+                "active": True,
+                "check_all_writes": case.check_all_writes,
+                "check_mmio_trace": case.check_mmio_trace,
+                "written_lines": written_lines,
+                "mmio_trace": mmio_trace,
+                "mmio_seq": case.mmio_read_seq,
+                "mmio_idx": {},
+            }
+
+            start_pc = self.elf_syms[case.symbol] if self.is_elf else case.ref_rva
+            until_pc = case.stop_pc if case.stop_pc is not None else STOP_ADDR
+
+            mu.emu_start(start_pc | 1, until_pc, count=case.max_insns)
+            self.ctx["active"] = False
+
+            did_early_stop = case.stop_pc is not None or stopped_by_hook["flag"]
+            callee_ok = all(
+                mu.reg_read(reg_id) == sentinel for reg_id, sentinel in callees.items()
+            ) and all(
+                (mu.reg_read(ac.UC_ARM_REG_S0 + s_idx) & 0xFFFFFFFF)
+                == (0x3F800000 + s_idx)
+                for s_idx in range(16, 32)
+            )
+
+            s_out = {
+                idx: (mu.reg_read(ac.UC_ARM_REG_S0 + idx) & 0xFFFFFFFF)
+                for idx in case.check_s_regs
+            }
+            d_out = {
+                idx: (mu.reg_read(ac.UC_ARM_REG_D0 + idx) & 0xFFFFFFFFFFFFFFFF)
+                for idx in case.check_d_regs
+            }
+            wl_snap = (
+                {la: bytes(mu.mem_read(la, 64)) for la in sorted(written_lines)}
+                if case.check_all_writes
+                else {}
+            )
+
+            out: dict[str, Any] = {
+                "r0": mu.reg_read(ac.UC_ARM_REG_R0),
+                "r1": mu.reg_read(ac.UC_ARM_REG_R1) if case.check_r1 else None,
+                "s0": (
+                    (mu.reg_read(ac.UC_ARM_REG_S0) & 0xFFFFFFFF)
+                    if case.check_s0
+                    else None
+                ),
+                "d0": (
+                    mu.reg_read(ac.UC_ARM_REG_D0) & 0xFFFFFFFFFFFFFFFF
+                    if case.check_d0
+                    else None
+                ),
+                "s_regs": s_out,
+                "d_regs": d_out,
+                "primask": (
+                    mu.reg_read(ac.UC_ARM_REG_PRIMASK)
+                    if case.check_special_regs
+                    else None
+                ),
+                "basepri": (
+                    mu.reg_read(ac.UC_ARM_REG_BASEPRI)
+                    if case.check_special_regs
+                    else None
+                ),
+                "callee_preserved": callee_ok if not did_early_stop else True,
+                "early_stop": did_early_stop,
+                "trace": trace,
+                "mem": [
+                    bytes(mu.mem_read(addr, length))
+                    for addr, length in case.compare_ranges
+                ],
+                "written_lines": wl_snap,
+                "mmio_trace": mmio_trace if case.check_mmio_trace else [],
+            }
+            return out
+        finally:
+            self.ctx["active"] = False
+            if code_hook_handle is not None:
+                try:
+                    mu.hook_del(code_hook_handle)
+                except uc.UcError:
+                    pass
+            self.rollback()
+
+
+def create_vm(is_elf: bool, raw: bytes, elf_segs: list[tuple[int, bytes]]) -> uc.Uc:
+    vm = FastVM(is_elf, raw, elf_segs, {})
+    return vm.mu
 
 
 def run_one_vm(
@@ -175,127 +576,8 @@ def run_one_vm(
     elf_syms: dict[str, int],
     case: DiffCase,
 ) -> dict[str, Any]:
-    mu = create_vm(is_elf, raw, elf_segs)
-
-    for addr, payload in case.mem_writes:
-        mu.mem_write(addr, payload)
-
-    sp = INITIAL_SP
-    if case.stack_args:
-        stack_blob = pack_u32(*case.stack_args)
-        sp -= (len(stack_blob) + 7) & ~7
-        mu.mem_write(sp, stack_blob)
-
-    callees = {
-        ac.UC_ARM_REG_R4: 0x44440004,
-        ac.UC_ARM_REG_R5: 0x55550005,
-        ac.UC_ARM_REG_R6: 0x66660006,
-        ac.UC_ARM_REG_R7: 0x77770007,
-        ac.UC_ARM_REG_R8: 0x88880008,
-        ac.UC_ARM_REG_R9: 0x99990009,
-        ac.UC_ARM_REG_R10: 0xAAAA000A,
-        ac.UC_ARM_REG_R11: 0xBBBB000B,
-    }
-    for reg_id, sentinel in callees.items():
-        mu.reg_write(reg_id, sentinel)
-
-    mu.reg_write(ac.UC_ARM_REG_SP, sp)
-    mu.reg_write(ac.UC_ARM_REG_MSP, sp)
-    mu.reg_write(ac.UC_ARM_REG_LR, STOP_ADDR | 1)
-    mu.reg_write(ac.UC_ARM_REG_R0, case.r0 & 0xFFFFFFFF)
-    mu.reg_write(ac.UC_ARM_REG_R1, case.r1 & 0xFFFFFFFF)
-    mu.reg_write(ac.UC_ARM_REG_R2, case.r2 & 0xFFFFFFFF)
-    mu.reg_write(ac.UC_ARM_REG_R3, case.r3 & 0xFFFFFFFF)
-    mu.reg_write(ac.UC_ARM_REG_PRIMASK, case.primask)
-    mu.reg_write(ac.UC_ARM_REG_BASEPRI, case.basepri)
-
-    if case.s0_bits is not None:
-        mu.reg_write(ac.UC_ARM_REG_S0, case.s0_bits & 0xFFFFFFFF)
-    if case.d0_bits is not None:
-        mu.reg_write(ac.UC_ARM_REG_D0, case.d0_bits & 0xFFFFFFFFFFFFFFFF)
-
-    trace: list[tuple[Any, ...]] = []
-    hook_map: dict[int, StubHook] = {}
-    for stub in case.stubs:
-        if is_elf and stub.elf_sym:
-            target_pc = elf_syms[stub.elf_sym] & ~1
-        else:
-            target_pc = stub.ref_addr & ~1
-        hook_map[target_pc] = stub
-
-    stopped_by_hook = {"flag": False}
-
-    if hook_map or case.stop_on_wfi:
-
-        def _code_hook(uc_obj: uc.Uc, address: int, _size: int, _user_data: Any) -> None:
-            pc_even = address & ~1
-            if case.stop_on_wfi and bytes(uc_obj.mem_read(pc_even, 2)) == b"\x30\xbf":
-                trace.append(("wfi",))
-                stopped_by_hook["flag"] = True
-                uc_obj.emu_stop()
-                return
-
-            stub = hook_map.get(pc_even)
-            if stub is None:
-                return
-            arg_regs = [
-                uc_obj.reg_read(ac.UC_ARM_REG_R0),
-                uc_obj.reg_read(ac.UC_ARM_REG_R1),
-                uc_obj.reg_read(ac.UC_ARM_REG_R2),
-                uc_obj.reg_read(ac.UC_ARM_REG_R3),
-            ]
-            rec_items: list[Any] = [stub.name]
-            for idx in range(stub.record_args):
-                if idx in stub.cstr_args:
-                    rec_items.append(read_guest_cstr(uc_obj, arg_regs[idx]))
-                else:
-                    rec_items.append(arg_regs[idx])
-            trace.append(tuple(rec_items))
-
-            ret_val = stub.ret_r0
-            if stub.on_call is not None:
-                override = stub.on_call(uc_obj, trace)
-                if override is not None:
-                    ret_val = override
-
-            if stub.stop_on_call:
-                stopped_by_hook["flag"] = True
-                uc_obj.emu_stop()
-                return
-
-            uc_obj.reg_write(ac.UC_ARM_REG_R0, ret_val & 0xFFFFFFFF)
-            lr_val = uc_obj.reg_read(ac.UC_ARM_REG_LR)
-            uc_obj.reg_write(ac.UC_ARM_REG_PC, lr_val | 1)
-
-        mu.hook_add(uc.UC_HOOK_CODE, _code_hook)
-
-    start_pc = elf_syms[case.symbol] if is_elf else case.ref_rva
-    until_pc = case.stop_pc if case.stop_pc is not None else STOP_ADDR
-
-    mu.emu_start(start_pc | 1, until_pc, count=case.max_insns)
-
-    did_early_stop = case.stop_pc is not None or stopped_by_hook["flag"]
-    callee_ok = all(
-        mu.reg_read(reg_id) == sentinel for reg_id, sentinel in callees.items()
-    )
-
-    out: dict[str, Any] = {
-        "r0": mu.reg_read(ac.UC_ARM_REG_R0),
-        "r1": mu.reg_read(ac.UC_ARM_REG_R1) if case.check_r1 else None,
-        "s0": (mu.reg_read(ac.UC_ARM_REG_S0) & 0xFFFFFFFF) if case.check_s0 else None,
-        "d0": (
-            mu.reg_read(ac.UC_ARM_REG_D0) & 0xFFFFFFFFFFFFFFFF
-            if case.check_d0
-            else None
-        ),
-        "primask": mu.reg_read(ac.UC_ARM_REG_PRIMASK) if case.check_special_regs else None,
-        "basepri": mu.reg_read(ac.UC_ARM_REG_BASEPRI) if case.check_special_regs else None,
-        "callee_preserved": callee_ok if not did_early_stop else True,
-        "early_stop": did_early_stop,
-        "trace": trace,
-        "mem": [bytes(mu.mem_read(addr, length)) for addr, length in case.compare_ranges],
-    }
-    return out
+    vm = FastVM(is_elf, raw, elf_segs, elf_syms)
+    return vm.run_case(case)
 
 
 def install_mock_pwr_vtable() -> list[tuple[int, bytes]]:
@@ -2444,10 +2726,126 @@ def build_cases() -> list[DiffCase]:
         ),
     ])
 
+    cases.extend(load_phase2_cases())
     return cases
 
 
-def compare_outcomes(case: DiffCase, ref_out: dict[str, Any], elf_out: dict[str, Any]) -> list[str]:
+def load_phase2_cases(spec_path: Path | None = None) -> list[DiffCase]:
+    if spec_path is None:
+        spec_path = (
+            Path(__file__).resolve().parents[1] / "verification" / "phase2_cases.json"
+        )
+    if not spec_path.is_file():
+        return []
+    doc = json.loads(spec_path.read_text(encoding="utf-8"))
+    presets: dict[str, list[tuple[int, bytes]]] = {}
+    for pname, writes in doc.get("presets", {}).items():
+        presets[pname] = [
+            (int(str(addr), 0), bytes.fromhex(hex_b)) for addr, hex_b in writes
+        ]
+
+    out: list[DiffCase] = []
+    for sym_spec in doc.get("symbols", []):
+        suite = str(sym_spec["suite"])
+        symbol = str(sym_spec["symbol"])
+        ref_rva = int(str(sym_spec["rva"]), 0)
+        preset_name = sym_spec.get("preset")
+        base_writes = list(presets.get(preset_name, [])) if preset_name else []
+        for addr, hex_b in sym_spec.get("mem", []):
+            base_writes.append((int(str(addr), 0), bytes.fromhex(hex_b)))
+
+        stubs = [
+            StubHook(
+                name=str(st["name"]),
+                ref_addr=int(str(st["ref_addr"]), 0),
+                elf_sym=str(st.get("elf_sym", st["name"])),
+                ret_r0=int(str(st.get("ret_r0", 0)), 0),
+                record_args=int(st.get("record_args", 2)),
+                cstr_args=tuple(int(x) for x in st.get("cstr_args", [])),
+                stop_on_call=bool(st.get("stop_on_call", False)),
+            )
+            for st in sym_spec.get("stubs", [])
+        ]
+        cmp_ranges = [
+            (int(str(a), 0), int(ln)) for a, ln in sym_spec.get("compare_ranges", [])
+        ]
+        check_r0 = bool(sym_spec.get("check_r0", True))
+        check_r1 = bool(sym_spec.get("check_r1", False))
+        check_s0 = bool(sym_spec.get("check_s0", False))
+        check_d0 = bool(sym_spec.get("check_d0", False))
+        check_s_regs = tuple(int(x) for x in sym_spec.get("check_s_regs", []))
+        check_d_regs = tuple(int(x) for x in sym_spec.get("check_d_regs", []))
+        check_special = bool(sym_spec.get("check_special_regs", False))
+        check_all_writes = bool(sym_spec.get("check_all_writes", True))
+        check_mmio_trace = bool(sym_spec.get("check_mmio_trace", True))
+        max_insns = int(sym_spec.get("max_insns", 100000))
+
+        for v_idx, vec in enumerate(sym_spec.get("vectors", [])):
+            v_writes = list(base_writes)
+            for addr, hex_b in vec.get("mem", []):
+                v_writes.append((int(str(addr), 0), bytes.fromhex(hex_b)))
+            s_regs = {
+                int(k): int(str(v), 0) for k, v in vec.get("s_regs", {}).items()
+            }
+            d_regs = {
+                int(k): int(str(v), 0) for k, v in vec.get("d_regs", {}).items()
+            }
+            mmio_seq = {
+                int(str(k), 0): [int(str(x), 0) for x in vs]
+                for k, vs in vec.get("mmio_read_seq", {}).items()
+            }
+            v_name = str(vec.get("name") or f"{symbol}_v{v_idx}")
+            out.append(
+                DiffCase(
+                    suite=suite,
+                    name=v_name,
+                    symbol=symbol,
+                    ref_rva=ref_rva,
+                    r0=int(str(vec.get("r0", 0)), 0),
+                    r1=int(str(vec.get("r1", 0)), 0),
+                    r2=int(str(vec.get("r2", 0)), 0),
+                    r3=int(str(vec.get("r3", 0)), 0),
+                    s0_bits=(
+                        int(str(vec["s0_bits"]), 0)
+                        if "s0_bits" in vec and vec["s0_bits"] is not None
+                        else None
+                    ),
+                    d0_bits=(
+                        int(str(vec["d0_bits"]), 0)
+                        if "d0_bits" in vec and vec["d0_bits"] is not None
+                        else None
+                    ),
+                    s_regs=s_regs,
+                    d_regs=d_regs,
+                    primask=int(vec.get("primask", 0)),
+                    basepri=int(vec.get("basepri", 0)),
+                    max_insns=int(vec.get("max_insns", max_insns)),
+                    check_r0=check_r0,
+                    check_r1=check_r1,
+                    check_s0=check_s0,
+                    check_d0=check_d0,
+                    check_s_regs=check_s_regs,
+                    check_d_regs=check_d_regs,
+                    check_special_regs=check_special,
+                    check_all_writes=check_all_writes,
+                    check_mmio_trace=check_mmio_trace,
+                    mem_writes=v_writes,
+                    compare_ranges=cmp_ranges,
+                    stubs=stubs,
+                    stack_args=[int(str(x), 0) for x in vec.get("stack_args", [])],
+                    mmio_read_seq=mmio_seq,
+                )
+            )
+    return out
+
+
+def compare_outcomes(
+    case: DiffCase,
+    ref_out: dict[str, Any],
+    elf_out: dict[str, Any],
+    ref_vm: FastVM | None = None,
+    elf_vm: FastVM | None = None,
+) -> list[str]:
     diffs: list[str] = []
 
     if not ref_out["early_stop"] and not elf_out["early_stop"]:
@@ -2459,8 +2857,18 @@ def compare_outcomes(case: DiffCase, ref_out: dict[str, Any], elf_out: dict[str,
             diffs.append(f"s0 ref=0x{ref_out['s0']:08x} != elf=0x{elf_out['s0']:08x}")
         if case.check_d0 and ref_out["d0"] != elf_out["d0"]:
             diffs.append(f"d0 ref=0x{ref_out['d0']:016x} != elf=0x{elf_out['d0']:016x}")
+        for s_idx in case.check_s_regs:
+            rs = ref_out.get("s_regs", {}).get(s_idx)
+            es = elf_out.get("s_regs", {}).get(s_idx)
+            if rs != es:
+                diffs.append(f"s{s_idx} ref={rs} != elf={es}")
+        for d_idx in case.check_d_regs:
+            rd = ref_out.get("d_regs", {}).get(d_idx)
+            ed = elf_out.get("d_regs", {}).get(d_idx)
+            if rd != ed:
+                diffs.append(f"d{d_idx} ref={rd} != elf={ed}")
         if not elf_out["callee_preserved"]:
-            diffs.append("ELF clobbered callee-saved register(s) r4..r11")
+            diffs.append("ELF clobbered callee-saved register(s) r4..r11 / s16..s31")
 
     if case.check_special_regs:
         if ref_out["primask"] != elf_out["primask"]:
@@ -2473,6 +2881,12 @@ def compare_outcomes(case: DiffCase, ref_out: dict[str, Any], elf_out: dict[str,
     if ref_out["trace"] != elf_out["trace"]:
         diffs.append(f"stub trace ref={ref_out['trace']} != elf={elf_out['trace']}")
 
+    if case.check_mmio_trace:
+        rm = ref_out.get("mmio_trace", [])
+        em = elf_out.get("mmio_trace", [])
+        if rm != em:
+            diffs.append(f"mmio_trace ref={rm[:8]} != elf={em[:8]}")
+
     for idx, (addr, length) in enumerate(case.compare_ranges):
         rb = ref_out["mem"][idx]
         eb = elf_out["mem"][idx]
@@ -2484,7 +2898,188 @@ def compare_outcomes(case: DiffCase, ref_out: dict[str, Any], elf_out: dict[str,
                     )
                     break
 
+    if case.check_all_writes:
+        rwl: dict[int, bytes] = ref_out.get("written_lines", {})
+        ewl: dict[int, bytes] = elf_out.get("written_lines", {})
+        all_lines = sorted(set(rwl.keys()) | set(ewl.keys()))
+        for la in all_lines:
+            rb = rwl.get(la)
+            if rb is None:
+                rb = (
+                    ref_vm.baseline_64b(la, case.mem_writes)
+                    if ref_vm is not None
+                    else b"\x00" * 64
+                )
+            eb = ewl.get(la)
+            if eb is None:
+                eb = (
+                    elf_vm.baseline_64b(la, case.mem_writes)
+                    if elf_vm is not None
+                    else b"\x00" * 64
+                )
+            if rb != eb:
+                for off in range(64):
+                    if rb[off] != eb[off]:
+                        diffs.append(
+                            f"write_mem[0x{la + off:08x}] ref=0x{rb[off]:02x} != elf=0x{eb[off]:02x}"
+                        )
+                        break
+                break
+
     return diffs
+
+
+_WORKER_STATE: dict[str, Any] = {}
+
+
+def _init_worker(elf_path_str: str, ref_path_str: str) -> None:
+    elf_path = Path(elf_path_str)
+    ref_path = Path(ref_path_str)
+    raw = ref_path.read_bytes()
+    elf_segs, elf_syms = load_elf_segments_and_symbols(elf_path)
+    cases = build_cases()
+    ref_vm = FastVM(False, raw, elf_segs, elf_syms)
+    elf_vm = FastVM(True, raw, elf_segs, elf_syms)
+    _WORKER_STATE["cases"] = cases
+    _WORKER_STATE["elf_syms"] = elf_syms
+    _WORKER_STATE["ref_vm"] = ref_vm
+    _WORKER_STATE["elf_vm"] = elf_vm
+
+
+def _run_diff_batch(bounds: tuple[int, int]) -> list[tuple[int, dict[str, Any]]]:
+    lo, hi = bounds
+    cases: list[DiffCase] = _WORKER_STATE["cases"]
+    elf_syms: dict[str, int] = _WORKER_STATE["elf_syms"]
+    ref_vm: FastVM = _WORKER_STATE["ref_vm"]
+    elf_vm: FastVM = _WORKER_STATE["elf_vm"]
+    results: list[tuple[int, dict[str, Any]]] = []
+
+    for idx in range(lo, hi):
+        case = cases[idx]
+        if case.symbol not in elf_syms:
+            err = f"Missing symbol '{case.symbol}' in ELF"
+            results.append(
+                (
+                    idx,
+                    {
+                        "suite": case.suite,
+                        "name": case.name,
+                        "symbol": case.symbol,
+                        "ref_rva": f"0x{case.ref_rva:06x}",
+                        "passed": False,
+                        "diffs": [err],
+                    },
+                )
+            )
+            continue
+
+        try:
+            ref_out = ref_vm.run_case(case)
+            elf_out = elf_vm.run_case(case)
+            diffs = compare_outcomes(case, ref_out, elf_out, ref_vm, elf_vm)
+        except Exception as exc:  # noqa: BLE001
+            diffs = [f"Unicorn execution error: {exc}"]
+            ref_out = {"r0": None}
+
+        results.append(
+            (
+                idx,
+                {
+                    "suite": case.suite,
+                    "name": case.name,
+                    "symbol": case.symbol,
+                    "ref_rva": f"0x{case.ref_rva:06x}",
+                    "elf_addr": f"0x{elf_syms[case.symbol]:06x}",
+                    "r0": (
+                        f"0x{ref_out['r0']:08x}"
+                        if isinstance(ref_out.get("r0"), int)
+                        else None
+                    ),
+                    "passed": len(diffs) == 0,
+                    "diffs": diffs,
+                },
+            )
+        )
+    return results
+
+
+def _run_mutation_symbol_batch(
+    item: tuple[list[tuple[int, list[int]]], dict[str, bytes]],
+) -> dict[int, list[dict[str, bool]]]:
+    sym_groups, stubs_dict = item
+    cases: list[DiffCase] = _WORKER_STATE["cases"]
+    elf_syms: dict[str, int] = _WORKER_STATE["elf_syms"]
+    ref_vm: FastVM = _WORKER_STATE["ref_vm"]
+    elf_vm: FastVM = _WORKER_STATE["elf_vm"]
+    out: dict[int, list[dict[str, bool]]] = {}
+
+    for rva, case_indices in sym_groups:
+        killed_so_far = {k: False for k in stubs_dict}
+        dets_for_rva: list[dict[str, bool]] = []
+        for c_idx in case_indices:
+            if all(killed_so_far.values()):
+                break
+            case = cases[c_idx]
+            if case.symbol not in elf_syms:
+                continue
+            target_addr = elf_syms[case.symbol] & ~1
+            ref_out = ref_vm.run_case(case)
+            det: dict[str, bool] = {}
+            for stub_name, stub_bytes in stubs_dict.items():
+                if killed_so_far[stub_name]:
+                    det[stub_name] = True
+                    continue
+                try:
+                    mut_out = elf_vm.run_case(
+                        case, patch_bytes=(target_addr, stub_bytes)
+                    )
+                    killed = (
+                        len(compare_outcomes(case, ref_out, mut_out, ref_vm, elf_vm))
+                        > 0
+                    )
+                except Exception:  # noqa: BLE001
+                    killed = True
+                det[stub_name] = killed
+                if killed:
+                    killed_so_far[stub_name] = True
+            dets_for_rva.append(det)
+        out[rva] = dets_for_rva
+    return out
+
+
+def audit_parallel_stub_mutations(
+    elf_path: Path,
+    ref_path: Path,
+    stubs_dict: dict[str, bytes],
+    workers: int | None = None,
+) -> dict[int, list[dict[str, bool]]]:
+    cases = build_cases()
+    by_rva: dict[int, list[int]] = {}
+    for idx, case in enumerate(cases):
+        by_rva.setdefault(case.ref_rva, []).append(idx)
+
+    groups = sorted(by_rva.items())
+    if not groups:
+        return {}
+
+    n_workers = workers or min(8, max(1, os.cpu_count() or 4), len(groups))
+    if len(groups) < 32 or n_workers <= 1:
+        _init_worker(str(elf_path), str(ref_path))
+        return _run_mutation_symbol_batch((groups, stubs_dict))
+
+    chunk_sz = max(16, (len(groups) + n_workers * 2 - 1) // (n_workers * 2))
+    batches = [
+        (groups[i : i + chunk_sz], stubs_dict) for i in range(0, len(groups), chunk_sz)
+    ]
+    merged: dict[int, list[dict[str, bool]]] = {}
+    with ProcessPoolExecutor(
+        max_workers=n_workers,
+        initializer=_init_worker,
+        initargs=(str(elf_path), str(ref_path)),
+    ) as pool:
+        for part in pool.map(_run_mutation_symbol_batch, batches):
+            merged.update(part)
+    return merged
 
 
 def main() -> int:
@@ -2492,50 +3087,47 @@ def main() -> int:
     ap.add_argument("--elf", required=True, type=Path, help="Path to linked rkof.elf")
     ap.add_argument("--reference", required=True, type=Path, help="Path to raw rkof binary")
     ap.add_argument("--output", required=True, type=Path, help="Path to output JSON report")
+    ap.add_argument("--workers", type=int, default=0, help="Worker process count (0=auto)")
     args = ap.parse_args()
 
-    raw = args.reference.read_bytes()
-    elf_segs, elf_syms = load_elf_segments_and_symbols(args.elf)
     cases = build_cases()
+    unique_symbols = sorted({c.symbol for c in cases})
+
+    n_workers = (
+        args.workers
+        if args.workers > 0
+        else min(8, max(1, os.cpu_count() or 4), max(1, len(cases) // 32))
+    )
+
+    ordered_results: list[dict[str, Any]] = [{} for _ in range(len(cases))]
+    if len(cases) < 64 or n_workers <= 1:
+        _init_worker(str(args.elf), str(args.reference))
+        for idx, rec in _run_diff_batch((0, len(cases))):
+            ordered_results[idx] = rec
+    else:
+        chunk_sz = max(32, (len(cases) + n_workers * 2 - 1) // (n_workers * 2))
+        batches = [
+            (i, min(i + chunk_sz, len(cases))) for i in range(0, len(cases), chunk_sz)
+        ]
+        with ProcessPoolExecutor(
+            max_workers=n_workers,
+            initializer=_init_worker,
+            initargs=(str(args.elf), str(args.reference)),
+        ) as pool:
+            for batch_res in pool.map(_run_diff_batch, batches):
+                for idx, rec in batch_res:
+                    ordered_results[idx] = rec
 
     suite_map: dict[str, list[dict[str, Any]]] = {}
     failures: list[dict[str, Any]] = []
-    unique_symbols = sorted({c.symbol for c in cases})
-
-    for case in cases:
-        if case.symbol not in elf_syms:
-            err = f"Missing symbol '{case.symbol}' in {args.elf}"
-            failures.append({"suite": case.suite, "case": case.name, "diffs": [err]})
-            suite_map.setdefault(case.suite, []).append({
-                "name": case.name,
-                "symbol": case.symbol,
-                "ref_rva": f"0x{case.ref_rva:06x}",
-                "passed": False,
-                "diffs": [err],
-            })
-            continue
-
-        try:
-            ref_out = run_one_vm(False, raw, elf_segs, elf_syms, case)
-            elf_out = run_one_vm(True, raw, elf_segs, elf_syms, case)
-            diffs = compare_outcomes(case, ref_out, elf_out)
-        except Exception as exc:  # noqa: BLE001
-            diffs = [f"Unicorn execution error: {exc}"]
-            ref_out = {"r0": None}
-
-        passed = len(diffs) == 0
-        if not passed:
-            failures.append({"suite": case.suite, "case": case.name, "diffs": diffs})
-
-        suite_map.setdefault(case.suite, []).append({
-            "name": case.name,
-            "symbol": case.symbol,
-            "ref_rva": f"0x{case.ref_rva:06x}",
-            "elf_addr": f"0x{elf_syms[case.symbol]:06x}",
-            "r0": f"0x{ref_out['r0']:08x}" if isinstance(ref_out.get("r0"), int) else None,
-            "passed": passed,
-            "diffs": diffs,
-        })
+    for rec in ordered_results:
+        sname = rec["suite"]
+        rec_clean = {k: v for k, v in rec.items() if k != "suite"}
+        suite_map.setdefault(sname, []).append(rec_clean)
+        if not rec["passed"]:
+            failures.append(
+                {"suite": sname, "case": rec["name"], "diffs": rec["diffs"]}
+            )
 
     suites_out = [
         {
@@ -2565,9 +3157,14 @@ def main() -> int:
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     if failures:
-        for fail in failures:
+        for fail in failures[:50]:
             print(
                 f"[FAIL] {fail['suite']}::{fail['case']}: {'; '.join(fail['diffs'])}",
+                file=sys.stderr,
+            )
+        if len(failures) > 50:
+            print(
+                f"[FAIL] ... and {len(failures) - 50} additional failures",
                 file=sys.stderr,
             )
         return 1

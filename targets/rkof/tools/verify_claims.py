@@ -44,13 +44,12 @@ ROM_TEXT_END = 0x001BFA00
 
 
 def load_arm_semantics_module(script_path: Path) -> Any:
-    spec = importlib.util.spec_from_file_location("rkof_arm_semantics", script_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Unable to load {script_path}")
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["rkof_arm_semantics"] = mod
-    spec.loader.exec_module(mod)
-    return mod
+    tools_dir = str(script_path.resolve().parent)
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
+    import arm_semantics
+
+    return arm_semantics
 
 
 def count_raw_code_pointers(
@@ -182,40 +181,11 @@ def main() -> int:
                 f"retained_native veneer '{vname}' not byte-verified in load-image.json"
             )
 
-    # 5. Live Unicorn stub-mutation sensitivity audit across all 108 reconstructed_c functions
+    # 5. Live Unicorn stub-mutation sensitivity audit across all reconstructed_c functions
     sem_mod = load_arm_semantics_module(Path(__file__).resolve().parent / "arm_semantics.py")
-    elf_segs, elf_syms = sem_mod.load_elf_segments_and_symbols(args.elf)
-    cases = sem_mod.build_cases()
-
-    orig_create_vm = sem_mod.create_vm
-    active_mut: dict[str, Any] = {"addr": None, "stub": b""}
-
-    def mutated_create_vm(
-        is_elf: bool, raw_bytes: bytes, segs: list[tuple[int, bytes]]
-    ) -> Any:
-        mu = orig_create_vm(is_elf, raw_bytes, segs)
-        if is_elf and active_mut["addr"] is not None:
-            mu.mem_write(active_mut["addr"], active_mut["stub"])
-        return mu
-
-    sem_mod.create_vm = mutated_create_vm
-
-    detections_by_rva: dict[int, list[dict[str, bool]]] = {}
-    for case in cases:
-        ref_out = sem_mod.run_one_vm(False, raw, elf_segs, elf_syms, case)
-        det: dict[str, bool] = {}
-        target_addr = elf_syms[case.symbol] & ~1
-        for stub_name, stub_bytes in STUBS.items():
-            active_mut["addr"] = target_addr
-            active_mut["stub"] = stub_bytes
-            try:
-                mut_out = sem_mod.run_one_vm(True, raw, elf_segs, elf_syms, case)
-                det[stub_name] = len(sem_mod.compare_outcomes(case, ref_out, mut_out)) > 0
-            except Exception:  # noqa: BLE001
-                det[stub_name] = True
-            finally:
-                active_mut["addr"] = None
-        detections_by_rva.setdefault(case.ref_rva, []).append(det)
+    detections_by_rva = sem_mod.audit_parallel_stub_mutations(
+        args.elf, args.reference, STUBS
+    )
 
     weak_claims: list[str] = []
     for fn in rec_entries:

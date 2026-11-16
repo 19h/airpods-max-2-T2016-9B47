@@ -54,10 +54,10 @@ SECTIONS
 
     .text 0x000003B0 :
     {
-        *(EXCLUDE_FILE(*entry_veneers.o *binary_blobs.o) .text)
-        *(EXCLUDE_FILE(*entry_veneers.o *binary_blobs.o) .text.*)
-        *(EXCLUDE_FILE(*binary_blobs.o) .rodata)
-        *(EXCLUDE_FILE(*binary_blobs.o) .rodata.*)
+        *(EXCLUDE_FILE(*entry_veneers.o *binary_blobs.o *p2_*.o) .text)
+        *(EXCLUDE_FILE(*entry_veneers.o *binary_blobs.o *p2_*.o) .text.*)
+        *(EXCLUDE_FILE(*binary_blobs.o *p2_*.o) .rodata)
+        *(EXCLUDE_FILE(*binary_blobs.o *p2_*.o) .rodata.*)
         . = ALIGN(4);
     } > ROM_TEXT :rom
 
@@ -68,6 +68,15 @@ SECTIONS
     {
         KEEP(*(.text.default_handler))
     } > ROM_TEXT :rom
+
+    .text.subsystems 0x00016F90 :
+    {
+        *p2_*.o(.text .text.* .rodata .rodata.*)
+        . = ALIGN(4);
+    } > ROM_TEXT :rom
+
+    ASSERT(ADDR(.text.subsystems) + SIZEOF(.text.subsystems) <= 0x001BFA00,
+           ".text.subsystems must fit before .rodata.image at 0x1BFA00")
 
     .rodata.image 0x001BFA00 :
     {

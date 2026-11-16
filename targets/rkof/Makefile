@@ -70,6 +70,8 @@ HOST_CFLAGS := \
 	-Itests \
 	$(WARN_FLAGS)
 
+P2_C_SRCS := $(sort $(wildcard src/*/p2_*.c))
+
 C_SRCS := \
 	src/rtkit/vectors.c \
 	src/rtkit/boot.c \
@@ -84,7 +86,8 @@ C_SRCS := \
 	src/phy/modem_inits.c \
 	src/phy/scanmedia.c \
 	src/phy/wnvv.c \
-	src/phy/bt_phy.c
+	src/phy/bt_phy.c \
+	$(P2_C_SRCS)
 
 ASM_SRCS := \
 	src/rtkit/binary_blobs.S \

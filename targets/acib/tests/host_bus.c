@@ -15,11 +15,12 @@
 
 /* Virtual address spaces for host behavioral tests */
 static uint8_t s_vrom[0x100000];      /* 0x00000000 .. 0x000FFFFF */
-static uint8_t s_vsram[0x30000];      /* 0x10000000 .. 0x1002FFFF */
+static uint8_t s_vsram[0x40000];      /* 0x10000000 .. 0x1003FFFF */
+static uint8_t s_vsocshm[0x10000];    /* 0x20000000 .. 0x2000FFFF */
 static uint8_t s_vmbox[0x1000];       /* 0x4D280000 .. 0x4D280FFF */
 
 /* Sparse MMIO register table */
-#define HOST_MMIO_SLOTS 256u
+#define HOST_MMIO_SLOTS 4096u
 struct mmio_slot {
     uint32_t addr;
     uint32_t val;
@@ -131,6 +132,7 @@ void acib_host_reset(void)
 
     memset(s_vrom, 0, sizeof(s_vrom));
     memset(s_vsram, 0, sizeof(s_vsram));
+    memset(s_vsocshm, 0, sizeof(s_vsocshm));
     memset(s_vmbox, 0, sizeof(s_vmbox));
     memset(s_mmio, 0, sizeof(s_mmio));
 
@@ -184,6 +186,9 @@ void *acib_host_translate_ptr(uint32_t addr)
     }
     if (addr >= ACIB_RAM_DATA_BASE && addr < ACIB_RAM_DATA_BASE + sizeof(s_vsram)) {
         return &s_vsram[addr - ACIB_RAM_DATA_BASE];
+    }
+    if (addr >= ACIB_MPU_R4_SOC_SHM_BASE && addr < ACIB_MPU_R4_SOC_SHM_BASE + sizeof(s_vsocshm)) {
+        return &s_vsocshm[addr - ACIB_MPU_R4_SOC_SHM_BASE];
     }
     if (addr >= ACIB_PHY_MBOX_BASE && addr < ACIB_PHY_MBOX_BASE + sizeof(s_vmbox)) {
         return &s_vmbox[addr - ACIB_PHY_MBOX_BASE];

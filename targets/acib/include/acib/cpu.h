@@ -87,4 +87,60 @@ static inline uint32_t acib_clz32(uint32_t v)
     return (v == 0u) ? 32u : (uint32_t)__builtin_clz(v);
 }
 
+static inline uint32_t acib_ctz32(uint32_t v)
+{
+    return (v == 0u) ? 32u : (uint32_t)__builtin_ctz(v);
+}
+
+static inline uint32_t acib_rev32(uint32_t v)
+{
+    return __builtin_bswap32(v);
+}
+
+static inline uint32_t acib_rev16_u32(uint32_t v)
+{
+    return ((v >> 8) & 0x00FF00FFu) | ((v & 0x00FF00FFu) << 8);
+}
+
+static inline uint32_t acib_rbit32(uint32_t v)
+{
+    v = ((v >> 1) & 0x55555555u) | ((v & 0x55555555u) << 1);
+    v = ((v >> 2) & 0x33333333u) | ((v & 0x33333333u) << 2);
+    v = ((v >> 4) & 0x0F0F0F0Fu) | ((v & 0x0F0F0F0Fu) << 4);
+    return __builtin_bswap32(v);
+}
+
+static inline uint32_t acib_ror32(uint32_t v, uint32_t rot)
+{
+    uint32_t s = rot & 31u;
+    return (s == 0u) ? v : ((v >> s) | (v << (32u - s)));
+}
+
+/* Defined ARMv7E-M variable shift semantics (Rs[7:0], zero C11 shift UB) */
+static inline uint32_t acib_arm_lsl32(uint32_t v, uint32_t shift)
+{
+    uint32_t s = shift & 0xFFu;
+    return (s >= 32u) ? 0u : (v << s);
+}
+
+static inline uint32_t acib_arm_lsr32(uint32_t v, uint32_t shift)
+{
+    uint32_t s = shift & 0xFFu;
+    return (s >= 32u) ? 0u : (v >> s);
+}
+
+static inline int32_t acib_arm_asr32(int32_t v, uint32_t shift)
+{
+    uint32_t s = shift & 0xFFu;
+    if (s == 0u) {
+        return v;
+    }
+    if (s >= 32u) {
+        return (v < 0) ? -1 : 0;
+    }
+    uint32_t uv = (uint32_t)v;
+    uint32_t res = (uv >> s) | ((v < 0) ? (~0u << (32u - s)) : 0u);
+    return (int32_t)res;
+}
+
 #endif /* ACIB_CPU_H */

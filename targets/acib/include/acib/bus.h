@@ -128,4 +128,141 @@ static inline void acib_write_unaligned_le16(void *p, uint16_t v)
     b[1] = (uint8_t)((v >> 8) & 0xFFu);
 }
 
+static inline void *acib_addr_ptr_or_null(uint32_t addr)
+{
+    return (addr == 0u) ? (void *)0 : acib_addr_ptr(addr);
+}
+
+/* Address-mapped SRAM / ROM scalar load & store helpers (32-bit ARM + 64-bit Host safe) */
+static inline uint8_t acib_mem_read8(uint32_t addr)
+{
+    return *(const uint8_t *)acib_addr_ptr(addr);
+}
+
+static inline int8_t acib_mem_read_s8(uint32_t addr)
+{
+    return *(const int8_t *)acib_addr_ptr(addr);
+}
+
+static inline void acib_mem_write8(uint32_t addr, uint8_t val)
+{
+    *(uint8_t *)acib_addr_ptr(addr) = val;
+}
+
+static inline uint16_t acib_mem_read16(uint32_t addr)
+{
+    uint16_t val;
+    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
+    return val;
+}
+
+static inline int16_t acib_mem_read_s16(uint32_t addr)
+{
+    int16_t val;
+    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
+    return val;
+}
+
+static inline void acib_mem_write16(uint32_t addr, uint16_t val)
+{
+    __builtin_memcpy(acib_addr_ptr(addr), &val, sizeof(val));
+}
+
+static inline uint32_t acib_mem_read32(uint32_t addr)
+{
+    uint32_t val;
+    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
+    return val;
+}
+
+static inline int32_t acib_mem_read_s32(uint32_t addr)
+{
+    int32_t val;
+    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
+    return val;
+}
+
+static inline void acib_mem_write32(uint32_t addr, uint32_t val)
+{
+    __builtin_memcpy(acib_addr_ptr(addr), &val, sizeof(val));
+}
+
+static inline uint64_t acib_mem_read64(uint32_t addr)
+{
+    uint64_t val;
+    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
+    return val;
+}
+
+static inline void acib_mem_write64(uint32_t addr, uint64_t val)
+{
+    __builtin_memcpy(acib_addr_ptr(addr), &val, sizeof(val));
+}
+
+/* Pointer + byte-offset scalar load & store helpers (zero alignment/aliasing UB) */
+static inline uint8_t acib_ld_u8(const void *base, uint32_t off)
+{
+    return *((const uint8_t *)base + off);
+}
+
+static inline int8_t acib_ld_s8(const void *base, uint32_t off)
+{
+    return *((const int8_t *)base + off);
+}
+
+static inline void acib_st_u8(void *base, uint32_t off, uint8_t val)
+{
+    *((uint8_t *)base + off) = val;
+}
+
+static inline uint16_t acib_ld_u16(const void *base, uint32_t off)
+{
+    uint16_t val;
+    __builtin_memcpy(&val, (const uint8_t *)base + off, sizeof(val));
+    return val;
+}
+
+static inline int16_t acib_ld_s16(const void *base, uint32_t off)
+{
+    int16_t val;
+    __builtin_memcpy(&val, (const uint8_t *)base + off, sizeof(val));
+    return val;
+}
+
+static inline void acib_st_u16(void *base, uint32_t off, uint16_t val)
+{
+    __builtin_memcpy((uint8_t *)base + off, &val, sizeof(val));
+}
+
+static inline uint32_t acib_ld_u32(const void *base, uint32_t off)
+{
+    uint32_t val;
+    __builtin_memcpy(&val, (const uint8_t *)base + off, sizeof(val));
+    return val;
+}
+
+static inline int32_t acib_ld_s32(const void *base, uint32_t off)
+{
+    int32_t val;
+    __builtin_memcpy(&val, (const uint8_t *)base + off, sizeof(val));
+    return val;
+}
+
+static inline void acib_st_u32(void *base, uint32_t off, uint32_t val)
+{
+    __builtin_memcpy((uint8_t *)base + off, &val, sizeof(val));
+}
+
+static inline uint64_t acib_ld_u64(const void *base, uint32_t off)
+{
+    uint64_t val;
+    __builtin_memcpy(&val, (const uint8_t *)base + off, sizeof(val));
+    return val;
+}
+
+static inline void acib_st_u64(void *base, uint32_t off, uint64_t val)
+{
+    __builtin_memcpy((uint8_t *)base + off, &val, sizeof(val));
+}
+
 #endif /* ACIB_BUS_H */

@@ -1,0 +1,35 @@
+# Build output (root phyb and build/<target> for the sub-targets)
+build/
+build-*/
+*.o
+*.a
+*.d
+*.map
+
+# Retained evidence is tracked whatever its extension
+!verification/evidence/*
+
+# Reference material that stays outside the repository:
+# IDA databases and exports of the original firmware
+*.i64
+*.idb
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
+/phyb.c
+/phyb.asm
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors and OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~

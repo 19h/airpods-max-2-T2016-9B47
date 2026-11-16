@@ -1,0 +1,3953 @@
+{
+  "objective": "fully, irrefutably and exhaustively address divergence and ensure complete semantic match",
+  "status": "C-only reconstruction in progress; no full reassembly alternative; complete C semantic equivalence remains refuted/unproved",
+  "evidence_policy": "raw firmware bytes and instruction semantics override conflicting prose; finite tests are not exhaustive proof",
+  "reference_sha256": "15f3ce1c30b82e3f87c45974284ccfa68e10928fea0f09a1a46376ac04cd50d4",
+  "assumptions": [
+    {
+      "id": "A1",
+      "text": "../phyb is the intended reference image",
+      "probe": "SHA-256 check before each run; phyb.asm and phyb.c hashes remain unchanged from review snapshot",
+      "dependent_results": "all reference comparisons"
+    },
+    {
+      "id": "A2",
+      "text": "selected Cortex-M4 instruction model covers the executed ARMv7E-M paths; physical core identity is unknown",
+      "probe": "independent Cortex-A15 QEMU scalar execution; target CPUID and exception/FP behavior would falsify the model",
+      "dependent_results": "Unicorn architecture, boot, packets, leaves, MAC, loopback, status bindings and trace; QEMU scalar/loopback checks use Cortex-A15"
+    },
+    {
+      "id": "A3",
+      "text": "peripheral reads follow the declared deterministic or scripted per-read response model, including ACK consumption and changing control/cursor values; no unmodeled asynchronous intervention",
+      "probe": "vary register seeds; compare complete interleaved access logs; independent target MMIO traces remain unavailable",
+      "dependent_results": "all MMIO comparisons"
+    },
+    {
+      "id": "A4",
+      "text": "the reload model supplies zero for trailing 0x43 source bytes; physical values remain unknown",
+      "probe": "DSRL=1 differential matrix now passes; physical loader/source-tail validation and arbitrary-tail tests remain",
+      "dependent_results": "modeled DSRL=1 boot; not physical loader equivalence"
+    },
+    {
+      "id": "A5",
+      "text": "fixed initialized pointer cells are a symbolic-check precondition, not a firmware invariant",
+      "probe": "FALSIFIED as a program invariant: accepted NVV 0x080B records replace workspace, loopback, status and trace cells; fixtures verify installed addresses and test mapped RAM/peripheral and payload/request/readback overlaps",
+      "dependent_results": "conditional symbolic checks retain explicit initial pointer values; full mutation/alias domains remain open"
+    },
+    {
+      "id": "A6",
+      "text": "scalar entry fixtures use declared AAPCS argument widths; flags include noncanonical byte values",
+      "probe": "raw register and width-boundary calls, host IPC cases, full argument-domain analysis",
+      "dependent_results": "finite leaf/API fixtures"
+    },
+    {
+      "id": "A7",
+      "text": "angr/PyVEX lifting and SMT semantics correctly model the selected scalar instruction paths",
+      "probe": "all paths cover the declared domain; unsupported behavior fails closed; mutation controls and 937 current query replays pass; old DPD counterexample and 77 historical replays retained",
+      "dependent_results": "57 conditional checks across 41 routines; fixed arguments recorded per case"
+    },
+    {
+      "id": "A8",
+      "text": "scalar checks observe AAPCS return registers, saved R4-R11/SP, written RAM, and guarded MMIO traces; interrupts do not intervene",
+      "probe": "interruption, aliasing, pointer substitution, architectural exception and timing analyses remain required",
+      "dependent_results": "conditional scalar equivalence only"
+    },
+    {
+      "id": "A9",
+      "text": "QEMU loopback fixture uses Cortex-A15 Normal writable memory, zero calibration pointers, valid readback arguments, active byte 1 and direct pointer-cell installation; no changing responses or interrupts",
+      "probe": "independent final-byte comparisons over declared memory regions and a compile-time snapshot capacity assertion; NVV installation, raw active bytes and changing reads are tested separately in Unicorn; device/interrupt traces remain unavailable",
+      "dependent_results": "1280 finite QEMU loopback cases only"
+    },
+    {
+      "id": "A10",
+      "text": "trace comparison maps original raw site argument (0x4D28D178 + offset modulo 2^32) to the reconstructed enum offset",
+      "probe": "reports retain both raw arguments; zero, normal, maximal and wrapped site values are compared; all arbitrary raw internal-call ABI equivalence remains unproven",
+      "dependent_results": "trace comparisons and normalized source caller token correspondence only"
+    },
+    {
+      "id": "A11",
+      "text": "crash-copy symbolic checks use ten recorded fixed R0 descriptor addresses and the original initialized mailbox cell",
+      "probe": "arbitrary descriptor bytes, both overlap directions, full return-domain coverage and a changed-first-word counterexample control; all arbitrary pointer geometries remain open",
+      "dependent_results": "10 conditional crash-copy checks within the 49-check, 40-routine set"
+    },
+    {
+      "id": "A12",
+      "text": "MAC instruction observation relies on Capstone 5.0.9 M-class decode and Unicorn executed-code callbacks for its supported transfer subset",
+      "probe": "conditional-load/store oracle matches fully unhooked execution; unsupported peripheral LDREX rejected; real IQMM observer reproducer agrees with logging-disabled final RAM. 762 command comparisons use the instruction observer; 42 crash-copy cases retain their declared memory-hook model. Executed-code addresses outside the declared ROM window are rejected; the rejection was exercised explicitly.",
+      "dependent_results": "MAC command peripheral traces; other suites retain their declared memory-hook model"
+    },
+    {
+      "id": "A13",
+      "text": "DPD workflow fixtures supply static aperture data and GTB=10 or an explicit per-read progress sequence; no independent device writes intervene",
+      "probe": "all actuation/test/capture flag combinations, armed values 0/1/2, absent/present tables, NVV and command-to-TX-to-result sequences, and polling-progress cases; physical progress/timing and concurrent aperture mutation remain unknown",
+      "dependent_results": "72 finite TX-setup DPD workflow comparisons"
+    },
+    {
+      "id": "A14",
+      "text": "QEMU DPD SCS virtual section 0xE0000000 maps to ordinary RAM at physical 0x4D100000; capture ISR is called as a scalar function",
+      "probe": "496 final-state comparisons cover command/output/capacity aliases and IRQ mode/trigger variants; declared device/test RAM ranges reset for both executions and snapshot capacity is compile-time checked",
+      "dependent_results": "QEMU scalar command/capture-IRQ comparisons only; not exception entry, NVIC or real SysTick semantics"
+    },
+    {
+      "id": "A15",
+      "text": "DPD symbolic command checks quantify arbitrary modeled data/responses at eight recorded fixed R0/R1/R2 address geometries",
+      "probe": "full return-domain coverage, RAM/state/output aliases, NULL output and peripheral command/capacity responses; old-ELF observable-difference query is satisfiable and independently replayed through the Z3 API",
+      "dependent_results": "8 conditional DPD checks within the 57-check, 41-routine set; not arbitrary-pointer equivalence"
+    },
+    {
+      "id": "A16",
+      "text": "Executable ROM layout is unobservable through accepted input: FALSIFIED in the current scalar model",
+      "probe": "Accepted 0x080B write installs ROM actuation pointer; three ROM pointers diverge with and without all hooks, RAM controls match; every copied byte equals the loaded source image. Physical ROM mapping remains unknown.",
+      "dependent_results": "full equivalence cannot be inferred from ordinary calibration-table cases or fixed-address conditional symbolic checks"
+    },
+    {
+      "id": "A17",
+      "text": "FRS entry/exit fixtures use fixed valid bands and selected output pointers, NVV-loaded calibration, scripted SysTick steps 1/1000 and optional changing MMIO values under the instruction observer",
+      "probe": "1740 cases cover all eight bands, raw single-channel flags, automatic/forced gain boundaries, zero/present calibration and NULL/output buffers; complete scans, arbitrary output/state aliases, target timing and interrupt interleavings remain open",
+      "dependent_results": "finite FRS entry/exit comparisons only"
+    },
+    {
+      "id": "A18",
+      "text": "Default FRS scanning matrix uses AGC selectors 1..3, explicit per-read SysTick/device responses and selected nonaliasing outputs under the instruction observer",
+      "probe": "3456 valid-selector cases match; separate selector-zero cases now match native prior-stack behavior. First memory faults are compared through failed access, not exception delivery; all other stack/alias domains remain open.",
+      "dependent_results": "finite FRS positive matrix only; no arbitrary-stack, all-alias or concurrent-device proof"
+    },
+    {
+      "id": "A19",
+      "text": "QEMU FRS runs scalar Cortex-A15 code in Normal RAM; SCS maps to Normal RAM, scan delays clamp to zero because reload=0, AGC is settled and correlator idle",
+      "probe": "224 calibration and 1296 scan comparisons plus seven matched seeded-stack cases without hooks; reference message binding is byte-identical and non-loadable, with no loadable reference-ROM overlap; exact counts and snapshot capacity checked",
+      "dependent_results": "finite QEMU FRS final states; not physical timing, selector reachability, NVIC or M-profile exception semantics"
+    },
+    {
+      "id": "A20",
+      "text": "Native FRS byte comparison verifies explicit external BL bindings and a fixed scan address; terminal-fault comparisons stop before M-profile exception delivery",
+      "probe": "scan bytes/table/literals, helper core and message bytes checked; three mutations rejected. Two faults match absolute PC, access, full general-register/xPSR state, active frame and pre-fault memory/transactions; six return sequences and seven independent seeded QEMU cases match.",
+      "dependent_results": "conditional native FRS body and selected scalar/fault-access observations only; no all-callee, arbitrary-alias, physical fault-delivery or whole-image ROM proof"
+    },
+    {
+      "id": "A21",
+      "text": "The compared initial memory map is the frozen ELF PT_LOAD map; NOBITS initialization and physical loader behavior are separate",
+      "probe": "Old ELF has two missing sections/71 bytes and loads zeros there; current 28 sections pass coverage and loaded 7558-byte readonly bank matches. Native code/message checks now include actual load coverage.",
+      "dependent_results": "ELF-load and readonly-bank checks only; not a universal physical loader proof"
+    },
+    {
+      "id": "A22",
+      "text": "Full ROM audit uses non-null actuation windows in readable ROM 0..0x88D2 under supplied GTB=10 with no concurrent writes",
+      "probe": "37 windows cover all 35025 nonzero byte addresses and execute with/without hooks; output equals each source slice and static/runtime differing-byte counts agree. Byte zero is not copied but already matches; physical mapping/progression remains unknown.",
+      "dependent_results": "necessity of code/data byte equality for observed copy outputs; not all execution/device semantics"
+    },
+    {
+      "id": "A23",
+      "text": "Clock callbacks are tested via scalar IRQ5 entry; synthetic capture code occupies unused modeled ROM outside original firmware bytes",
+      "probe": "Real NVV installation, four seeds, NULL/debug/capture callbacks and unhooked corroboration. Capture records R0-R12, entry SP/LR and xPSR; old fixed-pointer invalid instruction is preserved.",
+      "dependent_results": "24 fixed/control callback cases only; no all-pointer or hardware-IRQ proof"
+    },
+    {
+      "id": "A25",
+      "text": "Diagnostic alias matrix uses three fixed descriptor slots and mapped RAM with no external intervention",
+      "probe": "Old and corrected objects run on unhooked Unicorn and independent QEMU Normal memory: 1409/2100 old divergences, 0/2100 current. Separate executed-access check detects old ordering and checks eight current load/store events and widths.",
+      "dependent_results": "4200 finite comparisons and one executed sampling-order case; not arbitrary stack aliases or physical access behavior"
+    },
+    {
+      "id": "A26",
+      "text": "Diagnostic symbolic checks fix output geometry/index and stack arguments requested=0/capacity=0xA6; descriptor bytes, initial NZCV and all 32-bit offsets follow the shared Proof model",
+      "probe": "27 complete-return-domain checks, at most two paths per image and 11 block steps; old-ELF and changed-count controls are satisfiable; 212 exported queries replay with zero mismatches. Unknown symbolic addresses and incomplete execution fail closed.",
+      "dependent_results": "conditional zero-copy machine-code checks only; not all pointers, nonzero copies, interrupts, physical hardware or C-language undefined behavior"
+    },
+    {
+      "id": "A27",
+      "text": "NVV/MAC alias workflows enter the actual parser and ISR as scalar calls, with IPC registers modeled as ordinary memory and a nonzero diagnostic offset",
+      "probe": "Actual 0x080B cell installation verified; 216 cases in instruction-observed/fully unhooked pairs agree per image; old ELF has 144 divergences and corrected ELF none.",
+      "dependent_results": "accepted parser/MAC path within this model; no physical loader or interrupt-delivery proof"
+    },
+    {
+      "id": "A28",
+      "text": "C shift checks observe numerical u64 returns, AAPCS saved registers and restored SP with valid writable aligned entry stack; no caller-clobbered flag/register, timing, stack-alias or fault equivalence is claimed",
+      "probe": "16384 hook-free cases plus full-domain 96-bit input checks on both C helpers; shared host/target C masks amount to eight bits and bounds word shifts to 0..31. Generated code uses extra stack accesses (16 bytes left, 8 bytes right) and no helper calls; those effects remain outside the numerical proof.",
+      "dependent_results": "C shift numerical/AAPCS checks only, not whole-machine or complete firmware equivalence"
+    }
+  ],
+  "functions": [
+    {
+      "name": "_rtk_platform_halt",
+      "rva": "0x108",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_panic_abort",
+      "rva": "0x110",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_clear_context_switch_targets",
+      "rva": "0x11a",
+      "source": "src/rtkit/threading.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_warm_boot_init",
+      "rva": "0x124",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_late_init_noop",
+      "rva": "0x188",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_boot_router",
+      "rva": "0x18c",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rtk_irq_configure_basepri",
+      "rva": "0x1a4",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rtk_configure_irq_priority",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1a4",
+        "rebuilt_address": "0x1f0c",
+        "paths": [
+          2,
+          2
+        ],
+        "feasible_pairs": 2,
+        "block_steps": [
+          4,
+          4
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "nvic_enable_irq",
+      "rva": "0x1b4",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "nvic_enable_irq",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1b4",
+        "rebuilt_address": "0x1f1c",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "nvic_disable_irq",
+      "rva": "0x1c4",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "nvic_disable_irq",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1c4",
+        "rebuilt_address": "0x1f2c",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "nvic_clear_pending_irq",
+      "rva": "0x1d4",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "nvic_clear_pending_irq",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1d4",
+        "rebuilt_address": "0x1f3c",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "irq_save_and_disable",
+      "rva": "0x1e8",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "irq_restore",
+      "rva": "0x1f6",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "irq_enable",
+      "rva": "0x1fc",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "Reset_Handler",
+      "rva": "0x200",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "NMI_Handler",
+      "rva": "0x204",
+      "source": "src/rtkit/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "Fault_Handler",
+      "rva": "0x208",
+      "source": "src/rtkit/threading.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rtk_cpu_idle",
+      "rva": "0x20c",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_system_halt_on_code5",
+      "rva": "0x210",
+      "source": "src/w3/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_system_halt",
+      "rva": "0x216",
+      "source": "src/w3/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_fault_exception_bridge",
+      "rva": "0x220",
+      "source": "src/w3/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_clock_enable",
+      "rva": "0x264",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "clk_enable",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x264",
+        "rebuilt_address": "0x108",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_clock_delay_ticks",
+      "rva": "0x274",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ5_Handler",
+      "rva": "0x28c",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_clock_set_panic_mode",
+      "rva": "0x2c0",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "clk_enter_panic_mode",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x2c0",
+        "rebuilt_address": "0x160",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_clock_set_mux_divider",
+      "rva": "0x2d8",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_clock_set_prescaler",
+      "rva": "0x304",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "clk_set_prescaler",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x304",
+        "rebuilt_address": "0x1a4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          8
+        ],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_trace_log_entry",
+      "rva": "0x314",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_trace_get_buffer",
+      "rva": "0x3f4",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "trace_ring_base",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x3f4",
+        "rebuilt_address": "0x4914",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_trace_get_buffer_size",
+      "rva": "0x400",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "trace_ring_size",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x400",
+        "rebuilt_address": "0x4920",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "_btp_trace_outlined_current_record_base",
+      "rva": "0x406",
+      "source": "src/w3/trace.c",
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_btp_trace_outlined_indexed_record_base",
+      "rva": "0x412",
+      "source": "src/w3/trace.c",
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "btp_printf_stub",
+      "rva": "0x41c",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending",
+      "native_instruction_evidence": {
+        "address": "0x41c",
+        "byte_count": 4,
+        "artifact": "verification/evidence/frs-native.json.gz",
+        "scope": "exact loaded debug stub bytes and address"
+      }
+    },
+    {
+      "name": "btp_aux_timer_isr",
+      "rva": "0x420",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "aux_timer_isr",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x420",
+        "rebuilt_address": "0x1bc",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "SysTick_Handler",
+      "rva": "0x434",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "systick_isr",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x434",
+        "rebuilt_address": "0x1d0",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "systick_init",
+      "rva": "0x444",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "systick_init",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x444",
+        "rebuilt_address": "0x1e0",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32,
+          1,
+          1
+        ],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "systick_get_current_value",
+      "rva": "0x474",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "systick_now",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x474",
+        "rebuilt_address": "0x210",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "systick_delay_cycles",
+      "rva": "0x498",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "systick_wait_cycles",
+      "rva": "0x4a0",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "mac_ipc_send_warm_boot_ack",
+      "rva": "0x4c8",
+      "source": "src/w3/mac.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "mac_ipc_send_crash_notification",
+      "rva": "0x4ec",
+      "source": "src/w3/mac.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "mac_send_crash_notification",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4ec",
+        "rebuilt_address": "0x2b6c",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": false,
+        "fixed_arguments": {
+          "r0": "0x4d280700"
+        },
+        "fixed_stack_arguments": {}
+      },
+      "conditional_symbolic_cases": [
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d280700"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805ad"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805b1"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805bd"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805c0"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805c1"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805c2"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805c5"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805d1"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "mac_send_crash_notification",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x4ec",
+          "rebuilt_address": "0x2b6c",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            1,
+            1
+          ],
+          "argument_widths": [
+            32
+          ],
+          "return_observed": false,
+          "fixed_arguments": {
+            "r0": "0x4d2805d5"
+          },
+          "fixed_stack_arguments": {}
+        }
+      ]
+    },
+    {
+      "name": "mac_ipc_irq_handler",
+      "rva": "0x524",
+      "source": "src/w3/mac.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_mac_outlined_set_resp_ready_flag",
+      "rva": "0xc20",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_fill_cmd2_response",
+      "rva": "0xc32",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_setup_readback_buf",
+      "rva": "0xc4a",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_strrchr_slash_r4",
+      "rva": "0xc56",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_strrchr_slash",
+      "rva": "0xc5e",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_ring_frs_doorbell",
+      "rva": "0xc64",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_mac_outlined_log_cmd_error_18",
+      "rva": "0xc74",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "IRQ0_Handler",
+      "rva": "0xc80",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ1_Handler",
+      "rva": "0xc84",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ2_Handler",
+      "rva": "0xc88",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ3_Handler",
+      "rva": "0xc8c",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ4_Handler",
+      "rva": "0xc90",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ19_Handler",
+      "rva": "0xc94",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ20_Handler",
+      "rva": "0xc98",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ12_Handler",
+      "rva": "0xcb4",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ15_Handler",
+      "rva": "0xcb8",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ16_Handler",
+      "rva": "0xcbc",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "IRQ6_Handler",
+      "rva": "0xcd8",
+      "source": "src/w3/vectors.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_irq_init_and_enable",
+      "rva": "0xcdc",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_scan_channel_pass",
+      "rva": "0xd7c",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending",
+      "native_instruction_evidence": {
+        "artifact": "verification/evidence/frs-native.json.gz",
+        "scan_address": "0xd7c",
+        "scan_bytes": 744,
+        "helpers_bytes": 60,
+        "messages_bytes": 43,
+        "verified_calls": 18,
+        "mutation_controls": 3,
+        "scope": "byte geometry and decoded calls; not universal firmware proof"
+      }
+    },
+    {
+      "name": "frs_unpack_channel_bitmap",
+      "rva": "0x1064",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_run_multipass_scan",
+      "rva": "0x1120",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_process_and_calibrate_results",
+      "rva": "0x11b4",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_dump_rssi_readings",
+      "rva": "0x1430",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_configure_scan_params",
+      "rva": "0x1584",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_save_state_and_enter",
+      "rva": "0x15e0",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_restore_state_and_exit",
+      "rva": "0x1a1c",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_correlator_hw_init",
+      "rva": "0x1b7c",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "frs_format_rssi_fixed_point",
+      "rva": "0x1b98",
+      "source": "src/w3/frs.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_frs_outlined_elapsed_systick",
+      "rva": "0x1ba8",
+      "source": "src/w3/frs.c",
+      "status": "compiler helper to audit through call sites",
+      "native_instruction_evidence": {
+        "artifact": "verification/evidence/frs-native.json.gz",
+        "scan_address": "0xd7c",
+        "scan_bytes": 744,
+        "helpers_bytes": 60,
+        "messages_bytes": 43,
+        "verified_calls": 18,
+        "mutation_controls": 3,
+        "scope": "byte geometry and decoded calls; not universal firmware proof"
+      }
+    },
+    {
+      "name": "_frs_outlined_clear_agc_bit",
+      "rva": "0x1bb0",
+      "source": "src/w3/frs.c",
+      "status": "compiler helper to audit through call sites",
+      "native_instruction_evidence": {
+        "artifact": "verification/evidence/frs-native.json.gz",
+        "scan_address": "0xd7c",
+        "scan_bytes": 744,
+        "helpers_bytes": 60,
+        "messages_bytes": 43,
+        "verified_calls": 18,
+        "mutation_controls": 3,
+        "scope": "byte geometry and decoded calls; not universal firmware proof"
+      }
+    },
+    {
+      "name": "_frs_outlined_clear_trigger_bit",
+      "rva": "0x1bbe",
+      "source": "src/w3/frs.c",
+      "status": "compiler helper to audit through call sites",
+      "native_instruction_evidence": {
+        "artifact": "verification/evidence/frs-native.json.gz",
+        "scan_address": "0xd7c",
+        "scan_bytes": 744,
+        "helpers_bytes": 60,
+        "messages_bytes": 43,
+        "verified_calls": 18,
+        "mutation_controls": 3,
+        "scope": "byte geometry and decoded calls; not universal firmware proof"
+      }
+    },
+    {
+      "name": "rx_set_rssi_cal_override",
+      "rva": "0x1bcc",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rx_set_rssi_cal_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1bcc",
+        "rebuilt_address": "0x3ad4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "rx_set_mxdc_i_override",
+      "rva": "0x1bdc",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rx_set_mxdc_i_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1bdc",
+        "rebuilt_address": "0x3ae4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "rx_set_mxdc_q_override",
+      "rva": "0x1bec",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rx_set_mxdc_q_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1bec",
+        "rebuilt_address": "0x3af4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "rx_set_filter_bw_override",
+      "rva": "0x1bfc",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rx_set_filter_bw_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x1bfc",
+        "rebuilt_address": "0x3b04",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          8,
+          8
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "rx_setup_isr",
+      "rva": "0x1c10",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rx_done_isr",
+      "rva": "0x2470",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rx_set_iqmm_override",
+      "rva": "0x2544",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rx_update_maxgain_tables",
+      "rva": "0x2570",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rx_init",
+      "rva": "0x269c",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rf_test_set_correlator_magic",
+      "rva": "0x27ac",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rf_test_set_correlator_magic",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x27ac",
+        "rebuilt_address": "0x4a20",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "rf_test_configure_cw_tone",
+      "rva": "0x27c4",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rf_test_apply_cw_tone",
+      "rva": "0x27d0",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "coex_enable_rx_gain_backoff",
+      "rva": "0x28dc",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "coex_enable_rx_gain_backoff",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x28dc",
+        "rebuilt_address": "0x43d8",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "coex_disable_rx_gain_backoff",
+      "rva": "0x292c",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "coex_disable_rx_gain_backoff",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x292c",
+        "rebuilt_address": "0x4428",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "coex_is_active",
+      "rva": "0x2964",
+      "source": "src/w3/rx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "coex_is_active",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x2964",
+        "rebuilt_address": "0x4464",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "tx_set_slope_cal_bypass",
+      "rva": "0x2970",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "tx_set_slope_cal_bypass",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x2970",
+        "rebuilt_address": "0x49c4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "tx_set_df1_mantissa_override",
+      "rva": "0x297c",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "tx_set_df1_mantissa_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x297c",
+        "rebuilt_address": "0x49d0",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "tx_set_hf_coeff_bypass",
+      "rva": "0x298c",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "tx_set_hf_coeff_bypass",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x298c",
+        "rebuilt_address": "0x49e0",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          8
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "tx_override_noop_6",
+      "rva": "0x2998",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_override_noop_21",
+      "rva": "0x299c",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rf_test_configure_prbs_tx",
+      "rva": "0x29a0",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_setup_isr",
+      "rva": "0x2bb8",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_done_isr",
+      "rva": "0x3558",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "dpd_capture_done_isr",
+      "rva": "0x3598",
+      "source": "src/w3/dpd.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_set_power_mode_override",
+      "rva": "0x3658",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "tx_set_power_mode_override",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x3658",
+        "rebuilt_address": "0x49f4",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "dpd_handle_command",
+      "rva": "0x3684",
+      "source": "src/w3/dpd.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "dpd_handle_command",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x3684",
+        "rebuilt_address": "0x6c0",
+        "paths": [
+          6,
+          6
+        ],
+        "feasible_pairs": 6,
+        "block_steps": [
+          8,
+          7
+        ],
+        "argument_widths": [
+          32,
+          32,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {
+          "r0": "0x4d280800",
+          "r1": "0x4d280900",
+          "r2": "0x4d280a00"
+        },
+        "fixed_stack_arguments": {}
+      },
+      "conditional_symbolic_cases": [
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d280800",
+            "r1": "0x4d280900",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            5,
+            5
+          ],
+          "feasible_pairs": 5,
+          "block_steps": [
+            7,
+            6
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d280800",
+            "r1": "0x0",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d28aa84",
+            "r1": "0x4d280900",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d28b664",
+            "r1": "0x4d280900",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            1,
+            1
+          ],
+          "feasible_pairs": 1,
+          "block_steps": [
+            6,
+            5
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d28aaa4",
+            "r1": "0x4d280900",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d280800",
+            "r1": "0x4d28aaac",
+            "r2": "0x4d280a00"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d280800",
+            "r1": "0x4d280900",
+            "r2": "0x4d28aaa8"
+          },
+          "fixed_stack_arguments": {}
+        },
+        {
+          "name": "dpd_handle_command",
+          "status": "unsat for modeled difference",
+          "reference_rva": "0x3684",
+          "rebuilt_address": "0x6c0",
+          "paths": [
+            6,
+            6
+          ],
+          "feasible_pairs": 6,
+          "block_steps": [
+            8,
+            7
+          ],
+          "argument_widths": [
+            32,
+            32,
+            32
+          ],
+          "return_observed": true,
+          "fixed_arguments": {
+            "r0": "0x4d160000",
+            "r1": "0x4d280900",
+            "r2": "0x4d160200"
+          },
+          "fixed_stack_arguments": {}
+        }
+      ]
+    },
+    {
+      "name": "tx_init",
+      "rva": "0x377c",
+      "source": "src/w3/tx.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_tx_outlined_set_band_and_channel",
+      "rva": "0x3818",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_tx_outlined_scale_and_convert",
+      "rva": "0x383a",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_dpd_outlined_log_buffer_word",
+      "rva": "0x3846",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_tx_outlined_uint32_to_float",
+      "rva": "0x3850",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_dpd_outlined_log_timestamps",
+      "rva": "0x385c",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_dpd_outlined_copy_hw_buffer_save_r0",
+      "rva": "0x3868",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "tx_power_set_pa_gain_override",
+      "rva": "0x3874",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_reset_band_workspaces",
+      "rva": "0x3888",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_reset_channel_limits",
+      "rva": "0x38b0",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_get_channel_limit",
+      "rva": "0x38dc",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_set_channel_limit",
+      "rva": "0x38f0",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "update_tx_power_tables",
+      "rva": "0x3958",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_set_global_offset",
+      "rva": "0x3998",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_set_band_workspace",
+      "rva": "0x39ac",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_set_iq_scale_override",
+      "rva": "0x39cc",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "update_tx_power_tables_per_band",
+      "rva": "0x39e8",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_set_coex_floor",
+      "rva": "0x3a5c",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_init_and_interpolate_tables",
+      "rva": "0x3a68",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_apply_calibrated_target",
+      "rva": "0x3c20",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_apply_direct_index",
+      "rva": "0x3dd0",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_apply_for_packet",
+      "rva": "0x3e50",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending",
+      "naming_audit": {
+        "evidence": "NAME_RECOVERY.md",
+        "observation": "Native modes 4/5 use RAM 0x4D289960 as target/code-index override; current C model halts. Naming updated; runtime implementation unchanged."
+      }
+    },
+    {
+      "name": "tx_power_complete_packet",
+      "rva": "0x3fcc",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_configure_test_mode",
+      "rva": "0x4004",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "tx_power_setup_from_mac_command",
+      "rva": "0x4064",
+      "source": "src/w3/txpwr.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_tx_power_outlined_write_seq_code",
+      "rva": "0x40e4",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_tx_power_outlined_merge_pa_gain",
+      "rva": "0x40fa",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_tx_power_outlined_select_radio_bank",
+      "rva": "0x410a",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_tx_power_outlined_commit_pa_gain",
+      "rva": "0x411a",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "syscfg_init",
+      "rva": "0x412c",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "syscfg_write_chunk_checked",
+      "rva": "0x4148",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "syscfg_write_chunk",
+      "rva": "0x4150",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "syscfg_verify_checksum",
+      "rva": "0x417c",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "syscfg_find_tlv_tag",
+      "rva": "0x41ac",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "syscfg_apply",
+      "rva": "0x41e4",
+      "source": "src/w3/syscfg.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_apply_dcoc_cal",
+      "rva": "0x4288",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_apply_iqmm_dcoc_cal",
+      "rva": "0x42f8",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_apply_iqmm_ab_cal",
+      "rva": "0x4350",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_setup_tx_measurement",
+      "rva": "0x43a8",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_configure_corr_window",
+      "rva": "0x449c",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_corr0_done_isr",
+      "rva": "0x44ec",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "loopback_corr0_done_isr",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x44ec",
+        "rebuilt_address": "0x273c",
+        "paths": [
+          3,
+          3
+        ],
+        "feasible_pairs": 3,
+        "block_steps": [
+          3,
+          5
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "loopback_corr1_done_isr",
+      "rva": "0x4580",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "loopback_corr1_done_isr",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4580",
+        "rebuilt_address": "0x27ec",
+        "paths": [
+          3,
+          3
+        ],
+        "feasible_pairs": 3,
+        "block_steps": [
+          3,
+          5
+        ],
+        "argument_widths": [],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "loopback_restore_radio_state",
+      "rva": "0x4610",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_configure_mode",
+      "rva": "0x46a4",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_read_stats",
+      "rva": "0x48dc",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "loopback_is_active",
+      "rva": "0x4958",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "loopback_is_active",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4958",
+        "rebuilt_address": "0x2b14",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "loopback_init_noop",
+      "rva": "0x4964",
+      "source": "src/w3/loopback.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_assert_or_exception_panic",
+      "rva": "0x4968",
+      "source": "src/w3/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_report_hardware_exception",
+      "rva": "0x4a0c",
+      "source": "src/w3/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_trace_log_error",
+      "rva": "0x4a4c",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_format_fixed_point_slot",
+      "rva": "0x4ab6",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_timer_get_current_timestamp",
+      "rva": "0x4ae0",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "seq_timer_now",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4ae0",
+        "rebuilt_address": "0x244",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          2,
+          2
+        ],
+        "argument_widths": [],
+        "return_observed": "u64",
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_timer_get_tx_trigger_timestamp",
+      "rva": "0x4aec",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "seq_timer_tx_trigger",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4aec",
+        "rebuilt_address": "0x250",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          2,
+          2
+        ],
+        "argument_widths": [],
+        "return_observed": "u64",
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_timer_get_rx_trigger_timestamp",
+      "rva": "0x4af8",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "seq_timer_rx_trigger",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4af8",
+        "rebuilt_address": "0x25c",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          2,
+          2
+        ],
+        "argument_widths": [],
+        "return_observed": "u64",
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_timer_delay_ticks",
+      "rva": "0x4b04",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_timer_wait_until_timestamp",
+      "rva": "0x4b3e",
+      "source": "src/w3/clock.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_roundf_positive",
+      "rva": "0x4b54",
+      "source": "src/w3/trace.c",
+      "status": "semantic proof pending",
+      "bounded_evidence": "34 target instruction bytes identical, including VCVT and FPSCR effects"
+    },
+    {
+      "name": "btp_detect_radio_revision",
+      "rva": "0x4b78",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "radio_revision_detect",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4b78",
+        "rebuilt_address": "0x4470",
+        "paths": [
+          3,
+          3
+        ],
+        "feasible_pairs": 3,
+        "block_steps": [
+          4,
+          4
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_get_radio_revision",
+      "rva": "0x4bb8",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "radio_revision_get",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4bb8",
+        "rebuilt_address": "0x44b0",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_read_and_reset_telemetry",
+      "rva": "0x4bc4",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_read_version_info",
+      "rva": "0x4c9c",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_populate_version_info",
+      "rva": "0x4ce4",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_is_warm_boot",
+      "rva": "0x4d58",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "warm_boot_detected",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4d58",
+        "rebuilt_address": "0x44bc",
+        "paths": [
+          1,
+          2
+        ],
+        "feasible_pairs": 2,
+        "block_steps": [
+          1,
+          2
+        ],
+        "argument_widths": [],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_set_warm_boot_state",
+      "rva": "0x4d94",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "warm_boot_set_state",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4d94",
+        "rebuilt_address": "0x44f0",
+        "paths": [
+          2,
+          2
+        ],
+        "feasible_pairs": 2,
+        "block_steps": [
+          2,
+          2
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": false,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_read_diagnostic_buffer_chunk",
+      "rva": "0x4dbc",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending",
+      "diagnostic_alias_evidence": {
+        "finite_cases": 4416,
+        "divergences": 0,
+        "conditional_checks": 27,
+        "symbolic_report": "verification/evidence/diag-symbolic.json.gz",
+        "sampling_report": "verification/evidence/diag-sampling.json.gz",
+        "assumptions": [
+          "A25",
+          "A26",
+          "A27"
+        ],
+        "scope": "recorded mapped geometry and zero-copy conditional domains only; semantic proof still pending outside these domains"
+      }
+    },
+    {
+      "name": "btp_init_diagnostic_buffer_table",
+      "rva": "0x4e2c",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_set_trace_freeze_bit",
+      "rva": "0x4e5c",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_compute_xor_checksum",
+      "rva": "0x4e88",
+      "source": "src/w3/status.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "nvv_validate_mmio_address",
+      "rva": "0x4ea8",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "nvv_validate_address",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x4ea8",
+        "rebuilt_address": "0x3548",
+        "paths": [
+          3,
+          3
+        ],
+        "feasible_pairs": 3,
+        "block_steps": [
+          5,
+          5
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "nvv_log_bad_address",
+      "rva": "0x4ec6",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "modem_init_load_nvv_and_module",
+      "rva": "0x4edc",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "nvv_parse_blob",
+      "rva": "0x50b0",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "modem_warm_boot_restore_regs",
+      "rva": "0x5824",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "modem_set_register_write_unlock",
+      "rva": "0x5868",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "modem_set_register_unlock",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x5868",
+        "rebuilt_address": "0x3574",
+        "paths": [
+          1,
+          1
+        ],
+        "feasible_pairs": 1,
+        "block_steps": [
+          1,
+          1
+        ],
+        "argument_widths": [
+          8
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "_nvv_outlined_store_ptr_load_u16x3",
+      "rva": "0x58a8",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_nvv_outlined_store_ptr_get_presence0",
+      "rva": "0x58ba",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_nvv_outlined_set_presence0_load_u16",
+      "rva": "0x58c2",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_nvv_outlined_store_ptr_get_presence1",
+      "rva": "0x58cc",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "nvv_module_id_compare4",
+      "rva": "0x58d4",
+      "source": "src/w3/nvv.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_nvv_outlined_load_u8x4",
+      "rva": "0x58da",
+      "source": null,
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "btp_main",
+      "rva": "0x58f0",
+      "source": "src/w3/main.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "phy_reset_tx_and_radio_state",
+      "rva": "0x5964",
+      "source": "src/w3/main.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "phy_hw_init",
+      "rva": "0x59a8",
+      "source": "src/w3/main.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_phy_outlined_assert_reset",
+      "rva": "0x5a64",
+      "source": "src/w3/main.c",
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "_phy_outlined_deassert_reset",
+      "rva": "0x5a70",
+      "source": "src/w3/main.c",
+      "status": "compiler helper to audit through call sites"
+    },
+    {
+      "name": "phy_configure_synth_band_mux",
+      "rva": "0x5a7c",
+      "source": "src/w3/main.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "phy_set_synth_band",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x5a7c",
+        "rebuilt_address": "0x34e4",
+        "paths": [
+          4,
+          4
+        ],
+        "feasible_pairs": 4,
+        "block_steps": [
+          5,
+          5
+        ],
+        "argument_widths": [
+          1,
+          1,
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "btp_early_hw_init",
+      "rva": "0x5ae0",
+      "source": "src/w3/main.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_reset_init_stacks",
+      "rva": "0x5b50",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_nmi_and_kernel_fault_entry",
+      "rva": "0x5bb4",
+      "source": "src/rtkit/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_svc_pendsv_entry",
+      "rva": "0x5c04",
+      "source": "src/rtkit/threading.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_stack_chk_init",
+      "rva": "0x5c40",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "__stack_chk_fail",
+      "rva": "0x5c58",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "btp_memcpy",
+      "rva": "0x5c68",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "memmove",
+      "rva": "0x5c70",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending"
+    },
+    {
+      "name": "_memmove_core",
+      "rva": "0x5c76",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending"
+    },
+    {
+      "name": "btp_memset",
+      "rva": "0x5d80",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending"
+    },
+    {
+      "name": "strlen",
+      "rva": "0x5e00",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "strncmp",
+      "rva": "0x5e88",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "__aeabi_llsl",
+      "rva": "0x5f54",
+      "source": "src/libc/aeabi.c",
+      "status": "C implementation; numeric/AAPCS equivalence conditionally verified; whole-state/stack/fault/timing domains remain open",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "__aeabi_llsl",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x5f54",
+        "rebuilt_address": "0x1064",
+        "paths": [
+          3,
+          4
+        ],
+        "feasible_pairs": 6,
+        "block_steps": [
+          3,
+          3
+        ],
+        "argument_widths": [
+          32,
+          32,
+          32
+        ],
+        "return_observed": "u64",
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      },
+      "C_recovery_evidence": {
+        "source": "src/libc/aeabi.c",
+        "finite_report": "verification/evidence/c-shifts.json.gz",
+        "symbolic_report": "verification/evidence/symbolic.json.gz",
+        "domain": "all 64-bit values and all 32-bit shift arguments under the stated ABI/model",
+        "assumptions": [
+          "A28"
+        ]
+      }
+    },
+    {
+      "name": "__aeabi_llsr",
+      "rva": "0x5f76",
+      "source": "src/libc/aeabi.c",
+      "status": "C implementation; numeric/AAPCS equivalence conditionally verified; whole-state/stack/fault/timing domains remain open",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "__aeabi_llsr",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x5f76",
+        "rebuilt_address": "0x109a",
+        "paths": [
+          3,
+          3
+        ],
+        "feasible_pairs": 5,
+        "block_steps": [
+          3,
+          2
+        ],
+        "argument_widths": [
+          32,
+          32,
+          32
+        ],
+        "return_observed": "u64",
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      },
+      "C_recovery_evidence": {
+        "source": "src/libc/aeabi.c",
+        "finite_report": "verification/evidence/c-shifts.json.gz",
+        "symbolic_report": "verification/evidence/symbolic.json.gz",
+        "domain": "all 64-bit values and all 32-bit shift arguments under the stated ABI/model",
+        "assumptions": [
+          "A28"
+        ]
+      }
+    },
+    {
+      "name": "__udivdi3",
+      "rva": "0x5f98",
+      "source": "src/libc/aeabi.c",
+      "status": "semantic proof pending",
+      "bounded_evidence": "target instruction bytes match reference under checked placement; universal whole-program proof pending"
+    },
+    {
+      "name": "_rtk_cold_boot_init",
+      "rva": "0x605c",
+      "source": "src/rtkit/boot.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "rtk_irq_set_basepri_level",
+      "rva": "0x6210",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending",
+      "conditional_symbolic_evidence": {
+        "name": "rtk_set_irq_priority_level",
+        "status": "unsat for modeled difference",
+        "reference_rva": "0x6210",
+        "rebuilt_address": "0x1ee4",
+        "paths": [
+          2,
+          2
+        ],
+        "feasible_pairs": 2,
+        "block_steps": [
+          2,
+          2
+        ],
+        "argument_widths": [
+          32
+        ],
+        "return_observed": true,
+        "fixed_arguments": {},
+        "fixed_stack_arguments": {}
+      }
+    },
+    {
+      "name": "_rtk_check_active_stack_lower_bound",
+      "rva": "0x6240",
+      "source": "src/rtkit/threading.c",
+      "status": "semantic proof pending",
+      "naming_audit": {
+        "evidence": "NAME_RECOVERY.md",
+        "observation": "Native compares active SP once and loops on fixed flags; C model polls MSP. Runtime reachability and correction outside naming scope."
+      }
+    },
+    {
+      "name": "_rtk_thread_context_switch",
+      "rva": "0x624c",
+      "source": "src/rtkit/threading.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_cpu_idle_wfi",
+      "rva": "0x62d0",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_exc_get_frame_size",
+      "rva": "0x6302",
+      "source": "src/rtkit/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_capture_fault_and_panic",
+      "rva": "0x6314",
+      "source": "src/rtkit/exception.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_rtk_assert_fail",
+      "rva": "0x6430",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_vsnprintf_core",
+      "rva": "0x6444",
+      "source": "src/libc/printf.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_format_uint64_decimal",
+      "rva": "0x694c",
+      "source": "src/libc/printf.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "snprintf",
+      "rva": "0x69e6",
+      "source": "src/libc/printf.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "vsnprintf",
+      "rva": "0x6a00",
+      "source": "src/libc/printf.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_snprintf_putc",
+      "rva": "0x6a38",
+      "source": "src/libc/printf.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "strlcat",
+      "rva": "0x6a60",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "strlcpy",
+      "rva": "0x6ab8",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "strnlen",
+      "rva": "0x6aea",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "strrchr",
+      "rva": "0x6afe",
+      "source": "src/libc/string.c",
+      "status": "semantic proof pending",
+      "evidence": "reference instruction bytes (decoded external call relocations for strl*) and finite QEMU matrix; full execution environment correspondence remains conditional"
+    },
+    {
+      "name": "_rtk_cpu_halt_wfi",
+      "rva": "0x6b22",
+      "source": "src/rtkit/irq.c",
+      "status": "semantic proof pending"
+    },
+    {
+      "name": "_vsnprintf_outlined_emit_char",
+      "rva": "0x6b3e",
+      "source": "src/libc/printf.c",
+      "status": "compiler helper to audit through call sites"
+    }
+  ],
+  "confirmed_changes": [
+    "stackless reset and exception veneers",
+    "MPU descriptor offset +0x10",
+    "LP KVCO mode condition",
+    "TX modulation word selection including overrides",
+    "RTKit header and metadata wire bytes",
+    "formatter length/conversion/sink semantics and removal of numeric precision overflow",
+    "RX and FRS IQMM upper calibration halfword restored from PKHBT evidence",
+    "peripheral read/write ordering restored in synthesizer, PA bias, register unlock, MAC ISR and power-mode override",
+    "noncanonical override flag byte/word storage and full coex getter value preserved",
+    "position-independent target copy/fill/64-bit shift/division assembly with byte identity checks",
+    "all 0x98BD initialized RAM bytes and addresses restored, including shared NVV and original pointer cells",
+    "DSRL reload branch restored; warm and cold CCR sequences separated",
+    "HF coefficient selection preserves conditional and repeated PA-stage reads",
+    "TX power init and NVV parser raw return values restored",
+    "target roundf helper retains exact VCVT/FPSCR instruction behavior",
+    "workspace and loopback pointer cells followed after actual NVV register-write mutations",
+    "loopback calibration, window reads and radio/tone RMW sequences restored",
+    "RAM observer scope corrected and regression-tested",
+    "target strlen/strncmp/strnlen/strrchr/strlcpy/strlcat instruction access widths and order restored; relocated calls decoded and verified",
+    "TX power override requires flag byte exactly 1, including NVV-supplied noncanonical bytes",
+    "loopback statistics preserve word/byte access order, defined signed accumulator wrap, and all-sums-before-means readback",
+    "loopback path fields use fresh byte reads after each radio read; tone enable/frequency sampling order restored",
+    "two correlator ISRs added to conditional symbolic comparison; missing-count-store mutation detected",
+    "status cell binding corrected: fixed warm-boot flag, telemetry and version addresses; modem restore follows status cell and observes count/value/address read order",
+    "telemetry signed mean retains target SDIV instruction instead of undefined signed-minimum/-1 C division",
+    "trace payload preloads, per-store cursor reads, null-event timer ordering and wrapped 32-bit record addresses restored",
+    "MAC crash notification uses interleaved volatile word transfers instead of aggregate copy; preserves first-source-word-before-mailbox-cell ordering",
+    "MAC ready/header and version-payload stores retain observed halfword/byte widths and order; override selectors read only their observed byte/halfword fields",
+    "MAC probes replace corrupting Unicorn peripheral logging hooks with a checked executed-instruction observer; ACK response scope restricted",
+    "ten fixed-address arbitrary-data crash-copy checks and changed-first-word mutation control added to conditional symbolic verification",
+    "DPD commands retain operand preload/store ordering, actual repeated debug-argument reads and a single capacity read; overlapping command/state/output fields verified",
+    "DPD command/IRQ and TX actuation/test/capture workflows compared, including NVV table loading, command-to-TX-to-result sequences and scripted GTB progress",
+    "eight fixed-address arbitrary-data DPD command checks added; old ELF counterexample and 77 query replays preserved separately",
+    "FRS entry writes its initial scan-mode field from the saved SEQ_RF_CTRL sample, eliminating an extra peripheral read; 1740 entry/exit cases now match",
+    "FRS scan channel latch uses a fresh second register sample; PLL failure bits use separate loads; gain-table load precedes gain-force RMW; enabled center bin rereads its value",
+    "FRS scan/calibration/workflow matrix added (3456 matches); independent QEMU calibration and zero-reload scan matrix added (1520 matches)",
+    "Unsupported selector-zero hardware exclusion removed from source comment; unresolved first/reused-stack semantics retained and independently demonstrated in QEMU",
+    "Target FRS scan retains original Thumb instructions, 112-byte frame and original address 0xD7C; first/reused selector-zero stack slots match without C undefined behavior",
+    "Native outlined helpers preserve custom register contracts; all 18 scan calls, 744 scan bytes, 60 helper bytes and 43 pinned message bytes verified; three deliberate mutations rejected",
+    "Eight selector-zero cases now match, including exact pre-exception memory faults at PC 0xED2; all seven seeded hook-free QEMU cases match. Hardware fault delivery remains outside the scalar fixture",
+    "ROM output sections now follow address order; 71 formerly unmapped build/message bytes are covered by PT_LOAD. All 28 file-backed allocated sections now pass load-map checks.",
+    "Entire readonly bank 0x6B4C..0x88D2 (7558 bytes) is byte-exact in loaded memory; five data-only fragments restore 7408 bytes around typed objects.",
+    "Existing C debug stub pinned at original address 0x41C with exact four bytes; all 24 NVV-installed clock callback/control cases match, including unhooked execution.",
+    "Full ROM audit covers every nonzero ROM byte through 37 pointers in both observer modes; byte zero already equals the reference. Remaining differences are in code/vectors.",
+    "Diagnostic response writes now retain checksum/length preloads, exact volatile header store order/widths and late descriptor base read. 4200 direct/QEMU cases and 216 accepted NVV/MAC workflows match; 27 conditional zero-copy checks and their 212 queries pass with old-code and changed-count controls.",
+    "User selected C only. Removed full reassembly candidate from source/build/current evidence; preserved its files outside the project. Recovered both 64-bit shift helpers as shared defined C and replaced their old byte/displacement tests with numerical/ABI evidence and decoded division-call relocation checks."
+  ],
+  "evidence": [
+    {
+      "scope": "architecture",
+      "case_count": 26,
+      "divergences": 0,
+      "artifact": "verification/evidence/architecture.json.gz",
+      "uncompressed_sha256": "43f28f1dfb4338d696566693ff0f6d3c9c24fbed5565a7a907da329f31d6586d",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "boot",
+      "case_count": 34,
+      "divergences": 0,
+      "artifact": "verification/evidence/boot.json.gz",
+      "uncompressed_sha256": "3b6cfdb3da5f652038aeae293c0d4f0140f6961e179f59798e3f3bcc1de5d273",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "packets",
+      "case_count": 3072,
+      "divergences": 0,
+      "artifact": "verification/evidence/packets.json.gz",
+      "uncompressed_sha256": "bc7666d6f7cd3dbb967a33761ee3835c61217beb3d392261597264e31e3a04e3",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "leaves",
+      "case_count": 2550,
+      "divergences": 0,
+      "artifact": "verification/evidence/leaves.json.gz",
+      "uncompressed_sha256": "a77f6a5e668b04fa5aa9eb8431bf7a1a1fdfddbc59c8b455a00e05079d05407b",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "mac",
+      "case_count": 642,
+      "divergences": 0,
+      "artifact": "verification/evidence/mac.json.gz",
+      "uncompressed_sha256": "0c56b90c1045370283bac36ca3c206d22bd161b388a2af8fe78cb1784f2f27d4",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "power",
+      "case_count": 29,
+      "divergences": 0,
+      "artifact": "verification/evidence/power.json.gz",
+      "uncompressed_sha256": "4553f5df975b59233144af9566da0e84cceb6993a130462471677bd8451f1637",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "tx-calibration",
+      "case_count": 2432,
+      "divergences": 0,
+      "artifact": "verification/evidence/tx-calibration.json.gz",
+      "uncompressed_sha256": "9717accd5552c55fb83cbaa7eb4dcd3c0b204d75a3686f0cd5239bc5f82d2942",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "tx-volatile",
+      "case_count": 56,
+      "divergences": 0,
+      "artifact": "verification/evidence/tx-volatile.json.gz",
+      "uncompressed_sha256": "53407e4e6f7174f7214f4c234bdfe69442be3ba47ee235d493bd03b1632a966c",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "nvv",
+      "case_count": 198,
+      "divergences": 0,
+      "artifact": "verification/evidence/nvv.json.gz",
+      "uncompressed_sha256": "db7b3f20de113b8acf539f2eee6a1accc3edc24cafcff13abfba1f4fa056f0a9",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "loopback",
+      "case_count": 155,
+      "divergences": 0,
+      "artifact": "verification/evidence/loopback.json.gz",
+      "uncompressed_sha256": "89c1447e76091e2f6368a69e9df9d298b397349f3758241ec76f428544a7975b",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "QEMU scalar libc",
+      "case_count": 76512,
+      "exit_code": 0,
+      "artifact": "verification/evidence/formatter-qemu.json.gz",
+      "limit": "finite scalar Thumb formatter/memory/string comparison; not exception/hardware proof",
+      "uncompressed_sha256": "99e5c273bf342b48b15eeb0434d212d5a17b0f98e5604490b4a51d3a329f477b",
+      "divergences": 0
+    },
+    {
+      "scope": "formatter-diagnostic",
+      "case_count": 2248,
+      "divergences": 0,
+      "artifact": "verification/evidence/formatter-unicorn.json.gz",
+      "uncompressed_sha256": "0ab40a264197b4f33e68d5d4510463ba3d869c7a460afe70f00708cbf5407fb1",
+      "limit": "finite stated observations; not universal firmware proof"
+    },
+    {
+      "scope": "tx-modes",
+      "case_count": 4096,
+      "divergences": 0,
+      "artifact": "verification/evidence/tx-modes.json.gz",
+      "uncompressed_sha256": "013b4709c81e7367e8587fcfe408c56161f95d0490e0f25faa3158d4c1be2381",
+      "limit": "finite noncanonical TX power-mode/alternate-rate/NVV-flag matrix; no universal proof"
+    },
+    {
+      "scope": "loopback-alias",
+      "case_count": 1420,
+      "divergences": 0,
+      "artifact": "verification/evidence/loopback-alias.json.gz",
+      "uncompressed_sha256": "ef2234b1a96e3039925860ed0b0fd61efd571e823f98ca4cea75be719022bb3f",
+      "limit": "finite instruction/MMIO-response comparisons"
+    },
+    {
+      "scope": "QEMU loopback Normal memory",
+      "case_count": 1280,
+      "divergences": 0,
+      "artifact": "verification/evidence/loopback-qemu.json.gz",
+      "uncompressed_sha256": "2f983edf5a6b68e4205ea922193f074eb43e4e412cbfa73be11e18c3bf14dc4b",
+      "limit": "independent Cortex-A15 Normal-memory final states; no memory hooks; no physical-peripheral or changing-response proof",
+      "exit_code": 0
+    },
+    {
+      "scope": "status-bindings",
+      "case_count": 110,
+      "divergences": 0,
+      "artifact": "verification/evidence/status-bindings.json.gz",
+      "uncompressed_sha256": "b97170a85a45f17bb79331766efeaedafcbaa27c92220a24986fe0d4f37fcfe8",
+      "limit": "finite NVV substitutions, mapped-memory aliases and supplied response models; trace site arguments explicitly normalized; no whole-program or raw internal-ABI proof"
+    },
+    {
+      "scope": "trace",
+      "case_count": 1162,
+      "divergences": 0,
+      "artifact": "verification/evidence/trace.json.gz",
+      "uncompressed_sha256": "a20d4e6f8c11feb10be61fb65960b73f90f143651c887c91273a3530f73f48d0",
+      "limit": "finite NVV substitutions, mapped-memory aliases and supplied response models; trace site arguments explicitly normalized; no whole-program or raw internal-ABI proof"
+    },
+    {
+      "scope": "mac-alias",
+      "case_count": 162,
+      "divergences": 0,
+      "artifact": "verification/evidence/mac-alias.json.gz",
+      "uncompressed_sha256": "e3a49437a2c332d1c975664f41825a16a9b8a866e5fe1c19bb335d2423c00b3d",
+      "limit": "finite comparisons under recorded observer/address/memory assumptions; not all-pointer or physical-hardware proof"
+    },
+    {
+      "scope": "QEMU MAC crash Normal memory",
+      "case_count": 2160,
+      "divergences": 0,
+      "artifact": "verification/evidence/mac-crash-qemu.json.gz",
+      "uncompressed_sha256": "038557983df250f111b9377315387a48209f291ea565a5b114b1ee0ecce6fcc9",
+      "limit": "finite comparisons under recorded observer/address/memory assumptions; not all-pointer or physical-hardware proof",
+      "exit_code": 0
+    },
+    {
+      "scope": "instruction observer oracle",
+      "case_count": 4,
+      "divergences": 0,
+      "artifact": "verification/evidence/instruction-observer.json.gz",
+      "uncompressed_sha256": "55301e38546459abdd717a937e18e743ecad238faa1104ef582478287f662681",
+      "limit": "finite comparisons under recorded observer/address/memory assumptions; not all-pointer or physical-hardware proof"
+    },
+    {
+      "scope": "DPD command and capture IRQ",
+      "case_count": 496,
+      "divergences": 0,
+      "artifact": "verification/evidence/dpd.json.gz",
+      "uncompressed_sha256": "64e15a5e1cf46923999e1ca0af96b571f0dc76cc2868f7ff4a9a8cad0821f264",
+      "limit": "finite declared address/counter/memory domains; no all-pointer, physical interrupt, device-progress or concurrent-aperture proof"
+    },
+    {
+      "scope": "DPD TX workflows",
+      "case_count": 72,
+      "divergences": 0,
+      "artifact": "verification/evidence/dpd-workflow.json.gz",
+      "uncompressed_sha256": "afdd38e2d0284dee772bca8954893e80120919f68ef2c0c107e44b359cdf3eae",
+      "limit": "finite declared address/counter/memory domains; no all-pointer, physical interrupt, device-progress or concurrent-aperture proof"
+    },
+    {
+      "scope": "QEMU DPD command/capture IRQ",
+      "case_count": 496,
+      "divergences": 0,
+      "artifact": "verification/evidence/dpd-qemu.json.gz",
+      "uncompressed_sha256": "2fc93d2c7e3136683890cb99d290f53577975a058b79051f163f9802542439bf",
+      "limit": "finite declared address/counter/memory domains; no all-pointer, physical interrupt, device-progress or concurrent-aperture proof",
+      "exit_code": 0
+    },
+    {
+      "scope": "conditional scalar equivalence",
+      "routines": 43,
+      "SMT_queries": 973,
+      "SMT_replay_agreements": 973,
+      "artifact": "verification/evidence/symbolic.json.gz",
+      "SMT_archive": "verification/evidence/symbolic-smt.tar.gz",
+      "assumptions": [
+        "PyVEX/SMT semantics are correct",
+        "PyVEX ARM_COPY models all 16 initial NZCV patterns",
+        "initialized pointer cells retain image values",
+        "MMIO responses are independent symbolic values per read",
+        "declared AAPCS argument widths",
+        "interrupts do not intervene"
+      ],
+      "limit": "PyVEX/SMT model and declared entry-state preconditions; not whole firmware proof",
+      "uncompressed_sha256": "0df3fb2391a3e72fe06d6572e4439e5f85fd28d7a3ca29b9dacdfdc6c7d231d2",
+      "checks": 59
+    },
+    {
+      "scope": "rom-observability",
+      "case_count": 8,
+      "divergences": 6,
+      "artifact": "verification/evidence/rom-observability.json.gz",
+      "uncompressed_sha256": "7a40bbd344f6407f49c64c957494e02e64ed3acb1d42ba7cd109fd7c99489824",
+      "limit": "confirmed current scalar-model counterexample; two RAM controls match; six ROM cases include paired observed and fully unhooked executions"
+    },
+    {
+      "scope": "FRS entry/exit",
+      "case_count": 1740,
+      "divergences": 0,
+      "artifact": "verification/evidence/frs.json.gz",
+      "uncompressed_sha256": "b8600ac190319a1840c5ecc86f23fea61504efc3053063518f7d171c2819eb2d",
+      "limit": "finite all-band entry/exit, supplied SysTick/MMIO responses, NVV-loaded calibration and selected null/output geometries; not complete scans, arbitrary aliases or real devices"
+    },
+    {
+      "scope": "FRS scan/calibration/workflows",
+      "case_count": 3456,
+      "divergences": 0,
+      "artifact": "verification/evidence/frs-scan.json.gz",
+      "uncompressed_sha256": "14b60cd2c71d8dc4241854fc7e1acd1f2ca6385a344988a7ea7bd96e02f7b7fc",
+      "limit": "finite valid-selector matrix with scripted responses; not arbitrary aliases, selector-zero or concurrent devices"
+    },
+    {
+      "scope": "QEMU FRS calibration/bounded scans",
+      "case_count": 1520,
+      "divergences": 0,
+      "artifact": "verification/evidence/frs-process-qemu.json.gz",
+      "uncompressed_sha256": "e2b6aaa8bd021880b35714365f2961029d66ba7d3ad67033a006ea59dcb11409",
+      "limit": "224 calibration and 1296 scan cases in Normal RAM with zero-reload delays and settled/idle devices; no hooks",
+      "exit_code": 0
+    },
+    {
+      "scope": "FRS selector-zero diagnostic",
+      "case_count": 8,
+      "divergences": 0,
+      "artifact": "verification/evidence/frs-selector-zero.json.gz",
+      "uncompressed_sha256": "fbfa6eb3eef08ea695f7a5b9ec02d9bf3245ffb53b64df19a2c5a71d043fc866",
+      "limit": "six returned-state matches and two exact terminal memory-fault observations including absolute PC/registers/active frame; no exception-delivery proof"
+    },
+    {
+      "scope": "QEMU FRS seeded selector-zero diagnostic",
+      "case_count": 7,
+      "divergences": 0,
+      "artifact": "verification/evidence/frs-selector-zero-qemu.json.gz",
+      "uncompressed_sha256": "4ff23df07ba7d498991303b164640b30dc193aa41fdb6bebf50cf499c72c6364",
+      "limit": "seven explicit seeded-stack final-state matches without hooks; physical reachability and fault delivery remain unverified",
+      "exit_code": 0
+    },
+    {
+      "scope": "native FRS instruction layout",
+      "artifact": "verification/evidence/frs-native.json.gz",
+      "uncompressed_sha256": "39e743c60ce026ef98b6a1b913246ec4ee68c4ec25d8af3454c628e6f8c60292",
+      "scan_bytes": 744,
+      "helper_bytes": 60,
+      "message_bytes": 43,
+      "verified_calls": 18,
+      "mutation_controls_rejected": 3,
+      "limit": "exact byte/layout checks with verified external call relocations; not whole-firmware semantic proof"
+    },
+    {
+      "scope": "ELF allocated-section load coverage",
+      "artifact": "verification/evidence/load-coverage.json.gz",
+      "uncompressed_sha256": "f9def85b4e9de3690f1ec3ff697311401b38d6697a75260c53302b6408cb02a2",
+      "section_count": 28,
+      "readonly_bank_bytes": 7558,
+      "claim": "all file-backed allocated bytes covered by PT_LOAD and the readonly bank matches; NOBITS/physical loader policy not proved"
+    },
+    {
+      "scope": "full ROM observability domain",
+      "artifact": "verification/evidence/rom-domain.json.gz",
+      "uncompressed_sha256": "b6dbf33a1aec5a1ea34c7b6031ce73cb116caea63a5cf96e1a45748c4289b2a9",
+      "case_count": 74,
+      "divergences": 58,
+      "limit": "37 windows cover bytes 1..0x88D1 in both observer modes; byte zero already matches; physical mapping remains unverified"
+    },
+    {
+      "scope": "NVV clock callbacks",
+      "artifact": "verification/evidence/clock-callback.json.gz",
+      "uncompressed_sha256": "f23c510936d3a96927109b3402bab67de73a3ee3d8c70edda97c65aed025df62",
+      "case_count": 24,
+      "divergences": 0,
+      "limit": "NULL/fixed-debug/synthetic callbacks, four seeds and both observer modes; scalar IRQ5 entry, no physical interrupt-delivery proof"
+    },
+    {
+      "scope": "diagnostic descriptor/header aliases",
+      "artifact": "verification/evidence/diag-alias.json.gz",
+      "uncompressed_sha256": "80b2055adbf04ccd10a1bae1d595409570b35b129982c27672abaa6a79eed545",
+      "case_count": 2100,
+      "divergences": 0,
+      "limit": "recorded mapped-memory geometry, arguments and response model; not arbitrary stack/exception/physical behavior"
+    },
+    {
+      "scope": "QEMU diagnostic descriptor/header aliases",
+      "artifact": "verification/evidence/diag-alias-qemu.json.gz",
+      "uncompressed_sha256": "c218f4a213a5fe5038a4b67ef9c0103d8e7921ca036ad9920361bcb8f8d3dafa",
+      "case_count": 2100,
+      "divergences": 0,
+      "limit": "recorded mapped-memory geometry, arguments and response model; not arbitrary stack/exception/physical behavior"
+    },
+    {
+      "scope": "NVV/MAC diagnostic alias workflows",
+      "artifact": "verification/evidence/diag-mac.json.gz",
+      "uncompressed_sha256": "0ee1d128bbb54f46a023be50bbfb9e4b1fe55848bb5331e89c74796fd76b2158",
+      "case_count": 216,
+      "divergences": 0,
+      "limit": "recorded mapped-memory geometry, arguments and response model; not arbitrary stack/exception/physical behavior"
+    },
+    {
+      "scope": "executed diagnostic sampling order",
+      "artifact": "verification/evidence/diag-sampling.json.gz",
+      "uncompressed_sha256": "77287c4d7c98ac88979091b10877dd247bb630faf0bda323d0eaabdfa5c6fc11",
+      "descriptor_and_header_accesses": 8,
+      "limit": "one disjoint Normal-memory case with instruction observation; retained old ELF fails the same order check"
+    },
+    {
+      "scope": "conditional diagnostic zero-copy alias equivalence",
+      "artifact": "verification/evidence/diag-symbolic.json.gz",
+      "uncompressed_sha256": "ccfce8397f3b83003e2a36e73526e07a86b3d8c63a1d2708796df2adf0cfa010",
+      "checks": 27,
+      "routines": 1,
+      "SMT_queries": 212,
+      "SMT_replay_agreements": 212,
+      "SMT_archive": "verification/evidence/diag-symbolic-smt.tar.gz",
+      "limit": "fixed output/copy-count pointers and index, requested=0, capacity=0xA6, symbolic descriptor bytes and all 32-bit offsets under Proof/PyVEX/NZCV/entry-state assumptions"
+    },
+    {
+      "scope": "C 64-bit shifts",
+      "artifact": "verification/evidence/c-shifts.json.gz",
+      "uncompressed_sha256": "207d2f4990f461a88392c6733a02ae2719a152ce6fcfe2eb6244b5c1e8e06a1b",
+      "case_count": 16384,
+      "divergences": 0,
+      "limit": "numeric results, callee-saved registers and SP under valid fixed stack/ABI; caller-clobbered registers/flags, timing and arbitrary stack/fault domains remain open"
+    },
+    {
+      "scope": "current source rebuild runtime-image correspondence",
+      "artifact": "verification/evidence/build-image-equivalence.json.gz",
+      "uncompressed_sha256": "0bfb0f7b1a72f8613a01c052906aa2414b51baaa78e72cb9630ff354fce008dd",
+      "rebuilt_ELF": "verification/evidence/c-rebuild.elf",
+      "limit": "ordered PT_LOAD data/zero-fill actions, entry, allocated sections and symbol lookup agree; file hashes differ in unallocated debug information; physical loading remains unverified"
+    }
+  ],
+  "remaining": [
+    "CONFIRMED CURRENT DIVERGENCE: 26007 bytes differ in the code/vector region below 0x6B4C (including literal pools); readonly bank matches. Full ROM audit has 58/74 divergent comparisons. Exact executable layout remains required.",
+    "C-only recovery of retained algorithm instruction bodies, plus C-shift extra stack accesses and remaining caller-clobbered/timing/fault domains",
+    "CONFIRMED CURRENT DIVERGENCE: accepted NVV can expose executable bytes at fixed ROM addresses; recompiled C layout differs. Preserve original domain and resolve ROM/data/execution address semantics; do not special-case probe addresses.",
+    "FRS arbitrary initial stack/output aliases, callee/raw-PC interactions and physical exception delivery beyond restored native stack slots and selected matched fault-access snapshots",
+    "universal whole-program equivalence across all 219 recovered functions and outlined call sites",
+    "NVV arbitrary RAM writes, full pointer aliasing including pointer-cell self-overlap, malformed records; selected loopback RAM/peripheral and request/readback aliases now pass",
+    "TX full raw 32-bit mode domain and all channel/dynamic-table/calibration zero/extreme values; 4096-case noncanonical mode/alternate-rate/NVV-flag matrix now passes",
+    "full FRS, DPD, protocol and exception/fault/restore workflows",
+    "formatter complete grammar, extreme widths, mutable callbacks, canary corruption and helper ABI",
+    "interrupt interleavings, observable shared-memory ordering, timers and physical execution timing",
+    "physical loader, memory attributes, actual core/peripheral behavior and trailing reload source bytes",
+    "C undefined behavior, target/compiler sensitivity and the limits of host adapters",
+    "string routines retain reference instruction access widths/order; complete architectural boundary/fault/alias proof and host word-access fidelity remain unproven",
+    "full trace raw internal-ABI/site correspondence and faulting/unmapped cursor domains; modem restore full unbounded/malformed-table domain",
+    "DPD arbitrary pointer/counter and concurrent aperture domains; device progress, DMA coherence, actual IRQ/SysTick semantics and unbounded polling behavior",
+    "diagnostic response arbitrary/nonzero/stack/fault/device aliases beyond 4416 finite comparisons and 27 fixed zero-copy complete-domain checks"
+  ],
+  "updated_utc": "2026-10-29T20:19:02.700299+00:00",
+  "diagnostics": [
+    {
+      "scope": "generic RAM Unicorn memory hooks",
+      "status": "root cause isolated; observer scoped to peripheral/SCS ranges",
+      "artifact": "verification/evidence/observer-probe.json.gz",
+      "reproducer": "tools/probe_unicorn_observer.py",
+      "observation": "unhooked/scoped copy returns at 0x1F000; generic hook copy overruns to instruction cap with CPSR.Z clear",
+      "consequence": "previous formatter and DSRL copy discrepancies resolved; unaligned readback and DSRL=1 cases now pass under the declared memory model",
+      "limit": "this is not a complete validation of Unicorn or of instrumented peripheral Thumb IT paths"
+    },
+    {
+      "scope": "TX power override flag",
+      "status": "source divergence corrected",
+      "artifact": "verification/evidence/tx-modes-before-flag-fix.json.gz",
+      "case_count": 4096,
+      "historical_divergences": 384,
+      "trigger": "band 1 with NVV-reachable flag byte 2/255 and a mode/table combination that differs from forced mode 1",
+      "cause": "C nonzero predicate versus reference comparison to 1",
+      "current_evidence": "verification/evidence/tx-modes.json.gz",
+      "limit": "historical fixture injected flag cell directly; current fixtures deliver it through accepted NVV records and use stronger nonperiodic dynamic tables"
+    },
+    {
+      "scope": "loopback pointer aliases and access order",
+      "status": "source divergences corrected",
+      "artifact": "verification/evidence/loopback-alias-before-order-fix.json.gz",
+      "case_count": 1280,
+      "historical_divergences": 264,
+      "trigger": "NVV register records redirect statistics/control cells into modeled peripheral address ranges",
+      "cause": "cached control word, changed statistics preload/store order, reset order and tone read order",
+      "current_evidence": [
+        "verification/evidence/loopback-alias.json.gz",
+        "verification/evidence/loopback-qemu.json.gz"
+      ],
+      "limit": "historical probe was rerun after correcting the active-byte fixture; current QEMU snapshot has a compile-time capacity assertion"
+    },
+    {
+      "scope": "status pointer binding",
+      "status": "source divergences corrected",
+      "artifact": "verification/evidence/status-bindings-before-fix.json.gz",
+      "case_count": 36,
+      "historical_divergences": 34,
+      "cause": "wrong fixed-address versus pointer-cell binding; modem restore count/value/address ordering",
+      "current_evidence": "verification/evidence/status-bindings.json.gz"
+    },
+    {
+      "scope": "trace cursor/payload aliasing",
+      "status": "source divergences corrected",
+      "artifact": "verification/evidence/trace-before-cursor-fix.json.gz",
+      "case_count": 1154,
+      "historical_divergences": 370,
+      "cause": "cached record pointer and interleaved payload loads rather than initial four-word preload plus fresh cursors",
+      "current_evidence": "verification/evidence/trace.json.gz",
+      "limit": "reference termination verified for every archived historical case; unmapped/faulting trace domains remain open"
+    },
+    {
+      "scope": "MAC crash copy",
+      "status": "source divergence corrected",
+      "artifact": "verification/evidence/mac-alias-before-copy-fix.json.gz",
+      "case_count": 42,
+      "historical_divergences": 27,
+      "cause": "aggregate copy emitted memmove-like grouped/byte accesses and different overlap propagation"
+    },
+    {
+      "scope": "MAC mailbox response and override input access",
+      "status": "source divergence corrected",
+      "artifact": "verification/evidence/mac-mailbox-before-response-fix.json.gz",
+      "case_count": 162,
+      "historical_divergences": 60,
+      "cause": "nonvolatile response stores coalesced/reordered and override fields fetched eagerly or at wrong width"
+    },
+    {
+      "scope": "Unicorn peripheral IT logging",
+      "status": "memory-hook discrepancy reproduced; MAC uses instruction observer",
+      "artifact": "verification/evidence/mac-observer-probe.json.gz",
+      "reproducer": "tools/probe_mac_observer.py",
+      "observation": "same rebuilt ELF/input faults with peripheral memory logging hooks; instruction logging and logging-disabled runs agree in final mailbox/shared RAM",
+      "limit": "logging-disabled macro probe retains isolated ACK model; standalone oracle removes all memory hooks. This is not complete emulator validation."
+    },
+    {
+      "scope": "DPD command ordering",
+      "status": "source divergence corrected",
+      "artifact": "verification/evidence/dpd-before-command-fix.json.gz",
+      "case_count": 496,
+      "historical_divergences": 32,
+      "cause": "mode/control/debug argument and capacity-read ordering/width observability",
+      "current_evidence": "verification/evidence/dpd.json.gz"
+    },
+    {
+      "scope": "DPD old-ELF symbolic counterexample",
+      "status": "counterexample in old ELF; corresponding current fixed-address check passes",
+      "artifact": "verification/evidence/dpd-symbolic-before.json.gz",
+      "ELF": "verification/evidence/dpd-before-command-fix.elf",
+      "SMT_archive": "verification/evidence/dpd-before-smt.tar.gz",
+      "query_count": 77,
+      "replay_mismatches": 0,
+      "limit": "solver-derived under declared model and fixed argument addresses; not a physical execution claim"
+    },
+    {
+      "scope": "accepted NVV ROM data observability",
+      "status": "unresolved divergence in current ELF",
+      "artifact": "verification/evidence/rom-observability.json.gz",
+      "ELF": "verification/evidence/phyb.elf",
+      "detail": "NVV 0x080B writes cell 0x4D28AA94 with 0x108/0x10C/0x200; TX actuation copies 960 ROM bytes to 0x4D148800; 925/925/932 bytes differ. Hook-free final states agree with instruction-observed states.",
+      "limit": "physical ROM mapping and autonomous device behavior unknown; no claim of whole-program equivalence"
+    },
+    {
+      "scope": "FRS initial register sampling",
+      "status": "source divergence corrected",
+      "artifact": "verification/evidence/frs-before-read-fix.json.gz",
+      "ELF": "verification/evidence/frs-before-read-fix.elf",
+      "case_count": 1740,
+      "historical_divergences": 1728,
+      "current_evidence": "verification/evidence/frs.json.gz",
+      "cause": "first SEQ_RF_CTRL mode write must reuse its saved sample instead of consuming a second volatile read",
+      "limit": "finite entry/exit workflows, not full scans or concurrent device validation"
+    },
+    {
+      "scope": "FRS scan volatile sampling",
+      "status": "source divergences corrected",
+      "artifact": "verification/evidence/frs-before-scan-fix.json.gz",
+      "ELF": "verification/evidence/frs-before-scan-fix.elf",
+      "case_count": 3456,
+      "historical_divergences": 2928,
+      "current_evidence": "verification/evidence/frs-scan.json.gz",
+      "cause": "cached latch/PLL/center samples and gain-table versus gain-force access order"
+    },
+    {
+      "scope": "FRS selector-zero stack semantics",
+      "status": "historical target divergence corrected for recorded return/failed-access cases; physical exception delivery remains open",
+      "artifact": "verification/evidence/frs-selector-zero.json.gz",
+      "independent_artifact": "verification/evidence/frs-selector-zero-qemu.json.gz",
+      "limit": "conditional instruction/Normal-RAM models; physical selector-zero reachability and target exception handling unknown",
+      "historical_detail": "first zeroed stack slots fault at PC 0xED2, address 0xFFFFFF4C; later selector-zero cases reuse native table state that C resets. Seeded hook-free QEMU cases produce six different final gain-force words and one matched control.",
+      "historical_artifact": "verification/evidence/frs-selector-zero-before-native.json.gz",
+      "historical_ELF": "verification/evidence/frs-before-native-stack.elf",
+      "historical_independent_artifact": "verification/evidence/frs-selector-zero-before-native-qemu.json.gz",
+      "current_detail": "Native frame/instructions and absolute scan address restored. Both zero-stack cases match failed address/width/kind, all general registers/xPSR, absolute PC 0xED2, active 112-byte frame and pre-fault effects. Six changing-selector and seven seeded QEMU cases match."
+    },
+    {
+      "scope": "native FRS body/relocation controls",
+      "status": "verified",
+      "artifact": "verification/evidence/frs-native.json.gz",
+      "detail": "744 scan bytes at 0xD7C, 18 verified BL targets, 60 helper bytes and 43 message bytes; changed stack-slot load/call target/jump-table byte all rejected",
+      "limit": "callee contracts, full program ROM address/data compatibility and hardware exception delivery remain separate requirements"
+    },
+    {
+      "scope": "unloaded allocated ROM sections",
+      "status": "corrected",
+      "artifact": "verification/evidence/load-coverage-before.json.gz",
+      "native_check_artifact": "verification/evidence/frs-native-before-load-check.json.gz",
+      "ELF": "verification/evidence/before-load-order.elf",
+      "missing_sections": [
+        ".rtkit.build",
+        ".frs.scan_log"
+      ],
+      "missing_bytes": 71,
+      "current_evidence": "verification/evidence/load-coverage.json.gz",
+      "cause": "backwards output-section ordering left correct file section data outside PT_LOAD; previous section-only native checks were insufficient"
+    },
+    {
+      "scope": "NVV fixed code-address callback",
+      "status": "corrected for retained debug stub/control cases",
+      "artifact": "verification/evidence/callback-before-pin.json.gz",
+      "ELF": "verification/evidence/before-callback-pin.elf",
+      "historical_case_count": 24,
+      "historical_divergences": 8,
+      "current_evidence": "verification/evidence/clock-callback.json.gz",
+      "cause": "NVV callback 0x41D entered an invalid instruction in the recompiled layout; C stub now retains original address and bytes",
+      "limit": "other callback/code-pointer values, arbitrary contexts and physical IRQ delivery remain open"
+    },
+    {
+      "scope": "diagnostic descriptor/output aliases",
+      "status": "corrected in the recorded finite and conditional domains",
+      "before_ELF": "verification/evidence/diag-before-alias-fix.elf",
+      "before_C_source": "verification/evidence/diag-before-alias-fix-status.c",
+      "before_C_object": "verification/evidence/diag-before-alias-fix-status.o",
+      "before_unhooked": "verification/evidence/diag-before-alias-fix.json.gz",
+      "before_QEMU": "verification/evidence/diag-before-alias-fix-qemu.json.gz",
+      "before_QEMU_ELF": "verification/evidence/diag-before-alias-fix-qemu.elf",
+      "before_MAC": "verification/evidence/diag-before-alias-fix-mac.json.gz",
+      "before_order": "verification/evidence/diag-before-alias-fix-sampling.json.gz",
+      "cause": "C sampled checksum/length after initial header stores and hoisted source base before the remaining stores; volatile preloads/header stores/late source load restore the reference order and widths",
+      "historical_direct_divergences": 1409,
+      "historical_direct_cases_per_engine": 2100,
+      "historical_MAC_divergences": 144,
+      "historical_MAC_cases": 216,
+      "limit": "remaining arbitrary/nonzero/stack/exception/device domains are not proved"
+    }
+  ],
+  "exact_byte_checks": {
+    "initialized_ram_start": "0x4D280000",
+    "initialized_ram_end_exclusive": "0x4D2898BD",
+    "initialized_byte_count": 39101,
+    "target_routines": [
+      "memmove including memmove_core",
+      "memset",
+      "roundf_half_up",
+      "strlen",
+      "strncmp",
+      "strnlen",
+      "strrchr"
+    ],
+    "instruction_byte_count": 796,
+    "division_call_displacement_geometry_checked": false,
+    "limit": "relocation correspondence and valid architectural execution; not a proof of every firmware routine",
+    "literal_pool_byte_count": 8,
+    "relocation_normalized_routines": [
+      "__udivdi3",
+      "strlcpy",
+      "strlcat"
+    ],
+    "relocation_normalized_instruction_byte_count": 332,
+    "external_branch_destinations_decoded": true,
+    "native_frs_scan": {
+      "artifact": "verification/evidence/frs-native.json.gz",
+      "scan_address": "0xd7c",
+      "scan_bytes": 744,
+      "helpers_bytes": 60,
+      "messages_bytes": 43,
+      "verified_calls": 18,
+      "mutation_controls": 3,
+      "scope": "byte geometry and decoded calls; not universal firmware proof",
+      "debug_callback_address": "0x41c",
+      "debug_callback_bytes": 4
+    },
+    "readonly_rom_bank": {
+      "start": "0x6b4c",
+      "end_exclusive": "0x88d2",
+      "byte_count": 7558,
+      "data_fragment_bytes": 7408,
+      "typed_pinned_bytes": 150,
+      "artifact": "verification/evidence/load-coverage.json.gz",
+      "scope": "actual loaded bytes, not only ELF sections"
+    },
+    "checked_body_bytes_including_internal_literal": 800,
+    "C_acceptance_limit": "Retained instruction bodies are C-recovery debt. Their byte checks are binary regression evidence, not completion of the C-only deliverable. C shifts use separate numerical/ABI proof."
+  },
+  "bounded_scope_findings": [
+    {
+      "impact": "high",
+      "finding": "MMIO copy/fill access widths and grouped transactions affect DPD/capture apertures; exact target routines restored, complete DPD workflow still pending"
+    },
+    {
+      "impact": "high",
+      "finding": "reload copy exceeds initialized payload by 67 bytes; physical source bytes and loader behavior unknown"
+    },
+    {
+      "impact": "medium",
+      "finding": "raw host flags can be noncanonical; affected API and IPC storage now retains observed widths"
+    },
+    {
+      "impact": "low",
+      "finding": "provenance inventory checks coverage tags, not semantics; gate output and documentation corrected"
+    },
+    {
+      "impact": "high",
+      "finding": "NVV address masks permit RAM pointer-cell writes; fixed-cell assumptions can be violated by firmware inputs; workspace and loopback consumers corrected and tested"
+    },
+    {
+      "impact": "high",
+      "finding": "generic Unicorn RAM hooks can change Thumb IT behavior; independent no-hook/scoped-hook reproduction distinguishes observer failure from source behavior"
+    },
+    {
+      "impact": "medium",
+      "finding": "HF selection can sample PA stage twice and choose different sets when reads change; dynamic-response fixtures validate this branch"
+    },
+    {
+      "impact": "high",
+      "finding": "string word reads and forward overlapping strl* propagation differ from byte-walk/precomputed-length C; target instructions restored and 57784 additional QEMU string cases pass"
+    },
+    {
+      "impact": "medium",
+      "finding": "TX power override tests flag == 1; NVV supplies other byte values. Historical 4096-case matrix exposed 384 divergences, corrected predicate passes expanded fixtures"
+    },
+    {
+      "impact": "high",
+      "finding": "accepted NVV pointer substitutions make loopback byte/word widths and store order observable; fixed ordinary-RAM result tests missed these divergences"
+    },
+    {
+      "impact": "high",
+      "finding": "one initialized status cell has selected consumers; substituting it globally changed fixed telemetry/version/warm-boot accesses, while a fixed base incorrectly bypassed modem restore substitution"
+    },
+    {
+      "impact": "high",
+      "finding": "wrapped trace cursor values can make a record write modify the cursor itself; fresh per-field index loads affect subsequent destinations"
+    },
+    {
+      "impact": "medium",
+      "finding": "telemetry SDIV handles the signed-minimum/-1 boundary; source C division did not define that case"
+    },
+    {
+      "impact": "high",
+      "finding": "overlapping crash descriptors distinguish forward word propagation from aggregate/memmove copies; unaligned access widths are observable after accepted NVV mailbox substitution"
+    },
+    {
+      "impact": "high",
+      "finding": "peripheral memory hooks can leave stale Thumb IT state even when callbacks do nothing; MAC instruction observation avoids these hooks and retains an explicit decoder assumption"
+    },
+    {
+      "impact": "medium",
+      "finding": "volatile response and selector accesses preserve wire-facing widths/order and avoid unnecessary request field reads"
+    },
+    {
+      "impact": "high",
+      "finding": "DPD command/state/output aliases make load/store ordering and repeated capacity reads observable; current sequence restored and old binary counterexample retained"
+    },
+    {
+      "impact": "medium",
+      "finding": "DPD result_len counts 32-bit words, whereas GET_RESULT reports an 8-byte pointer/count response; IRQ capture does not publish new result metadata"
+    },
+    {
+      "impact": "medium",
+      "finding": "actuation reporting, test-flag clearing and capture-trigger clearing have different lifetimes; combined workflows preserve these transitions under supplied counter progress"
+    },
+    {
+      "impact": "high",
+      "finding": "Executable layout is observable through accepted NVV actuation pointer substitution; raw ROM bytes reach the hardware aperture, so fixed RAM/state and selected-string layout preservation is insufficient."
+    },
+    {
+      "impact": "medium",
+      "finding": "Reusing versus rereading a saved register changes FRS entry transactions even when ordinary RAM snapshots match; supplied changing reads also consume a different response sequence."
+    },
+    {
+      "impact": "high",
+      "finding": "Native FRS instructions/frame and absolute scan address now preserve first/reused stack state; scalar failed accesses match, while physical exception delivery remains unverified",
+      "historical_finding": "FRS selector zero retains stack-backed table state across channels; deterministic helper defaults change mapped MMIO transactions and seeded hook-free QEMU final gain-force state"
+    },
+    {
+      "impact": "medium",
+      "finding": "FRS PLL failure bits are sampled at different instants; a combined masked read changes decisions under supplied changing status responses"
+    },
+    {
+      "impact": "high",
+      "finding": "Preexisting stack bytes require an explicit native frame rather than uninitialized C locals; fixing only table defaults would preserve a different computation. Absolute fault PC also required pinning the native scan address."
+    },
+    {
+      "impact": "high",
+      "finding": "Correct section contents do not prove runtime bytes: 71 bytes were absent from PT_LOAD. Load-map and bank checks now close this source-to-runtime gap."
+    },
+    {
+      "impact": "high",
+      "finding": "Accepted NVV pointers expose essentially the whole ROM; restoring the readonly bank is necessary but leaves executable/vector byte identity unresolved."
+    },
+    {
+      "impact": "high",
+      "finding": "Code addresses are callable data as well as copy sources; fixed debug callback originally faulted, and preserving its true entry restores the recorded cases without input filtering."
+    },
+    {
+      "impact": "high",
+      "finding": "A checksum/length preload and late pointer read are observable even through accepted NVV/MAC inputs; ordinary C struct loads/stores reordered them. Both CPU engines reproduce the old failures and the corrected recorded cases match."
+    },
+    {
+      "impact": "medium",
+      "finding": "The prior host shift adapter treated negative/large counts differently from the reference. Shared C now uses low-eight-bit counts and defined word shifts. Compiler-generated stack accesses remain a separate fidelity domain."
+    }
+  ],
+  "algorithm_bounds": {
+    "differential_execution": "per case O(I + M + T) time and O(M + T) space, where I is executed instructions, M observed memory bytes, and T captured transactions; execution has an explicit instruction cap",
+    "report_compaction": "matched memory is compared byte for byte before SHA-256 compaction; divergence reports retain complete snapshots",
+    "scope_limit": "finite input matrices cannot establish universal equivalence",
+    "symbolic": "execution bounded at 500 blocks and 128 active paths; all declared inputs must be covered or the check fails. Comparison is O(P_ref * P_new * (written_bytes + MMIO_events^2)) before solver cost; SMT queries have a 10 s timeout and unknown is unresolved.",
+    "instruction_observer": "O(I + T) time and O(U + T) space for I executed instructions, U cached decoded addresses and T recorded transfers; cached bytes are validated and unsupported peripheral transfers fail closed",
+    "C_shift_helpers": "O(1) time/space in bounded 32-bit operations; 64-bit assembly/reassembly paths are not used for these two functions"
+  },
+  "quality_gates": {
+    "QG1": "pass: nonnormative technical task",
+    "QG2": "pass: assumptions and falsification probes recorded",
+    "QG3": "not satisfied: C-only reconstruction is incomplete; retained instruction bodies and listed full semantic requirements remain",
+    "QG4": "pass for stated artifact sizes and finite checks; no empirical numerical error claims",
+    "QG5": "not satisfied: ROM observability divergence remains; new C shift numeric proofs do not cover extra stack accesses, caller-clobbered state, timing or arbitrary fault contexts",
+    "QG6": "pass for recorded local primary evidence and hashes; no hardware provenance claim",
+    "QG7": "pass: bounded impact findings recorded"
+  },
+  "artifacts": {
+    "input_manifest": "verification/input_manifest.json",
+    "isolated_build": "/tmp/phyb-semantic-build",
+    "pre_edit_backup": "/tmp/phyb-before-semantic-fixes-20261029-0706.tar.gz",
+    "reference_listings_modified": false,
+    "default_build_directory_used": false,
+    "durable_evidence": "verification/evidence",
+    "current_elf": "verification/evidence/phyb.elf",
+    "current_elf_sha256": "8b1595f338492f37655fa0fcb24a7c6fb9c298a24930d089cdaee1244c9738f7",
+    "standalone_SMT_replay": "verification/evidence/smt-replay.json",
+    "toolchain": "verification/evidence/toolchain.json",
+    "full_semantic_gate": "positive suites including C shifts pass; original ROM gate 6/8 and full-domain gate 58/74 still diverge",
+    "semantic_domains_report": "verification/evidence/semantic-domains.json.gz",
+    "gate_execution_note": "Full C-target make run completed. Current source rebuild differs only in unallocated debug sections; ordered load actions, entry, allocated sections and symbol lookup match the tested executable. The two distinct file hashes are retained.",
+    "current_source_rebuild_ELF": "verification/evidence/c-rebuild.elf",
+    "current_source_rebuild_ELF_sha256": "f4ad959dd3539f2c13b084c64f3bdc6ad4a57209d58e0d7955fb47e9b8b87eba",
+    "current_source_runtime_image_correspondence": "verification/evidence/build-image-equivalence.json.gz"
+  },
+  "next_actions": [
+    "Recover retained instruction function bodies as readable C and prove the C builds; full reassembly identity is excluded from acceptance.",
+    "resolve complete executable/vector byte and code-address compatibility; do not substitute a data-only ROM facade or restrict accepted pointers",
+    "resolve fixed-address executable-ROM observability without excluding accepted pointer values; gate verify-rom-observability currently fails",
+    "audit remaining FRS output/stack aliases and full exception delivery after native frame/address restoration; resolve whole-image ROM-as-data compatibility",
+    "audit FRS scan/calibration and output/state-alias domains beyond the 1740 entry/exit cases",
+    "audit complete FRS scan/state-save/restore workflows and remaining exception aliases; extend counter/interrupt/aperture models beyond finite DPD cases",
+    "extend instruction-observer validation to remaining peripheral IT paths, then audit remaining exception/mailbox aliases and FRS/DPD/protocol workflows",
+    "test NVV-driven aliases into peripheral buffers and pointer/control overlap",
+    "expand remaining protocol/FRS/DPD/fault workflows and scalar symbolic coverage",
+    "independently validate observer behavior on instrumented peripheral Thumb IT instructions"
+  ],
+  "native_validation": {
+    "checks": 73,
+    "failures": 0,
+    "state_blocks": 22,
+    "provenance_inventory": 219,
+    "outlined_exempt": 30,
+    "claim": "layout and finite regression checks only",
+    "claimed": 197
+  },
+  "implementation_requirement": {
+    "source": "User clarification: Yes that is correct, only C",
+    "recorded_utc": "2026-10-29T19:37:14Z",
+    "deliverable": "Readable C reconstruction, verified against the original firmware",
+    "excluded": "Using a separate whole-image native reassembly as implementation or proof of C correctness",
+    "remaining_debt": "Existing retained-instruction bodies are not completed C reconstructions"
+  },
+  "retained_instruction_recovery_debt": {
+    "status": "incomplete C recovery; classification of architectural entry/intrinsic requirements remains explicit",
+    "sites": [
+      {
+        "source": "src/libc/aeabi.c",
+        "line": 84,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/libc/aeabi.c",
+        "line": 87,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 20,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 23,
+        "declaration": "__asm__ volatile(\"b.w memmove\");"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 50,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 53,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 184,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 187,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 259,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 262,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 319,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 322,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 357,
+        "declaration": "__asm__(\".pushsection .text.strncmp,\\\"ax\\\",%progbits\\n\""
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 359,
+        "declaration": "__attribute__((naked, aligned(4), section(\".text.strncmp\")))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 362,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 455,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 458,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 499,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 502,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 550,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/libc/string.c",
+        "line": 553,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/rtkit/boot.c",
+        "line": 30,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/rtkit/boot.c",
+        "line": 74,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/rtkit/exception.c",
+        "line": 38,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/rtkit/exception.c",
+        "line": 94,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/rtkit/threading.c",
+        "line": 12,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/rtkit/threading.c",
+        "line": 62,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 317,
+        "declaration": "__attribute__((naked, used, aligned(4)))"
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 320,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 340,
+        "declaration": "__attribute__((naked, used))"
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 343,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 351,
+        "declaration": "__attribute__((naked, used))"
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 354,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 364,
+        "declaration": "__attribute__((naked, aligned(4)))"
+      },
+      {
+        "source": "src/w3/frs.c",
+        "line": 367,
+        "declaration": "__asm__ volatile("
+      },
+      {
+        "source": "src/w3/status.c",
+        "line": 77,
+        "declaration": "__asm__ volatile(\"sdiv %0, %1, %2\" : \"=r\"(result)"
+      },
+      {
+        "source": "src/w3/trace.c",
+        "line": 143,
+        "declaration": "__attribute__((naked))"
+      },
+      {
+        "source": "src/w3/trace.c",
+        "line": 147,
+        "declaration": "__asm__ volatile("
+      }
+    ],
+    "scope": "retained algorithm bodies are not accepted as C reconstruction merely because bytes match"
+  }
+}

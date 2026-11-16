@@ -1,0 +1,139 @@
+{
+  "scope": "Source-layout refactor; no whole-firmware equivalence claim",
+  "date": "2026-10-29",
+  "moves": {
+    "src/clock.c": "src/w3/clock.c",
+    "src/dpd.c": "src/w3/dpd.c",
+    "src/frs.c": "src/w3/frs.c",
+    "src/loopback.c": "src/w3/loopback.c",
+    "src/mac.c": "src/w3/mac.c",
+    "src/main.c": "src/w3/main.c",
+    "src/nvv.c": "src/w3/nvv.c",
+    "src/rx.c": "src/w3/rx.c",
+    "src/status.c": "src/w3/status.c",
+    "src/syscfg.c": "src/w3/syscfg.c",
+    "src/trace.c": "src/w3/trace.c",
+    "src/tx.c": "src/w3/tx.c",
+    "src/txpwr.c": "src/w3/txpwr.c",
+    "src/vectors.c": "src/w3/vectors.c",
+    "src/frs_scan_arm.inc": "src/w3/frs_scan_arm.inc"
+  },
+  "body_check": {
+    "functions": 289,
+    "body_tokens_identical": true
+  },
+  "host_checks": 73,
+  "state_blocks": 22,
+  "provenance": {
+    "recovered": 219,
+    "claimed": 197,
+    "outlined_exempt": 30
+  },
+  "differential_suites": [
+    {
+      "stage": "before",
+      "suite": "architecture",
+      "exit": 0,
+      "output": "architecture: 29 cases, 0 divergences\n"
+    },
+    {
+      "stage": "before",
+      "suite": "boot",
+      "exit": 0,
+      "output": "boot: 34 cases, 0 divergences\n"
+    },
+    {
+      "stage": "before",
+      "suite": "leaves",
+      "exit": 0,
+      "output": "leaves: 2550 cases, 0 divergences\n"
+    },
+    {
+      "stage": "before",
+      "suite": "mac",
+      "exit": 0,
+      "output": "mac: 642 cases, 0 divergences\n"
+    },
+    {
+      "stage": "after",
+      "suite": "architecture",
+      "exit": 0,
+      "output": "architecture: 29 cases, 0 divergences\n"
+    },
+    {
+      "stage": "after",
+      "suite": "boot",
+      "exit": 0,
+      "output": "boot: 34 cases, 0 divergences\n"
+    },
+    {
+      "stage": "after",
+      "suite": "leaves",
+      "exit": 0,
+      "output": "leaves: 2550 cases, 0 divergences\n"
+    },
+    {
+      "stage": "after",
+      "suite": "mac",
+      "exit": 0,
+      "output": "mac: 642 cases, 0 divergences\n"
+    }
+  ],
+  "qemu": {
+    "mac-crash-qemu": {
+      "cases": 2160,
+      "failures": 0
+    },
+    "dpd-qemu": {
+      "cases": 496,
+      "failures": 0
+    },
+    "loopback-qemu": {
+      "cases": 1280,
+      "failures": 0
+    },
+    "frs-process-qemu": {
+      "cases": 1520,
+      "failures": 0
+    }
+  },
+  "image_sections": {
+    "images": {
+      "before": {
+        "elf_sha256": "531d062c95e5437f386684f268bf08b1a944566055478e6d79c799be55f34863",
+        "sections": {
+          ".rtkit.header": "06c061aa5a8f32f467553fd7c3ce5efab86835baa5c3689197b90d278dba163d",
+          ".rom.rodata_6b4c": "7a7ffc58177973cacda96d6265008a2cdc656ccd85e3f7e8eb2d4afd8c2ee13b",
+          ".rtkit.product": "6ce305d186d7d8b986378418ef4553c0f8d40185a9b5cc035ecf03c3704aa682",
+          ".rom.rodata_6b76": "9c6afa5cdbefd7326034f28a47f7ba26886bee61e791394a56cf3eafff6e6913",
+          ".rom.rodata_6bdd": "0d400e0602c047932b398592442e1e4495f4fa7a8d0a33ae98d92b89f6ffb1b0",
+          ".rtkit.build": "03866badc9e41a87fb4e644220c0e67a08cf460c9426f8b94a61fc1f8e2b4318",
+          ".rom.rodata_7d1c": "ca992b705111c3b3b5ea1048d51295ee59b78d16387eda423be9e9b7ac6decf3",
+          ".rom.rodata_7e73": "28253a4c15217768037693a1f3719c47dc516a96760b92e5b04e206985239e29",
+          ".image.prefix": "35ecd48530f54fdd3d7f6e4be93c582ecc1bd82c5e8e2ccc667b58f1178dc393",
+          ".rtkit.guard": "cada0b8c78f5acf7d384dc5497b9110e97c9f53c87782a24d255737c3918fbf3",
+          ".rtkit.meta": "1b21ae66311969f098065d148e1c5ae5f15285b1f66a6bea7bfafd87d03597ea"
+        }
+      },
+      "after": {
+        "elf_sha256": "7d2a8ad41d7b3f386eb3e73f6844dcd48016af19b1a990f4974c61806838f076",
+        "sections": {
+          ".rtkit.header": "06c061aa5a8f32f467553fd7c3ce5efab86835baa5c3689197b90d278dba163d",
+          ".rom.rodata_6b4c": "7a7ffc58177973cacda96d6265008a2cdc656ccd85e3f7e8eb2d4afd8c2ee13b",
+          ".rtkit.product": "6ce305d186d7d8b986378418ef4553c0f8d40185a9b5cc035ecf03c3704aa682",
+          ".rom.rodata_6b76": "9c6afa5cdbefd7326034f28a47f7ba26886bee61e791394a56cf3eafff6e6913",
+          ".rom.rodata_6bdd": "0d400e0602c047932b398592442e1e4495f4fa7a8d0a33ae98d92b89f6ffb1b0",
+          ".rtkit.build": "03866badc9e41a87fb4e644220c0e67a08cf460c9426f8b94a61fc1f8e2b4318",
+          ".rom.rodata_7d1c": "ca992b705111c3b3b5ea1048d51295ee59b78d16387eda423be9e9b7ac6decf3",
+          ".rom.rodata_7e73": "28253a4c15217768037693a1f3719c47dc516a96760b92e5b04e206985239e29",
+          ".image.prefix": "35ecd48530f54fdd3d7f6e4be93c582ecc1bd82c5e8e2ccc667b58f1178dc393",
+          ".rtkit.guard": "cada0b8c78f5acf7d384dc5497b9110e97c9f53c87782a24d255737c3918fbf3",
+          ".rtkit.meta": "1b21ae66311969f098065d148e1c5ae5f15285b1f66a6bea7bfafd87d03597ea"
+        }
+      }
+    },
+    "changed_sections": []
+  },
+  "artifacts": "/tmp/phyb-structure-20261029",
+  "historical_input_manifest": "Unmodified; describes its archived build, not the refactored source tree."
+}

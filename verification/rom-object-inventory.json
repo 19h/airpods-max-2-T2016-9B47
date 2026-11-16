@@ -1,0 +1,1212 @@
+{
+  "reference_sha256": "15f3ce1c30b82e3f87c45974284ccfa68e10928fea0f09a1a46376ac04cd50d4",
+  "fields": [
+    {
+      "field": "psp_top",
+      "address": "0x6b4c",
+      "size": 4,
+      "kind": "32-bit stack address"
+    },
+    {
+      "field": "psp_bytes",
+      "address": "0x6b50",
+      "size": 4,
+      "kind": "stack byte count"
+    },
+    {
+      "field": "msp_base",
+      "address": "0x6b54",
+      "size": 4,
+      "kind": "32-bit stack address"
+    },
+    {
+      "field": "msp_top",
+      "address": "0x6b58",
+      "size": 4,
+      "kind": "32-bit stack address"
+    },
+    {
+      "field": "msp_bytes",
+      "address": "0x6b5c",
+      "size": 4,
+      "kind": "stack byte count"
+    },
+    {
+      "field": "product_string_padding",
+      "address": "0x6b76",
+      "size": 2,
+      "kind": "alignment bytes"
+    },
+    {
+      "field": "exception_name_addresses",
+      "address": "0x6b78",
+      "size": 36,
+      "kind": "9 encoded 32-bit string addresses"
+    },
+    {
+      "field": "frs_band_spans",
+      "address": "0x6b9c",
+      "size": 8,
+      "kind": "8 per-band channel spans"
+    },
+    {
+      "field": "format_string",
+      "address": "0x7d1c",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%s"
+    },
+    {
+      "field": "newline",
+      "address": "0x7d1f",
+      "size": 2,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n"
+    },
+    {
+      "field": "exception_reset",
+      "address": "0x7d21",
+      "size": 6,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "RESET"
+    },
+    {
+      "field": "exception_undefined",
+      "address": "0x7d27",
+      "size": 6,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "UNDEF"
+    },
+    {
+      "field": "exception_svc",
+      "address": "0x7d2d",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "SVC"
+    },
+    {
+      "field": "exception_prefetch_abort",
+      "address": "0x7d31",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "PREFETCH_ABORT"
+    },
+    {
+      "field": "exception_data_abort",
+      "address": "0x7d40",
+      "size": 11,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DATA_ABORT"
+    },
+    {
+      "field": "exception_irq",
+      "address": "0x7d4b",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "IRQ"
+    },
+    {
+      "field": "exception_fiq",
+      "address": "0x7d4f",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "FIQ"
+    },
+    {
+      "field": "exception_nmi",
+      "address": "0x7d53",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "NMI"
+    },
+    {
+      "field": "exception_hardfault",
+      "address": "0x7d57",
+      "size": 10,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "HARDFAULT"
+    },
+    {
+      "field": "mac_source_path",
+      "address": "0x7d61",
+      "size": 127,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "/Library/Caches/com.apple.xbs/E06151E4-0C9A-48B8-A88C-98275C13C50B/TemporaryDirectory.vX0z3Y/Sources/WxBtPhy/firmware/w3/mac.c"
+    },
+    {
+      "field": "dpd_ram_irq_enter",
+      "address": "0x7de0",
+      "size": 26,
+      "kind": "NUL-terminated diagnostic string",
+      "value": ">> ISR: DPD_RAM_WR_AVAIL\n"
+    },
+    {
+      "field": "dpd_ram_irq_leave",
+      "address": "0x7dfa",
+      "size": 26,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "<< ISR: DPD_RAM_WR_AVAIL\n"
+    },
+    {
+      "field": "afe_correlation_irq_enter",
+      "address": "0x7e14",
+      "size": 26,
+      "kind": "NUL-terminated diagnostic string",
+      "value": ">> ISR: AFE_EL_CORR_DONE\n"
+    },
+    {
+      "field": "afe_correlation_irq_leave",
+      "address": "0x7e2e",
+      "size": 26,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "<< ISR: AFE_EL_CORR_DONE\n"
+    },
+    {
+      "field": "frs_status_invalid",
+      "address": "0x7e73",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "inv"
+    },
+    {
+      "field": "frs_status_clipped",
+      "address": "0x7e77",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "clp"
+    },
+    {
+      "field": "frs_status_pll",
+      "address": "0x7e7b",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "pll"
+    },
+    {
+      "field": "frs_status_agc",
+      "address": "0x7e7f",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "agc"
+    },
+    {
+      "field": "frs_readings_heading",
+      "address": "0x7e83",
+      "size": 16,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "RSSI readings:\n"
+    },
+    {
+      "field": "frs_columns_format",
+      "address": "0x7e93",
+      "size": 18,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%4s %15s     %15s"
+    },
+    {
+      "field": "frs_channel_heading",
+      "address": "0x7ea5",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Ch"
+    },
+    {
+      "field": "frs_pass_one_heading",
+      "address": "0x7ea8",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "#1"
+    },
+    {
+      "field": "frs_pass_two_heading",
+      "address": "0x7eab",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "#2"
+    },
+    {
+      "field": "frs_pass_three_format",
+      "address": "0x7eae",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%15s     %15s\n"
+    },
+    {
+      "field": "frs_pass_three_heading",
+      "address": "0x7ebd",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "#3"
+    },
+    {
+      "field": "frs_double_hash",
+      "address": "0x7ec0",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "##"
+    },
+    {
+      "field": "frs_reading_prefix_format",
+      "address": "0x7ec3",
+      "size": 14,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%4d %15s|%3d "
+    },
+    {
+      "field": "frs_bad_sample",
+      "address": "0x7ed1",
+      "size": 4,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "bad"
+    },
+    {
+      "field": "frs_readings_row_format",
+      "address": "0x7ed5",
+      "size": 28,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%15s|%3d %15s|%3d %15s|%3d\n"
+    },
+    {
+      "field": "dpd_actuation_timestamp_format",
+      "address": "0x7ef1",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Act GTB=%d:\n"
+    },
+    {
+      "field": "decimal_csv_format",
+      "address": "0x7efe",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": " %d,"
+    },
+    {
+      "field": "dpd_test_timestamp_format",
+      "address": "0x7f03",
+      "size": 22,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "GTB DPD test %d (%d)\n"
+    },
+    {
+      "field": "dpd_test_enter_format",
+      "address": "0x7f19",
+      "size": 24,
+      "kind": "NUL-terminated diagnostic string",
+      "value": ">>>>>> (err=%d gtb=%d)\n"
+    },
+    {
+      "field": "hexadecimal_csv_format",
+      "address": "0x7f31",
+      "size": 7,
+      "kind": "NUL-terminated diagnostic string",
+      "value": " %08x,"
+    },
+    {
+      "field": "dpd_test_leave_format",
+      "address": "0x7f38",
+      "size": 18,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n<<<<<< (err=%d)\n"
+    },
+    {
+      "field": "dpd_capture_timestamp_format",
+      "address": "0x7f4a",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "GTB DPD %d (%d)\n"
+    },
+    {
+      "field": "dpd_capture_enter_format",
+      "address": "0x7f5b",
+      "size": 27,
+      "kind": "NUL-terminated diagnostic string",
+      "value": ">>>>>> (err=%d gtb=%d>%d)\n"
+    },
+    {
+      "field": "timestamp_triplet_format",
+      "address": "0x7f76",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "TS=%d %d %d\n"
+    },
+    {
+      "field": "unsigned_csv_format",
+      "address": "0x7f83",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": " %u,"
+    },
+    {
+      "field": "dpd_capture_leave_format",
+      "address": "0x7f88",
+      "size": 32,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "<<<<<< (dpd_cpu_access_err=%d)\n"
+    },
+    {
+      "field": "dpd_mode_change_format",
+      "address": "0x7fa8",
+      "size": 27,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DPD mode %d>%d set up @%d\n"
+    },
+    {
+      "field": "dpd_actuation_format",
+      "address": "0x7fc3",
+      "size": 27,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DPD actuation %d (GTB=%d)\n"
+    },
+    {
+      "field": "dpd_test_format",
+      "address": "0x7fde",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DPD test %d, GTB=%d\n"
+    },
+    {
+      "field": "dpd_get_format",
+      "address": "0x7ff3",
+      "size": 22,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DPD get: %x %x %d %d\n"
+    },
+    {
+      "field": "tx_power_mode_format",
+      "address": "0x8009",
+      "size": 16,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "tx_pwr_mode=%d\n"
+    },
+    {
+      "field": "tx_power_table_update_format",
+      "address": "0x8019",
+      "size": 41,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n update_tx_power_tables @ %08x size %d\n"
+    },
+    {
+      "field": "tx_power_band_update_format",
+      "address": "0x8042",
+      "size": 53,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n update_tx_power_tables per band %d @ %08x size %d\n"
+    },
+    {
+      "field": "tx_power_entry_format",
+      "address": "0x8077",
+      "size": 36,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "band: %d packet type: %d:%08x:%08x\n"
+    },
+    {
+      "field": "tx_power_table_missing",
+      "address": "0x809b",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "No Tx PWR TBL found!!\n"
+    },
+    {
+      "field": "tx_power_calibration_format",
+      "address": "0x80b2",
+      "size": 27,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "phymaxpwr_p=%08x CAL %08x\n"
+    },
+    {
+      "field": "syscfg_location_format",
+      "address": "0x80cd",
+      "size": 18,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\nsyscfg_g @ %08x\n"
+    },
+    {
+      "field": "syscfg_checksum_error_format",
+      "address": "0x80df",
+      "size": 40,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n checksum ERROR got %08x expect  %08x\n"
+    },
+    {
+      "field": "syscfg_apply_format",
+      "address": "0x8107",
+      "size": 56,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\nappkying syscfg ver %d, dev %04x len=%d checksum=%08x\n"
+    },
+    {
+      "field": "syscfg_rssi_cal_format",
+      "address": "0x813f",
+      "size": 24,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n syscfg_rssicalp=%08x\n"
+    },
+    {
+      "field": "assert_lowercase_format",
+      "address": "0x8157",
+      "size": 24,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "assert at line %d in %s"
+    },
+    {
+      "field": "assert_uppercase_format",
+      "address": "0x816f",
+      "size": 24,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Assert at line %d in %s"
+    },
+    {
+      "field": "exception_format",
+      "address": "0x8187",
+      "size": 14,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Exception: %s"
+    },
+    {
+      "field": "exception_source_path",
+      "address": "0x8195",
+      "size": 133,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "/Library/Caches/com.apple.xbs/E06151E4-0C9A-48B8-A88C-98275C13C50B/TemporaryDirectory.vX0z3Y/Sources/WxBtPhy/firmware/w3/exception.c"
+    },
+    {
+      "field": "fixed_point_format",
+      "address": "0x821a",
+      "size": 8,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%d.%02d"
+    },
+    {
+      "field": "phy_exported_build",
+      "address": "0x8222",
+      "size": 16,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "185{T:w3}{C:B0}"
+    },
+    {
+      "field": "radio_stepping",
+      "address": "0x8232",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "B0"
+    },
+    {
+      "field": "nvv_bad_address_format",
+      "address": "0x8235",
+      "size": 20,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "## BAD ADDR %08x!!\n"
+    },
+    {
+      "field": "modem_initialization_heading",
+      "address": "0x8249",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\nModem inits:\n"
+    },
+    {
+      "field": "loading_rf_sequence",
+      "address": "0x8258",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "loading rfseq\n"
+    },
+    {
+      "field": "loading_mdmi",
+      "address": "0x8267",
+      "size": 14,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "loading mdmi\n"
+    },
+    {
+      "field": "module_daug",
+      "address": "0x8275",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "DAUG"
+    },
+    {
+      "field": "found_module_daug",
+      "address": "0x827a",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "found DAUG module\n"
+    },
+    {
+      "field": "module_plty",
+      "address": "0x828d",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "PLTY"
+    },
+    {
+      "field": "found_module_plty",
+      "address": "0x8292",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "found PLTY module\n"
+    },
+    {
+      "field": "module_plte",
+      "address": "0x82a5",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "PLTE"
+    },
+    {
+      "field": "found_module_plte",
+      "address": "0x82aa",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "found PLTE module\n"
+    },
+    {
+      "field": "module_yngr",
+      "address": "0x82bd",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "YNGR"
+    },
+    {
+      "field": "found_module_yngr",
+      "address": "0x82c2",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "found YNGR module\n"
+    },
+    {
+      "field": "module_eldr",
+      "address": "0x82d5",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "ELDR"
+    },
+    {
+      "field": "found_module_eldr",
+      "address": "0x82da",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "found ELDR module\n"
+    },
+    {
+      "field": "unexpected_module",
+      "address": "0x82ed",
+      "size": 30,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Error! Unexpected module id!\n"
+    },
+    {
+      "field": "missing_module_info",
+      "address": "0x830b",
+      "size": 38,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "missing mod info, defaulting to YNGR\n"
+    },
+    {
+      "field": "initialization_complete_format",
+      "address": "0x8331",
+      "size": 14,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Done @ %04x!\n"
+    },
+    {
+      "field": "nvv_blob_too_large_format",
+      "address": "0x833f",
+      "size": 30,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Blob too big! (%x + %x > %x)\n"
+    },
+    {
+      "field": "nvv_blob_location_format",
+      "address": "0x835d",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "Blob @ %x..\n"
+    },
+    {
+      "field": "unknown_value",
+      "address": "0x836a",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "??"
+    },
+    {
+      "field": "nvv_tag_rf_seq",
+      "address": "0x836d",
+      "size": 7,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rf_seq"
+    },
+    {
+      "field": "nvv_tag_global_phy_inits",
+      "address": "0x8374",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "global_phy_inits"
+    },
+    {
+      "field": "nvv_tag_global_phy_masked_inits",
+      "address": "0x8385",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "global_phy_msk_inits"
+    },
+    {
+      "field": "nvv_tag_global_radio_masked_inits",
+      "address": "0x839a",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "global_radio_msk_inits"
+    },
+    {
+      "field": "nvv_tag_dynamic_hf_coeff",
+      "address": "0x83b1",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_hf_coeff"
+    },
+    {
+      "field": "nvv_tag_dynamic_hf_delay_pty",
+      "address": "0x83c2",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_hf_delay_pty"
+    },
+    {
+      "field": "nvv_tag_dynamic_hf_delay_pte",
+      "address": "0x83d7",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_hf_delay_pte"
+    },
+    {
+      "field": "nvv_tag_dynamic_mantissa",
+      "address": "0x83ec",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_mant"
+    },
+    {
+      "field": "nvv_tag_dynamic_exponent",
+      "address": "0x83f9",
+      "size": 12,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_exp"
+    },
+    {
+      "field": "nvv_tag_dynamic_if_delay",
+      "address": "0x8405",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_if_delay"
+    },
+    {
+      "field": "nvv_tag_dynamic_hf_delay",
+      "address": "0x8416",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_hf_delay"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_lna_bw1p5",
+      "address": "0x8427",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_lna1st_bw1p5"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_lna_bw2",
+      "address": "0x843e",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_lna1st_bw2"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_lna_bw2p5",
+      "address": "0x8453",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_lna1st_bw2p5"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_lna_bw3",
+      "address": "0x846a",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_lna1st_bw3"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_mixer_bw1p5",
+      "address": "0x847f",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_mix1st_bw1p5"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_mixer_bw2",
+      "address": "0x8496",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_mix1st_bw2"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_mixer_bw2p5",
+      "address": "0x84ab",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_mix1st_bw2p5"
+    },
+    {
+      "field": "nvv_tag_rxiqmm_mixer_bw3",
+      "address": "0x84c2",
+      "size": 21,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rxiqmm_ab_mix1st_bw3"
+    },
+    {
+      "field": "nvv_tag_dynamic_am_delay",
+      "address": "0x84d7",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dynamic_am_delay"
+    },
+    {
+      "field": "nvv_tag_dpd_actuation_table",
+      "address": "0x84e8",
+      "size": 20,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "dpd_actuation_table"
+    },
+    {
+      "field": "nvv_dpd_bad_length_format",
+      "address": "0x84fc",
+      "size": 20,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "## DPD bad len %d!\n"
+    },
+    {
+      "field": "nvv_mxdc_calibration_format",
+      "address": "0x8510",
+      "size": 53,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "NVV_TAG_MXDC_CAL: %02x %02x %02x %02x  %02x %02x   \n"
+    },
+    {
+      "field": "nvv_a0_rssi_calibration_format",
+      "address": "0x8545",
+      "size": 60,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "NVV_TAG_A0_RSSI_CAL: %02x %02x %02x %02x  %02x %02x %02x  \n"
+    },
+    {
+      "field": "nvv_tag_tx_maxpower_calibration",
+      "address": "0x8581",
+      "size": 17,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "tx_maxpwr_cal_v2"
+    },
+    {
+      "field": "nvv_tx_power_table_format",
+      "address": "0x8592",
+      "size": 33,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "TX PWR TBL: %02x %02x %02x %02x\n"
+    },
+    {
+      "field": "nvv_tag_a4p_calibration",
+      "address": "0x85b3",
+      "size": 8,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "a4p_cal"
+    },
+    {
+      "field": "nvv_tag_a4p_slopes",
+      "address": "0x85bb",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "a4p_cal_slopes"
+    },
+    {
+      "field": "nvv_tag_kvco_calibration",
+      "address": "0x85ca",
+      "size": 9,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "kvco_cal"
+    },
+    {
+      "field": "nvv_tag_kvco_lowpass",
+      "address": "0x85d3",
+      "size": 12,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "kvco_cal_lp"
+    },
+    {
+      "field": "nvv_tag_df1_mantissa",
+      "address": "0x85df",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "df1_mant_cal"
+    },
+    {
+      "field": "nvv_tag_df1_v2",
+      "address": "0x85ec",
+      "size": 11,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "df1_cal_v2"
+    },
+    {
+      "field": "nvv_tag_df1_v3",
+      "address": "0x85f7",
+      "size": 11,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "df1_cal_v3"
+    },
+    {
+      "field": "nvv_tag_df1_v4",
+      "address": "0x8602",
+      "size": 11,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "df1_cal_v4"
+    },
+    {
+      "field": "nvv_tag_module_info",
+      "address": "0x860d",
+      "size": 9,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "mod_info"
+    },
+    {
+      "field": "nvv_tag_loopback_dcoc_lowpass",
+      "address": "0x8616",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lb_dcoc_cal_lp"
+    },
+    {
+      "field": "nvv_loopback_dcoc_lowpass_format",
+      "address": "0x8625",
+      "size": 37,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lb_dcoc_cal_lp: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_loopback_dcoc_highpass",
+      "address": "0x864a",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lb_dcoc_cal_hp"
+    },
+    {
+      "field": "nvv_loopback_dcoc_highpass_format",
+      "address": "0x8659",
+      "size": 37,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lb_dcoc_cal_hp: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_loopback_iqmm_dcoc_lowpass",
+      "address": "0x867e",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_dcoc_lp"
+    },
+    {
+      "field": "nvv_loopback_iqmm_dcoc_lowpass_format",
+      "address": "0x868d",
+      "size": 39,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_dcoc_lp_p: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_loopback_iqmm_dcoc_highpass",
+      "address": "0x86b4",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_dcoc_hp"
+    },
+    {
+      "field": "nvv_loopback_iqmm_dcoc_highpass_format",
+      "address": "0x86c3",
+      "size": 39,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_dcoc_hp_p: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_loopback_iqmm_ab_lowpass",
+      "address": "0x86ea",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_ab_lp"
+    },
+    {
+      "field": "nvv_loopback_iqmm_ab_lowpass_format",
+      "address": "0x86f7",
+      "size": 37,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_ab_lp_p: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_loopback_iqmm_ab_highpass",
+      "address": "0x871c",
+      "size": 13,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_ab_hp"
+    },
+    {
+      "field": "nvv_loopback_iqmm_ab_highpass_format",
+      "address": "0x8729",
+      "size": 37,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "lbiqmm_ab_hp_p: %04x %04x %04x %04x\n"
+    },
+    {
+      "field": "nvv_tag_rx_maxgain",
+      "address": "0x874e",
+      "size": 15,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rx_maxgain_cal"
+    },
+    {
+      "field": "nvv_rx_maxgain_format",
+      "address": "0x875d",
+      "size": 31,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "rx_maxgain_cal_p: %08x %08x..\n"
+    },
+    {
+      "field": "nvv_tag_frs_iqmm_lna_bw3",
+      "address": "0x877c",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "frs_iqmm_ab_lna1st_bw3"
+    },
+    {
+      "field": "nvv_tag_frs_iqmm_mixer_bw3",
+      "address": "0x8793",
+      "size": 23,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "frs_iqmm_ab_mix1st_bw3"
+    },
+    {
+      "field": "nvv_record_format",
+      "address": "0x87aa",
+      "size": 27,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "NVV %s (%x) %d bytes = %d\n"
+    },
+    {
+      "field": "phy_version_heading",
+      "address": "0x87c5",
+      "size": 19,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "\n[BTP]: (version: "
+    },
+    {
+      "field": "phy_version_suffix_format",
+      "address": "0x87d8",
+      "size": 5,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "%s)\n"
+    },
+    {
+      "field": "phy_initialization_complete_format",
+      "address": "0x87dd",
+      "size": 26,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "PHY init done rad_rev=%d\n"
+    },
+    {
+      "field": "stack_failure",
+      "address": "0x87f7",
+      "size": 9,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "stk_fail"
+    },
+    {
+      "field": "threading_source_file",
+      "address": "0x8800",
+      "size": 12,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "threading.c"
+    },
+    {
+      "field": "save_context_assertion",
+      "address": "0x880c",
+      "size": 52,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "context->regs.exc_return & EXC_RETURN_PROCESS_STACK"
+    },
+    {
+      "field": "restore_context_assertion",
+      "address": "0x8840",
+      "size": 40,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "restore_context->register_frame != NULL"
+    },
+    {
+      "field": "restore_stack_assertion",
+      "address": "0x8868",
+      "size": 67,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "_rtk_thread_exc_return(restore_context) & EXC_RETURN_PROCESS_STACK"
+    },
+    {
+      "field": "assertion_failed_format",
+      "address": "0x88ab",
+      "size": 29,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "ASSERTION FAILED: %s:%d\n\t%s\n"
+    },
+    {
+      "field": "null_string",
+      "address": "0x88c8",
+      "size": 7,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "<null>"
+    },
+    {
+      "field": "hexadecimal_prefix",
+      "address": "0x88cf",
+      "size": 3,
+      "kind": "NUL-terminated diagnostic string",
+      "value": "0x"
+    },
+    {
+      "field": "frs_channel_counts",
+      "address": "0x6bdd",
+      "size": 8,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "align_status_pointers",
+      "address": "0x6be5",
+      "size": 3,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "frs_status_name_addresses",
+      "address": "0x6be8",
+      "size": 16,
+      "kind": "uint32_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "frs_maxgain_defaults",
+      "address": "0x6bf8",
+      "size": 64,
+      "kind": "8 bands x 2 packed 32-bit calibration words",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "frs_fixed_gain_indices",
+      "address": "0x6c38",
+      "size": 13,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "align_gain_codes",
+      "address": "0x6c45",
+      "size": 1,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "frs_fixed_gain_codes",
+      "address": "0x6c46",
+      "size": 26,
+      "kind": "uint16_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "frs_status_samples",
+      "address": "0x6c60",
+      "size": 8,
+      "kind": "int16_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "rx_bandwidth_lookup_storage",
+      "address": "0x6c68",
+      "size": 21,
+      "kind": "uint8_t array",
+      "logical_extent_proven": false
+    },
+    {
+      "field": "rx_maxgain_band_offsets",
+      "address": "0x6c7d",
+      "size": 8,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "tx_alternate_power_types",
+      "address": "0x6c85",
+      "size": 8,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "tx_packet_power_types",
+      "address": "0x6c8d",
+      "size": 16,
+      "kind": "uint8_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "unclassified_zero_fill",
+      "address": "0x6c9d",
+      "size": 4099,
+      "kind": "uint8_t array",
+      "logical_extent_proven": false
+    },
+    {
+      "field": "exception_class_by_number",
+      "address": "0x7ca0",
+      "size": 56,
+      "kind": "uint32_t array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "stack_paint_pattern",
+      "address": "0x7cd8",
+      "size": 8,
+      "kind": "64-bit RTKSTACK pattern",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "format_hex_lower",
+      "address": "0x7ce0",
+      "size": 16,
+      "kind": "char array",
+      "logical_extent_proven": true
+    },
+    {
+      "field": "format_hex_upper",
+      "address": "0x7cf0",
+      "size": 16,
+      "kind": "char array",
+      "logical_extent_proven": true
+    }
+  ],
+  "original_raw_includes": "Archived under verification/fixtures/rom-rodata/; historical logical paths are mapped by input_manifest.json source_relocations",
+  "string_count": 146,
+  "covered_fragment_bytes": 7408,
+  "unclassified_zero_bytes": 4099,
+  "overlapping_views": [
+    {
+      "name": "rx_alternate_rate",
+      "address": "0x6c68",
+      "consumer_view_size": 8,
+      "bytes_match_existing_C_model": true
+    },
+    {
+      "name": "rx_packet_type",
+      "address": "0x6c6f",
+      "consumer_view_size": 16,
+      "bytes_match_existing_C_model": true
+    }
+  ]
+}

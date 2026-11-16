@@ -1,0 +1,34 @@
+{
+  "clang": {
+    "path": "/Users/int/local/bin/clang",
+    "version": [
+      "clang version 23.0.0git (git@github.com:llvm/llvm-project b51054818b78dc395cd4d33f17cfb6e98a36a76d)",
+      "Target: arm64-apple-darwin27.2.0"
+    ]
+  },
+  "qemu-system-arm": {
+    "path": "/opt/homebrew/bin/qemu-system-arm",
+    "version": [
+      "QEMU emulator version 11.1.2",
+      "Copyright (c) 2003-2026 Fabrice Bellard and the QEMU Project developers"
+    ]
+  },
+  "make": {
+    "path": "/usr/bin/make",
+    "version": [
+      "GNU Make 3.81",
+      "Copyright (C) 2006  Free Software Foundation, Inc."
+    ]
+  },
+  "python_semantic": "Python 3.15.0",
+  "python_symbolic": "Python 3.13.16",
+  "make_arguments": [
+    "check",
+    "verify",
+    "verify-semantics",
+    "verify-symbolic",
+    "BUILD=/tmp/phyb-semantic-build",
+    "SEMANTIC_PYTHON=/tmp/phyb-verify-venv/bin/python",
+    "SYMBOLIC_PYTHON=/tmp/phyb-symbolic-venv/bin/python"
+  ]
+}

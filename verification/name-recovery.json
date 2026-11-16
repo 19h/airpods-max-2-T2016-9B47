@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-29",
+  "scope": "Evidence-backed naming changes; no runtime logic changed",
+  "function_renames": {
+    "rtk_sched_take_switch_request": "rtk_clear_context_targets",
+    "nvv_module_id_equals": "nvv_module_prefix4_matches",
+    "xor_checksum": "xor_checksum_words",
+    "txpwr_get_channel_limit": "txpwr_get_channel_limit_word"
+  },
+  "loaded_image_identical": true,
+  "loaded_bytes": 74127,
+  "final_elf_sha256": "74926ecf1fe1a34be1944e325219641038cb58ff8ee82f9e07d6e8a170871871",
+  "native_original_file_identity": true,
+  "native_mutation_controls": 3,
+  "diagnostic_alias_cases": 2100,
+  "diagnostic_alias_divergences": 0,
+  "diagnostic_sampling_passed": true,
+  "host_checks": 73,
+  "state_blocks": 22,
+  "temporary_artifacts": "/tmp/phyb-names-20261029",
+  "unchanged_provenance_names": true
+}

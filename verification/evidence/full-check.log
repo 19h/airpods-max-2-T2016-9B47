@@ -1,0 +1,42 @@
+73 checks, 0 failures
+all checks passed
+layout verified: 22 state blocks at their documented addresses
+provenance inventory passed (not a semantic proof): 219 recovered functions, 30 outlined helpers exempt, 197 claimed
+ELF load coverage: 28 sections, 0 failures, reference readonly=True
+FRS native layout: scan=True, 18 calls checked, helpers=True, loads=True, controls=True, passed=True
+architecture: 26 cases, 0 divergences
+C shifts: 16384 cases, 0 divergences
+packets: 3072 cases, 0 divergences
+boot: 34 cases, 0 divergences
+leaves: 2550 cases, 0 divergences
+mac: 642 cases, 0 divergences
+mac-alias: 162 cases, 0 divergences
+instruction observer: 4 oracle cases, 0 divergences; unsupported access rejected=True
+power: 29 cases, 0 divergences
+tx-calibration: 2432 cases, 0 divergences
+tx-volatile: 56 cases, 0 divergences
+tx-modes: 4096 cases, 0 divergences
+nvv: 198 cases, 0 divergences
+loopback: 155 cases, 0 divergences
+loopback-alias: 1420 cases, 0 divergences
+status-bindings: 110 cases, 0 divergences
+Diagnostic aliases: 2100 cases, 0 divergences
+Diagnostic sampling: reference=True, rebuilt=True
+NVV/MAC diagnostic aliases: 216 cases, 0 divergences, modes_agree=True
+trace: 1162 cases, 0 divergences
+dpd: 496 cases, 0 divergences
+dpd-workflow: 72 cases, 0 divergences
+FRS entry/exit: 1740 cases, 0 divergences
+CASES 76512 FAILED 0
+CASES 1280 FAILED 0
+CASES 2160 FAILED 0
+CASES 2100 FAILED 0
+CASES 496 FAILED 0
+CASES 1520 FAILED 0
+FRS scanning: 3456 cases, 0 divergences
+Clock callbacks: 24 cases, 0 divergences
+ROM observability: 6/8 comparisons diverge; RAM controls and observer-independent states verified
+FRS scanning: 8 cases, 0 divergences
+CASES 7 FAILED 0
+ROM domain: 37 pointers, 35025/35026 bytes observed, 26007 static byte differences, 58/74 divergent comparisons
+make: *** [verify-semantics] Error 1

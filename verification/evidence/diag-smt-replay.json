@@ -1,0 +1,1279 @@
+{
+  "z3_version": "5.3.1",
+  "query_count": 212,
+  "mismatches": 0,
+  "queries": [
+    {
+      "query": "0000-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0001-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0002-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0003-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0004-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0005-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0006-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0007-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0008-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0009-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0010-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0011-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0012-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0013-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0014-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0015-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0016-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0017-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0018-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0019-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0020-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0021-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0022-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0023-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0024-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0025-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0026-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0027-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0028-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0029-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0030-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0031-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0032-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0033-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0034-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0035-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0036-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0037-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0038-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0039-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0040-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0041-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0042-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0043-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0044-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0045-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0046-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0047-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0048-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0049-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0050-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0051-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0052-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0053-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0054-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0055-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0056-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0057-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0058-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0059-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0060-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0061-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0062-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0063-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0064-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0065-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0066-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0067-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0068-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0069-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0070-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0071-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0072-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0073-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0074-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0075-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0076-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0077-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0078-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0079-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0080-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0081-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0082-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0083-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0084-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0085-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0086-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0087-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0088-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0089-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0090-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0091-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0092-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0093-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0094-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0095-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0096-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0097-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0098-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0099-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0100-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0101-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0102-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0103-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0104-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0105-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0106-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0107-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0108-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0109-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0110-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0111-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0112-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0113-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0114-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0115-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0116-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0117-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0118-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0119-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0120-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0121-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0122-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0123-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0124-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0125-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0126-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0127-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0128-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0129-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0130-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0131-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0132-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0133-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0134-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0135-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0136-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0137-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0138-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0139-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0140-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0141-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0142-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0143-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0144-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0145-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0146-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0147-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0148-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0149-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0150-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0151-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0152-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0153-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0154-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0155-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0156-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0157-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0158-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0159-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0160-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0161-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0162-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0163-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0164-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0165-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0166-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0167-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0168-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0169-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0170-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0171-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0172-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0173-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0174-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0175-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0176-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0177-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0178-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0179-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0180-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0181-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0182-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0183-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0184-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0185-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0186-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0187-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0188-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0189-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0190-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0191-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0192-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0193-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0194-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0195-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0196-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0197-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0198-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0199-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0200-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0201-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0202-positive.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0203-positive.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0204-old-alias-bug.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0205-old-alias-bug.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0206-old-alias-bug.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0207-old-alias-bug.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0208-changed-count.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0209-changed-count.smt2",
+      "expected": "unsat",
+      "actual": "unsat",
+      "match": true
+    },
+    {
+      "query": "0210-changed-count.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    },
+    {
+      "query": "0211-changed-count.smt2",
+      "expected": "sat",
+      "actual": "sat",
+      "match": true
+    }
+  ]
+}

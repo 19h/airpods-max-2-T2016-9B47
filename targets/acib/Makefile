@@ -66,8 +66,16 @@ RECONSTRUCTED_SRCS := \
 	src/rtkit/boot.c \
 	src/rtkit/exception.c \
 	src/rtkit/irq.c \
+	src/rtkit/kernel_prim.c \
+	src/rtkit/endpoints.c \
 	src/libc/string.c \
+	src/libc/bitops_math.c \
+	src/osa/osa_core.c \
+	src/osa/osa_services.c \
 	src/phy/phy_ipc.c \
+	src/phy/phy_modem.c \
+	src/phy/phy_rf_ctrl.c \
+	src/phy/phy_rf_seq.c \
 	src/aci/trace.c \
 	src/aci/osa.c \
 	src/aci/bt_ctrl.c
@@ -79,8 +87,16 @@ HOST_TEST_SRCS := \
 	src/rtkit/boot.c \
 	src/rtkit/exception.c \
 	src/rtkit/irq.c \
+	src/rtkit/kernel_prim.c \
+	src/rtkit/endpoints.c \
 	src/libc/string.c \
+	src/libc/bitops_math.c \
+	src/osa/osa_core.c \
+	src/osa/osa_services.c \
 	src/phy/phy_ipc.c \
+	src/phy/phy_modem.c \
+	src/phy/phy_rf_ctrl.c \
+	src/phy/phy_rf_seq.c \
 	src/aci/trace.c \
 	src/aci/osa.c \
 	src/aci/bt_ctrl.c \

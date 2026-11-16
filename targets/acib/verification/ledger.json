@@ -5,7 +5,7 @@
     "CPU is ARMv7E-M soft-float (-target armv7em-none-eabi -mcpu=cortex-m4 -mfloat-abi=soft): zero VFP/FP instructions exist in acib; ROM 0xe50b8..0xe564b provides software IEEE-754 double routines and exception veneers save integer r4-r11+lr only.",
     "External loader (uarp/fwsg host loader) maps __TEXT (file 0x0..0xf984c -> VMA 0x0..0xf984c) and __DATA (file 0xf9860..0x10447e -> VMA 0x10000000..0x1000ac1e) directly before releasing Reset_Handler; Reset_Handler zeroes .bss (0x1000ac40..0x1002d2c4).",
     "MAC<->PHY IPC shares 4 KB mailbox SRAM at 0x4d280000 (MPU Region 5) and W3 PHY sequencer registers at 0x4d154000 (0x4d154038 SEQ_RF_CTRL, 0x4d154c64 PHY->MAC W1C status, 0x4d154c68 MAC->PHY doorbell) directly with phyb.",
-    "Only functions reimplemented in idiomatic, warning-free C11 with @provenance tags and passing Unicorn differential + stub-mutation checks are marked reconstructed_c (120); only byte-exact unedited instruction slices verified against raw acib by verify_load_image.py are marked retained_native (1: NMI_Handler @ 0xe4a94, 114 B); all unported functions and relocated ASM entry veneers remain pending_c (9,796)."
+    "Only functions reimplemented in idiomatic, warning-free C11 with @provenance tags and passing Unicorn differential + stub-mutation checks are marked reconstructed_c (620); only byte-exact unedited instruction slices verified against raw acib by verify_load_image.py are marked retained_native (1: NMI_Handler @ 0xe4a94, 114 B); all unported functions and relocated ASM entry veneers remain pending_c (9,296)."
   ],
   "known_deviations": {
     "relocated_entry_veneers": {
@@ -49,9 +49,9 @@
   },
   "summary": {
     "total_functions": 9917,
-    "reconstructed_c": 120,
+    "reconstructed_c": 620,
     "retained_native": 1,
-    "pending_c": 9796
+    "pending_c": 9296
   },
   "functions": [
     {
@@ -25022,7 +25022,9 @@
       "rva": "0x68300",
       "size": 24,
       "ida_name": "sub_68300",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_068300",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x68318",
@@ -25046,7 +25048,9 @@
       "rva": "0x6838c",
       "size": 4,
       "ida_name": "sub_6838C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06838c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x68390",
@@ -25202,7 +25206,9 @@
       "rva": "0x68a6c",
       "size": 10,
       "ida_name": "sub_68A6C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_068a6c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x68a7c",
@@ -25214,7 +25220,9 @@
       "rva": "0x68adc",
       "size": 30,
       "ida_name": "sub_68ADC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_068adc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x68afa",
@@ -25364,7 +25372,9 @@
       "rva": "0x69110",
       "size": 8,
       "ida_name": "sub_69110",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_069110",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6911c",
@@ -25376,7 +25386,9 @@
       "rva": "0x69140",
       "size": 22,
       "ida_name": "sub_69140",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_069140",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x69160",
@@ -25568,7 +25580,9 @@
       "rva": "0x6a7d0",
       "size": 16,
       "ida_name": "sub_6A7D0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06a7d0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6a7e4",
@@ -25628,7 +25642,9 @@
       "rva": "0x6ab74",
       "size": 6,
       "ida_name": "sub_6AB74",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06ab74",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6ab80",
@@ -25640,7 +25656,9 @@
       "rva": "0x6aba4",
       "size": 14,
       "ida_name": "sub_6ABA4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06aba4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6abb8",
@@ -25874,13 +25892,17 @@
       "rva": "0x6b888",
       "size": 38,
       "ida_name": "sub_6B888",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06b888",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6b8b4",
       "size": 14,
       "ida_name": "sub_6B8B4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06b8b4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6b8c8",
@@ -25898,7 +25920,9 @@
       "rva": "0x6b968",
       "size": 30,
       "ida_name": "sub_6B968",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06b968",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6b98c",
@@ -25910,19 +25934,25 @@
       "rva": "0x6bb80",
       "size": 100,
       "ida_name": "sub_6BB80",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06bb80",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6bbf0",
       "size": 94,
       "ida_name": "sub_6BBF0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06bbf0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6bc58",
       "size": 8,
       "ida_name": "sub_6BC58",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06bc58",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6bc60",
@@ -25934,7 +25964,9 @@
       "rva": "0x6bc68",
       "size": 4,
       "ida_name": "sub_6BC68",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06bc68",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6bc6c",
@@ -26110,7 +26142,9 @@
       "rva": "0x6c774",
       "size": 18,
       "ida_name": "sub_6C774",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06c774",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6c786",
@@ -26134,7 +26168,9 @@
       "rva": "0x6c80c",
       "size": 58,
       "ida_name": "sub_6C80C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06c80c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6c850",
@@ -26152,7 +26188,9 @@
       "rva": "0x6c950",
       "size": 10,
       "ida_name": "sub_6C950",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06c950",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6c960",
@@ -26260,7 +26298,9 @@
       "rva": "0x6cf54",
       "size": 14,
       "ida_name": "sub_6CF54",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06cf54",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6cf68",
@@ -26308,13 +26348,17 @@
       "rva": "0x6d234",
       "size": 28,
       "ida_name": "sub_6D234",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d234",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d258",
       "size": 8,
       "ida_name": "sub_6D258",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d258",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d260",
@@ -26404,7 +26448,9 @@
       "rva": "0x6d804",
       "size": 26,
       "ida_name": "sub_6D804",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d804",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d820",
@@ -26416,13 +26462,17 @@
       "rva": "0x6d858",
       "size": 32,
       "ida_name": "sub_6D858",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d858",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d878",
       "size": 22,
       "ida_name": "sub_6D878",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d878",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d890",
@@ -26434,13 +26484,17 @@
       "rva": "0x6d8d4",
       "size": 14,
       "ida_name": "sub_6D8D4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d8d4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d8e4",
       "size": 22,
       "ida_name": "sub_6D8E4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06d8e4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6d8fc",
@@ -26494,7 +26548,9 @@
       "rva": "0x6dd5c",
       "size": 20,
       "ida_name": "sub_6DD5C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06dd5c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6dd70",
@@ -26578,7 +26634,9 @@
       "rva": "0x6df20",
       "size": 26,
       "ida_name": "sub_6DF20",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06df20",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6df3c",
@@ -26620,13 +26678,17 @@
       "rva": "0x6e0dc",
       "size": 18,
       "ida_name": "sub_6E0DC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e0dc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e0ee",
       "size": 18,
       "ida_name": "sub_6E0EE",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e0ee",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e100",
@@ -26644,19 +26706,25 @@
       "rva": "0x6e112",
       "size": 8,
       "ida_name": "sub_6E112",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e112",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e124",
       "size": 14,
       "ida_name": "sub_6E124",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e124",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e134",
       "size": 14,
       "ida_name": "sub_6E134",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e134",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e144",
@@ -26674,7 +26742,9 @@
       "rva": "0x6e164",
       "size": 14,
       "ida_name": "sub_6E164",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e164",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e174",
@@ -26686,61 +26756,81 @@
       "rva": "0x6e184",
       "size": 20,
       "ida_name": "sub_6E184",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e184",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e198",
       "size": 20,
       "ida_name": "sub_6E198",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e198",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e1ac",
       "size": 20,
       "ida_name": "sub_6E1AC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e1ac",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e1c0",
       "size": 20,
       "ida_name": "sub_6E1C0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e1c0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e1d4",
       "size": 20,
       "ida_name": "sub_6E1D4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e1d4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e1e8",
       "size": 20,
       "ida_name": "sub_6E1E8",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e1e8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e1fc",
       "size": 20,
       "ida_name": "sub_6E1FC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e1fc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e210",
       "size": 20,
       "ida_name": "sub_6E210",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e210",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e224",
       "size": 12,
       "ida_name": "sub_6E224",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e224",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e230",
       "size": 22,
       "ida_name": "sub_6E230",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e230",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e248",
@@ -26758,37 +26848,49 @@
       "rva": "0x6e260",
       "size": 10,
       "ida_name": "sub_6E260",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e260",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e26c",
       "size": 10,
       "ida_name": "sub_6E26C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e26c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e278",
       "size": 10,
       "ida_name": "sub_6E278",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e278",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e284",
       "size": 10,
       "ida_name": "sub_6E284",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e284",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e290",
       "size": 10,
       "ida_name": "sub_6E290",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e290",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e29c",
       "size": 10,
       "ida_name": "sub_6E29C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e29c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e2c0",
@@ -26806,7 +26908,9 @@
       "rva": "0x6e500",
       "size": 30,
       "ida_name": "sub_6E500",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e500",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e520",
@@ -26824,13 +26928,17 @@
       "rva": "0x6e610",
       "size": 18,
       "ida_name": "sub_6E610",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e610",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e622",
       "size": 16,
       "ida_name": "sub_6E622",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e622",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e63c",
@@ -26872,7 +26980,9 @@
       "rva": "0x6e6f0",
       "size": 58,
       "ida_name": "sub_6E6F0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06e6f0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6e72c",
@@ -27034,13 +27144,17 @@
       "rva": "0x6f108",
       "size": 36,
       "ida_name": "sub_6F108",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f108",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f134",
       "size": 20,
       "ida_name": "sub_6F134",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f134",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f14c",
@@ -27058,7 +27172,9 @@
       "rva": "0x6f198",
       "size": 18,
       "ida_name": "sub_6F198",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f198",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f1b0",
@@ -27070,7 +27186,9 @@
       "rva": "0x6f1e0",
       "size": 88,
       "ida_name": "sub_6F1E0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f1e0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f240",
@@ -27106,19 +27224,25 @@
       "rva": "0x6f2d8",
       "size": 44,
       "ida_name": "sub_6F2D8",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f2d8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f308",
       "size": 4,
       "ida_name": "sub_6F308",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f308",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f30c",
       "size": 32,
       "ida_name": "sub_6F30C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f30c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f32c",
@@ -27160,19 +27284,25 @@
       "rva": "0x6f514",
       "size": 32,
       "ida_name": "sub_6F514",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f514",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f534",
       "size": 32,
       "ida_name": "sub_6F534",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f534",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f554",
       "size": 26,
       "ida_name": "sub_6F554",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f554",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f570",
@@ -27190,7 +27320,9 @@
       "rva": "0x6f578",
       "size": 22,
       "ida_name": "sub_6F578",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f578",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f590",
@@ -27226,13 +27358,17 @@
       "rva": "0x6f7a0",
       "size": 20,
       "ida_name": "sub_6F7A0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f7a0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f7b4",
       "size": 20,
       "ida_name": "sub_6F7B4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f7b4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f7c8",
@@ -27250,13 +27386,17 @@
       "rva": "0x6f8b8",
       "size": 68,
       "ida_name": "sub_6F8B8",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f8b8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f8fc",
       "size": 64,
       "ida_name": "sub_6F8FC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f8fc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6f93c",
@@ -27274,7 +27414,9 @@
       "rva": "0x6f9d8",
       "size": 42,
       "ida_name": "sub_6F9D8",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06f9d8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6fa04",
@@ -27298,19 +27440,25 @@
       "rva": "0x6fb04",
       "size": 48,
       "ida_name": "sub_6FB04",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06fb04",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6fb34",
       "size": 54,
       "ida_name": "sub_6FB34",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06fb34",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6fb6c",
       "size": 68,
       "ida_name": "sub_6FB6C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06fb6c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6fbb0",
@@ -27340,7 +27488,9 @@
       "rva": "0x6fda8",
       "size": 118,
       "ida_name": "sub_6FDA8",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_06fda8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x6fe20",
@@ -27376,7 +27526,9 @@
       "rva": "0x700bc",
       "size": 18,
       "ida_name": "sub_700BC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_0700bc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x700d0",
@@ -27388,13 +27540,17 @@
       "rva": "0x70294",
       "size": 198,
       "ida_name": "sub_70294",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_070294",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x7035c",
       "size": 44,
       "ida_name": "sub_7035C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_07035c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x70388",
@@ -27424,13 +27580,17 @@
       "rva": "0x704c4",
       "size": 186,
       "ida_name": "sub_704C4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_0704c4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x70580",
       "size": 68,
       "ida_name": "sub_70580",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_070580",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x705c4",
@@ -27442,13 +27602,17 @@
       "rva": "0x705ec",
       "size": 30,
       "ida_name": "sub_705EC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_0705ec",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x7060c",
       "size": 104,
       "ida_name": "sub_7060C",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_07060c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x70674",
@@ -27604,13 +27768,17 @@
       "rva": "0x70cac",
       "size": 14,
       "ida_name": "sub_70CAC",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_070cac",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x70cc0",
       "size": 14,
       "ida_name": "sub_70CC0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_070cc0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x70cd4",
@@ -27828,7 +27996,9 @@
       "rva": "0x712f0",
       "size": 72,
       "ida_name": "sub_712F0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_0712f0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x71340",
@@ -27858,7 +28028,9 @@
       "rva": "0x71588",
       "size": 6,
       "ida_name": "sub_71588",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_071588",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x71594",
@@ -27998,19 +28170,25 @@
       "rva": "0x71ca4",
       "size": 30,
       "ida_name": "sub_71CA4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_071ca4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x71cc4",
       "size": 10,
       "ida_name": "sub_71CC4",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_071cc4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x71cd0",
       "size": 60,
       "ida_name": "sub_71CD0",
-      "status": "pending_c"
+      "c_symbol": "osa_core_fn_071cd0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_core.c"
     },
     {
       "rva": "0x71d0c",
@@ -28064,7 +28242,9 @@
       "rva": "0x72174",
       "size": 12,
       "ida_name": "sub_72174",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072174",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72180",
@@ -28094,13 +28274,17 @@
       "rva": "0x722e4",
       "size": 82,
       "ida_name": "sub_722E4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0722e4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72338",
       "size": 50,
       "ida_name": "sub_72338",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072338",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7236c",
@@ -28302,7 +28486,9 @@
       "rva": "0x72a78",
       "size": 24,
       "ida_name": "sub_72A78",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072a78",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72a94",
@@ -28326,7 +28512,9 @@
       "rva": "0x72b0c",
       "size": 16,
       "ida_name": "sub_72B0C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072b0c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72b20",
@@ -28344,7 +28532,9 @@
       "rva": "0x72b3c",
       "size": 12,
       "ida_name": "sub_72B3C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072b3c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72b4c",
@@ -28368,7 +28558,9 @@
       "rva": "0x72cbc",
       "size": 12,
       "ida_name": "sub_72CBC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072cbc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72ccc",
@@ -28386,19 +28578,25 @@
       "rva": "0x72e04",
       "size": 36,
       "ida_name": "sub_72E04",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072e04",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72e28",
       "size": 456,
       "ida_name": "sub_72E28",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072e28",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x72ffc",
       "size": 102,
       "ida_name": "sub_72FFC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_072ffc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x73068",
@@ -28560,7 +28758,9 @@
       "rva": "0x737d4",
       "size": 16,
       "ida_name": "sub_737D4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0737d4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x737e8",
@@ -28620,19 +28820,25 @@
       "rva": "0x73be8",
       "size": 4,
       "ida_name": "sub_73BE8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_073be8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x73bf0",
       "size": 4,
       "ida_name": "sub_73BF0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_073bf0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x73bf4",
       "size": 14,
       "ida_name": "sub_73BF4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_073bf4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x73c08",
@@ -28728,31 +28934,41 @@
       "rva": "0x73ff8",
       "size": 14,
       "ida_name": "sub_73FF8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_073ff8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7400c",
       "size": 6,
       "ida_name": "sub_7400C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07400c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74012",
       "size": 6,
       "ida_name": "sub_74012",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_074012",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74018",
       "size": 66,
       "ida_name": "sub_74018",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_074018",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74060",
       "size": 18,
       "ida_name": "sub_74060",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_074060",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74072",
@@ -28896,7 +29112,9 @@
       "rva": "0x744a0",
       "size": 16,
       "ida_name": "sub_744A0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0744a0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x744b4",
@@ -28908,7 +29126,9 @@
       "rva": "0x744fc",
       "size": 18,
       "ida_name": "sub_744FC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0744fc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74514",
@@ -28944,7 +29164,9 @@
       "rva": "0x7485c",
       "size": 22,
       "ida_name": "sub_7485C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07485c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74878",
@@ -28962,7 +29184,9 @@
       "rva": "0x74920",
       "size": 26,
       "ida_name": "sub_74920",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_074920",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x74940",
@@ -29094,7 +29318,9 @@
       "rva": "0x750ac",
       "size": 32,
       "ida_name": "sub_750AC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0750ac",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x750d0",
@@ -29118,13 +29344,17 @@
       "rva": "0x75194",
       "size": 52,
       "ida_name": "sub_75194",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075194",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x751d0",
       "size": 8,
       "ida_name": "sub_751D0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0751d0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x751dc",
@@ -29142,7 +29372,9 @@
       "rva": "0x75210",
       "size": 72,
       "ida_name": "sub_75210",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075210",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75260",
@@ -29172,7 +29404,9 @@
       "rva": "0x754a0",
       "size": 38,
       "ida_name": "sub_754A0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0754a0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x754cc",
@@ -29184,7 +29418,9 @@
       "rva": "0x754e0",
       "size": 18,
       "ida_name": "sub_754E0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0754e0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x754f8",
@@ -29316,7 +29552,9 @@
       "rva": "0x75b4c",
       "size": 46,
       "ida_name": "sub_75B4C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075b4c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75b80",
@@ -29370,13 +29608,17 @@
       "rva": "0x75d14",
       "size": 14,
       "ida_name": "sub_75D14",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075d14",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75d28",
       "size": 14,
       "ida_name": "sub_75D28",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075d28",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75d3c",
@@ -29394,7 +29636,9 @@
       "rva": "0x75d80",
       "size": 16,
       "ida_name": "sub_75D80",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075d80",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75d94",
@@ -29406,7 +29650,9 @@
       "rva": "0x75da8",
       "size": 102,
       "ida_name": "sub_75DA8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075da8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75e14",
@@ -29418,7 +29664,9 @@
       "rva": "0x75e20",
       "size": 24,
       "ida_name": "sub_75E20",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075e20",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x75e38",
@@ -29448,13 +29696,17 @@
       "rva": "0x75fec",
       "size": 34,
       "ida_name": "sub_75FEC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_075fec",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7600e",
       "size": 4,
       "ida_name": "sub_7600E",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07600e",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76014",
@@ -29586,13 +29838,17 @@
       "rva": "0x76348",
       "size": 74,
       "ida_name": "sub_76348",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076348",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76398",
       "size": 4,
       "ida_name": "sub_76398",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076398",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7639c",
@@ -29634,7 +29890,9 @@
       "rva": "0x765d0",
       "size": 16,
       "ida_name": "sub_765D0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0765d0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x765e0",
@@ -29646,7 +29904,9 @@
       "rva": "0x76704",
       "size": 42,
       "ida_name": "sub_76704",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076704",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76734",
@@ -29676,7 +29936,9 @@
       "rva": "0x767d4",
       "size": 58,
       "ida_name": "sub_767D4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0767d4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76810",
@@ -29688,13 +29950,17 @@
       "rva": "0x76864",
       "size": 8,
       "ida_name": "sub_76864",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076864",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7686c",
       "size": 6,
       "ida_name": "sub_7686C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07686c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76874",
@@ -29718,19 +29984,25 @@
       "rva": "0x76944",
       "size": 60,
       "ida_name": "sub_76944",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076944",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76988",
       "size": 28,
       "ida_name": "sub_76988",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076988",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x769a8",
       "size": 8,
       "ida_name": "sub_769A8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0769a8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x769b4",
@@ -29742,19 +30014,25 @@
       "rva": "0x769f8",
       "size": 38,
       "ida_name": "sub_769F8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0769f8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76a30",
       "size": 6,
       "ida_name": "sub_76A30",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076a30",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76a48",
       "size": 6,
       "ida_name": "sub_76A48",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076a48",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76a54",
@@ -29766,13 +30044,17 @@
       "rva": "0x76b10",
       "size": 16,
       "ida_name": "sub_76B10",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076b10",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76b24",
       "size": 8,
       "ida_name": "sub_76B24",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076b24",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76b30",
@@ -29790,13 +30072,17 @@
       "rva": "0x76bd4",
       "size": 20,
       "ida_name": "sub_76BD4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076bd4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76bda",
       "size": 12,
       "ida_name": "sub_76BDA",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076bda",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76bf8",
@@ -29808,7 +30094,9 @@
       "rva": "0x76d10",
       "size": 4,
       "ida_name": "sub_76D10",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076d10",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76d18",
@@ -29826,7 +30114,9 @@
       "rva": "0x76e40",
       "size": 14,
       "ida_name": "sub_76E40",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_076e40",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x76e54",
@@ -29856,13 +30146,17 @@
       "rva": "0x77014",
       "size": 36,
       "ida_name": "sub_77014",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077014",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7703c",
       "size": 20,
       "ida_name": "sub_7703C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07703c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77054",
@@ -29898,7 +30192,9 @@
       "rva": "0x770ec",
       "size": 18,
       "ida_name": "sub_770EC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0770ec",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77104",
@@ -29916,19 +30212,25 @@
       "rva": "0x771ec",
       "size": 26,
       "ida_name": "sub_771EC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0771ec",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7720c",
       "size": 140,
       "ida_name": "sub_7720C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07720c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x772a8",
       "size": 30,
       "ida_name": "sub_772A8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0772a8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x772d0",
@@ -29946,7 +30248,9 @@
       "rva": "0x77320",
       "size": 12,
       "ida_name": "sub_77320",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077320",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77330",
@@ -29982,7 +30286,9 @@
       "rva": "0x77758",
       "size": 14,
       "ida_name": "sub_77758",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077758",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7776c",
@@ -30000,19 +30306,25 @@
       "rva": "0x777bc",
       "size": 22,
       "ida_name": "sub_777BC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0777bc",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x777d4",
       "size": 6,
       "ida_name": "sub_777D4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0777d4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x777e0",
       "size": 54,
       "ida_name": "sub_777E0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0777e0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7781c",
@@ -30030,7 +30342,9 @@
       "rva": "0x77858",
       "size": 4,
       "ida_name": "sub_77858",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077858",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7785c",
@@ -30042,7 +30356,9 @@
       "rva": "0x77860",
       "size": 34,
       "ida_name": "sub_77860",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077860",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77884",
@@ -30054,25 +30370,33 @@
       "rva": "0x778f8",
       "size": 72,
       "ida_name": "sub_778F8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0778f8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77948",
       "size": 20,
       "ida_name": "sub_77948",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077948",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x7795c",
       "size": 28,
       "ida_name": "sub_7795C",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_07795c",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77978",
       "size": 20,
       "ida_name": "sub_77978",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077978",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77990",
@@ -30096,7 +30420,9 @@
       "rva": "0x77a60",
       "size": 22,
       "ida_name": "sub_77A60",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077a60",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77a7c",
@@ -30114,7 +30440,9 @@
       "rva": "0x77c4a",
       "size": 166,
       "ida_name": "sub_77C4A",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077c4a",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77cf0",
@@ -30186,7 +30514,9 @@
       "rva": "0x77ec4",
       "size": 48,
       "ida_name": "sub_77EC4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077ec4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77ef8",
@@ -30228,19 +30558,25 @@
       "rva": "0x77fa4",
       "size": 4,
       "ida_name": "sub_77FA4",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077fa4",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77fa8",
       "size": 4,
       "ida_name": "sub_77FA8",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077fa8",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77fac",
       "size": 8,
       "ida_name": "sub_77FAC",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077fac",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77fb4",
@@ -30252,13 +30588,17 @@
       "rva": "0x77fc0",
       "size": 32,
       "ida_name": "sub_77FC0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077fc0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77fe0",
       "size": 8,
       "ida_name": "sub_77FE0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_077fe0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x77fe8",
@@ -30270,19 +30610,25 @@
       "rva": "0x7801c",
       "size": 14,
       "ida_name": "sub_7801C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07801c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7802a",
       "size": 24,
       "ida_name": "sub_7802A",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07802a",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78042",
       "size": 26,
       "ida_name": "sub_78042",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078042",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7805c",
@@ -30312,25 +30658,33 @@
       "rva": "0x782b8",
       "size": 4,
       "ida_name": "sub_782B8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0782b8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x782bc",
       "size": 4,
       "ida_name": "sub_782BC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0782bc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x782c0",
       "size": 14,
       "ida_name": "sub_782C0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0782c0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x782ce",
       "size": 44,
       "ida_name": "sub_782CE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0782ce",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x782fc",
@@ -30342,7 +30696,9 @@
       "rva": "0x78328",
       "size": 22,
       "ida_name": "sub_78328",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078328",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78344",
@@ -30360,43 +30716,57 @@
       "rva": "0x78374",
       "size": 60,
       "ida_name": "sub_78374",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078374",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783b8",
       "size": 6,
       "ida_name": "sub_783B8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783b8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783be",
       "size": 6,
       "ida_name": "sub_783BE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783be",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783c4",
       "size": 6,
       "ida_name": "sub_783C4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783c4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783ca",
       "size": 6,
       "ida_name": "sub_783CA",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783ca",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783d0",
       "size": 6,
       "ida_name": "sub_783D0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783d0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783d8",
       "size": 6,
       "ida_name": "sub_783D8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783d8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783de",
@@ -30408,25 +30778,33 @@
       "rva": "0x783e2",
       "size": 20,
       "ida_name": "sub_783E2",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783e2",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x783f8",
       "size": 10,
       "ida_name": "sub_783F8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0783f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78408",
       "size": 46,
       "ida_name": "sub_78408",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078408",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7843c",
       "size": 118,
       "ida_name": "sub_7843C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07843c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x784b2",
@@ -30492,19 +30870,25 @@
       "rva": "0x786ae",
       "size": 32,
       "ida_name": "sub_786AE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0786ae",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x786ce",
       "size": 6,
       "ida_name": "sub_786CE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0786ce",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x786d6",
       "size": 10,
       "ida_name": "sub_786D6",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0786d6",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x786e0",
@@ -30516,7 +30900,9 @@
       "rva": "0x786e8",
       "size": 6,
       "ida_name": "sub_786E8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0786e8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x786ee",
@@ -30534,19 +30920,25 @@
       "rva": "0x78794",
       "size": 22,
       "ida_name": "sub_78794",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078794",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x787b0",
       "size": 26,
       "ida_name": "sub_787B0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0787b0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x787cc",
       "size": 12,
       "ida_name": "sub_787CC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0787cc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x787d8",
@@ -30558,13 +30950,17 @@
       "rva": "0x788ae",
       "size": 94,
       "ida_name": "sub_788AE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0788ae",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7890c",
       "size": 16,
       "ida_name": "sub_7890C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07890c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7891c",
@@ -30582,13 +30978,17 @@
       "rva": "0x7895c",
       "size": 14,
       "ida_name": "sub_7895C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07895c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78970",
       "size": 32,
       "ida_name": "sub_78970",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078970",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78994",
@@ -30606,7 +31006,9 @@
       "rva": "0x78b24",
       "size": 18,
       "ida_name": "sub_78B24",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078b24",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78b3c",
@@ -30618,13 +31020,17 @@
       "rva": "0x78b84",
       "size": 24,
       "ida_name": "sub_78B84",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078b84",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78ba2",
       "size": 30,
       "ida_name": "sub_78BA2",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078ba2",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78bc0",
@@ -30636,7 +31042,9 @@
       "rva": "0x78be8",
       "size": 4,
       "ida_name": "sub_78BE8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078be8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78bec",
@@ -30648,7 +31056,9 @@
       "rva": "0x78c08",
       "size": 22,
       "ida_name": "sub_78C08",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078c08",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78c20",
@@ -30660,13 +31070,17 @@
       "rva": "0x78c54",
       "size": 8,
       "ida_name": "sub_78C54",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078c54",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78c5c",
       "size": 8,
       "ida_name": "sub_78C5C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078c5c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78c64",
@@ -30678,61 +31092,81 @@
       "rva": "0x78ca8",
       "size": 6,
       "ida_name": "sub_78CA8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078ca8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cae",
       "size": 4,
       "ida_name": "sub_78CAE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cae",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cb2",
       "size": 12,
       "ida_name": "sub_78CB2",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cb2",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cbe",
       "size": 12,
       "ida_name": "sub_78CBE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cbe",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cca",
       "size": 6,
       "ida_name": "sub_78CCA",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cca",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cd0",
       "size": 6,
       "ida_name": "sub_78CD0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cd0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cd6",
       "size": 6,
       "ida_name": "sub_78CD6",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cd6",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cdc",
       "size": 6,
       "ida_name": "sub_78CDC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cdc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78ce2",
       "size": 12,
       "ida_name": "sub_78CE2",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078ce2",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cee",
       "size": 12,
       "ida_name": "sub_78CEE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078cee",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78cfa",
@@ -30744,7 +31178,9 @@
       "rva": "0x78d00",
       "size": 26,
       "ida_name": "sub_78D00",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078d00",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78d30",
@@ -30772,49 +31208,65 @@
       "rva": "0x78dc4",
       "size": 62,
       "ida_name": "sub_78DC4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078dc4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78e04",
       "size": 62,
       "ida_name": "sub_78E04",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078e04",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78e44",
       "size": 62,
       "ida_name": "sub_78E44",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078e44",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78e84",
       "size": 62,
       "ida_name": "sub_78E84",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078e84",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78ec4",
       "size": 62,
       "ida_name": "sub_78EC4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078ec4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78f04",
       "size": 62,
       "ida_name": "sub_78F04",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078f04",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78f44",
       "size": 62,
       "ida_name": "sub_78F44",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078f44",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78f84",
       "size": 62,
       "ida_name": "sub_78F84",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_078f84",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x78fc4",
@@ -30826,49 +31278,65 @@
       "rva": "0x79074",
       "size": 62,
       "ida_name": "sub_79074",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079074",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x790b4",
       "size": 62,
       "ida_name": "sub_790B4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0790b4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x790f4",
       "size": 62,
       "ida_name": "sub_790F4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0790f4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79134",
       "size": 62,
       "ida_name": "sub_79134",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079134",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79174",
       "size": 62,
       "ida_name": "sub_79174",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079174",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x791b4",
       "size": 62,
       "ida_name": "sub_791B4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0791b4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x791f4",
       "size": 62,
       "ida_name": "sub_791F4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0791f4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79234",
       "size": 62,
       "ida_name": "sub_79234",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079234",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79274",
@@ -30970,13 +31438,17 @@
       "rva": "0x79530",
       "size": 10,
       "ida_name": "sub_79530",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079530",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79540",
       "size": 28,
       "ida_name": "sub_79540",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079540",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79564",
@@ -31072,13 +31544,17 @@
       "rva": "0x7970c",
       "size": 34,
       "ida_name": "sub_7970C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07970c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79734",
       "size": 50,
       "ida_name": "sub_79734",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079734",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7976c",
@@ -31108,13 +31584,17 @@
       "rva": "0x797f4",
       "size": 14,
       "ida_name": "sub_797F4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0797f4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79818",
       "size": 48,
       "ida_name": "sub_79818",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079818",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7984c",
@@ -31126,7 +31606,9 @@
       "rva": "0x798c4",
       "size": 30,
       "ida_name": "sub_798C4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0798c4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x798e8",
@@ -31144,7 +31626,9 @@
       "rva": "0x79928",
       "size": 34,
       "ida_name": "sub_79928",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079928",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79950",
@@ -31180,7 +31664,9 @@
       "rva": "0x79af0",
       "size": 32,
       "ida_name": "sub_79AF0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079af0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79b14",
@@ -31228,19 +31714,25 @@
       "rva": "0x79d84",
       "size": 26,
       "ida_name": "sub_79D84",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079d84",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79da8",
       "size": 30,
       "ida_name": "sub_79DA8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079da8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79dd0",
       "size": 30,
       "ida_name": "sub_79DD0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_079dd0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x79df8",
@@ -31376,7 +31868,9 @@
       "rva": "0x7a500",
       "size": 24,
       "ida_name": "sub_7A500",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07a500",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7a518",
@@ -31394,7 +31888,9 @@
       "rva": "0x7a618",
       "size": 14,
       "ida_name": "sub_7A618",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07a618",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7a62c",
@@ -31418,7 +31914,9 @@
       "rva": "0x7a804",
       "size": 66,
       "ida_name": "sub_7A804",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07a804",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7a858",
@@ -31436,13 +31934,17 @@
       "rva": "0x7a918",
       "size": 96,
       "ida_name": "sub_7A918",
-      "status": "pending_c"
+      "c_symbol": "phy_aci_if_poll_and_ack",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x7a978",
       "size": 62,
       "ida_name": "sub_7A978",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07a978",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7a9d0",
@@ -31454,7 +31956,9 @@
       "rva": "0x7aa74",
       "size": 54,
       "ida_name": "sub_7AA74",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07aa74",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7aab0",
@@ -31490,7 +31994,9 @@
       "rva": "0x7afc8",
       "size": 32,
       "ida_name": "sub_7AFC8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07afc8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7aff4",
@@ -31502,7 +32008,9 @@
       "rva": "0x7b01c",
       "size": 72,
       "ida_name": "sub_7B01C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b01c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b06c",
@@ -31520,7 +32028,9 @@
       "rva": "0x7b1b0",
       "size": 14,
       "ida_name": "sub_7B1B0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b1b0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b1c4",
@@ -31532,7 +32042,9 @@
       "rva": "0x7b260",
       "size": 32,
       "ida_name": "sub_7B260",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b260",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b284",
@@ -31544,7 +32056,9 @@
       "rva": "0x7b2c0",
       "size": 12,
       "ida_name": "sub_7B2C0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b2c0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b2d0",
@@ -31580,13 +32094,17 @@
       "rva": "0x7b2e8",
       "size": 54,
       "ida_name": "sub_7B2E8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b2e8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b328",
       "size": 14,
       "ida_name": "sub_7B328",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b328",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b33c",
@@ -31604,7 +32122,9 @@
       "rva": "0x7b380",
       "size": 32,
       "ida_name": "sub_7B380",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b380",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b3a8",
@@ -31634,7 +32154,9 @@
       "rva": "0x7b51c",
       "size": 14,
       "ida_name": "sub_7B51C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b51c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7b52a",
@@ -31712,13 +32234,17 @@
       "rva": "0x7b9ea",
       "size": 14,
       "ida_name": "def_7B9B0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07b9ea",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ba30",
       "size": 52,
       "ida_name": "sub_7BA30",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ba30",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ba44",
@@ -31736,7 +32262,9 @@
       "rva": "0x7bb30",
       "size": 10,
       "ida_name": "sub_7BB30",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07bb30",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7bb40",
@@ -31754,7 +32282,9 @@
       "rva": "0x7bc10",
       "size": 22,
       "ida_name": "sub_7BC10",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07bc10",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7bc2c",
@@ -31802,7 +32332,9 @@
       "rva": "0x7c0cc",
       "size": 18,
       "ida_name": "sub_7C0CC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c0cc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c0e4",
@@ -31820,7 +32352,9 @@
       "rva": "0x7c154",
       "size": 12,
       "ida_name": "sub_7C154",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c154",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c164",
@@ -31838,13 +32372,17 @@
       "rva": "0x7c18c",
       "size": 10,
       "ida_name": "sub_7C18C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c18c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c19c",
       "size": 10,
       "ida_name": "sub_7C19C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c19c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c1ac",
@@ -31874,7 +32412,9 @@
       "rva": "0x7c1ea",
       "size": 14,
       "ida_name": "sub_7C1EA",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c1ea",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c1f8",
@@ -31892,7 +32432,9 @@
       "rva": "0x7c3a0",
       "size": 100,
       "ida_name": "sub_7C3A0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c3a0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c40c",
@@ -31922,7 +32464,9 @@
       "rva": "0x7c5a4",
       "size": 122,
       "ida_name": "sub_7C5A4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c5a4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c628",
@@ -31940,25 +32484,33 @@
       "rva": "0x7c6a8",
       "size": 66,
       "ida_name": "sub_7C6A8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c6a8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c720",
       "size": 64,
       "ida_name": "sub_7C720",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c720",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c76c",
       "size": 54,
       "ida_name": "sub_7C76C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c76c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c7ac",
       "size": 50,
       "ida_name": "sub_7C7AC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07c7ac",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7c7e4",
@@ -32066,13 +32618,17 @@
       "rva": "0x7cc08",
       "size": 124,
       "ida_name": "sub_7CC08",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07cc08",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7cc8c",
       "size": 124,
       "ida_name": "sub_7CC8C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07cc8c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7cd10",
@@ -32146,7 +32702,9 @@
       "rva": "0x7d2c8",
       "size": 26,
       "ida_name": "sub_7D2C8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07d2c8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7d2ec",
@@ -32386,7 +32944,9 @@
       "rva": "0x7e084",
       "size": 14,
       "ida_name": "sub_7E084",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e084",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e098",
@@ -32404,7 +32964,9 @@
       "rva": "0x7e17c",
       "size": 8,
       "ida_name": "sub_7E17C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e17c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e18a",
@@ -32574,7 +33136,9 @@
       "rva": "0x7e7f8",
       "size": 8,
       "ida_name": "sub_7E7F8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e7f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e804",
@@ -32604,7 +33168,9 @@
       "rva": "0x7e8f0",
       "size": 28,
       "ida_name": "sub_7E8F0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e8f0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e914",
@@ -32622,13 +33188,17 @@
       "rva": "0x7e978",
       "size": 4,
       "ida_name": "sub_7E978",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e978",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e98a",
       "size": 20,
       "ida_name": "sub_7E98A",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07e98a",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7e9a0",
@@ -32658,7 +33228,9 @@
       "rva": "0x7ea1c",
       "size": 68,
       "ida_name": "sub_7EA1C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ea1c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ea6c",
@@ -32676,7 +33248,9 @@
       "rva": "0x7ead4",
       "size": 10,
       "ida_name": "sub_7EAD4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ead4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7eae4",
@@ -32748,13 +33322,17 @@
       "rva": "0x7ed0c",
       "size": 10,
       "ida_name": "sub_7ED0C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ed0c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ed18",
       "size": 8,
       "ida_name": "sub_7ED18",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ed18",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ed20",
@@ -32766,13 +33344,17 @@
       "rva": "0x7edba",
       "size": 72,
       "ida_name": "sub_7EDBA",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07edba",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ee04",
       "size": 78,
       "ida_name": "sub_7EE04",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07ee04",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7ee58",
@@ -32790,7 +33372,9 @@
       "rva": "0x7f020",
       "size": 56,
       "ida_name": "sub_7F020",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07f020",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7f058",
@@ -32808,7 +33392,9 @@
       "rva": "0x7f1b4",
       "size": 72,
       "ida_name": "sub_7F1B4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07f1b4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7f204",
@@ -32892,7 +33478,9 @@
       "rva": "0x7fd38",
       "size": 4,
       "ida_name": "sub_7FD38",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_07fd38",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x7fd3c",
@@ -32946,7 +33534,9 @@
       "rva": "0x801d0",
       "size": 58,
       "ida_name": "sub_801D0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0801d0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x8020c",
@@ -32970,13 +33560,17 @@
       "rva": "0x8035c",
       "size": 24,
       "ida_name": "sub_8035C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_08035c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80374",
       "size": 54,
       "ida_name": "sub_80374",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080374",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x803ac",
@@ -32988,7 +33582,9 @@
       "rva": "0x803b2",
       "size": 20,
       "ida_name": "sub_803B2",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0803b2",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x803f8",
@@ -33012,7 +33608,9 @@
       "rva": "0x80514",
       "size": 124,
       "ida_name": "sub_80514",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080514",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80590",
@@ -33054,7 +33652,9 @@
       "rva": "0x80728",
       "size": 22,
       "ida_name": "sub_80728",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080728",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80744",
@@ -33072,7 +33672,9 @@
       "rva": "0x80800",
       "size": 22,
       "ida_name": "sub_80800",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080800",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80818",
@@ -33150,7 +33752,9 @@
       "rva": "0x80be0",
       "size": 14,
       "ida_name": "sub_80BE0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080be0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80bf0",
@@ -33168,7 +33772,9 @@
       "rva": "0x80c18",
       "size": 26,
       "ida_name": "sub_80C18",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_080c18",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x80c34",
@@ -33348,13 +33954,17 @@
       "rva": "0x81e0c",
       "size": 32,
       "ida_name": "sub_81E0C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_081e0c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x81e30",
       "size": 14,
       "ida_name": "sub_81E30",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_081e30",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x81e40",
@@ -33366,7 +33976,9 @@
       "rva": "0x81ea4",
       "size": 16,
       "ida_name": "sub_81EA4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_081ea4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x81eb8",
@@ -33396,7 +34008,9 @@
       "rva": "0x82b64",
       "size": 62,
       "ida_name": "sub_82B64",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_082b64",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x82bb0",
@@ -33426,7 +34040,9 @@
       "rva": "0x82d60",
       "size": 34,
       "ida_name": "sub_82D60",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_082d60",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x82d88",
@@ -33480,7 +34096,9 @@
       "rva": "0x82fe8",
       "size": 22,
       "ida_name": "sub_82FE8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_082fe8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83004",
@@ -33528,13 +34146,17 @@
       "rva": "0x83160",
       "size": 28,
       "ida_name": "sub_83160",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083160",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83180",
       "size": 8,
       "ida_name": "sub_83180",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083180",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x8318c",
@@ -33570,7 +34192,9 @@
       "rva": "0x83370",
       "size": 52,
       "ida_name": "sub_83370",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083370",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x833b0",
@@ -33624,7 +34248,9 @@
       "rva": "0x83500",
       "size": 52,
       "ida_name": "sub_83500",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083500",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83540",
@@ -33666,7 +34292,9 @@
       "rva": "0x836b0",
       "size": 8,
       "ida_name": "sub_836B0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0836b0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x836bc",
@@ -33684,7 +34312,9 @@
       "rva": "0x8377c",
       "size": 12,
       "ida_name": "sub_8377C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_08377c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83794",
@@ -33702,7 +34332,9 @@
       "rva": "0x83930",
       "size": 14,
       "ida_name": "sub_83930",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083930",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83944",
@@ -33720,7 +34352,9 @@
       "rva": "0x839dc",
       "size": 24,
       "ida_name": "sub_839DC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0839dc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x839f8",
@@ -33732,7 +34366,9 @@
       "rva": "0x83a2c",
       "size": 50,
       "ida_name": "sub_83A2C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_083a2c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x83a64",
@@ -33810,7 +34446,9 @@
       "rva": "0x842a4",
       "size": 18,
       "ida_name": "sub_842A4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0842a4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x842bc",
@@ -33822,7 +34460,9 @@
       "rva": "0x8436c",
       "size": 36,
       "ida_name": "sub_8436C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_08436c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84394",
@@ -33858,7 +34498,9 @@
       "rva": "0x84860",
       "size": 4,
       "ida_name": "sub_84860",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084860",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84868",
@@ -33918,7 +34560,9 @@
       "rva": "0x849c8",
       "size": 8,
       "ida_name": "sub_849C8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0849c8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x849d4",
@@ -33978,7 +34622,9 @@
       "rva": "0x84b20",
       "size": 8,
       "ida_name": "sub_84B20",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084b20",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84b2c",
@@ -34002,7 +34648,9 @@
       "rva": "0x84b80",
       "size": 24,
       "ida_name": "sub_84B80",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084b80",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84b9c",
@@ -34014,7 +34662,9 @@
       "rva": "0x84bb6",
       "size": 14,
       "ida_name": "sub_84BB6",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084bb6",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84bc4",
@@ -34026,43 +34676,57 @@
       "rva": "0x84bd4",
       "size": 20,
       "ida_name": "sub_84BD4",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084bd4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84be0",
       "size": 12,
       "ida_name": "sub_84BE0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084be0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84c5c",
       "size": 22,
       "ida_name": "sub_84C5C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084c5c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84c84",
       "size": 32,
       "ida_name": "sub_84C84",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084c84",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84cb0",
       "size": 46,
       "ida_name": "sub_84CB0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084cb0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84cec",
       "size": 28,
       "ida_name": "sub_84CEC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084cec",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84d10",
       "size": 74,
       "ida_name": "sub_84D10",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084d10",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84d6c",
@@ -34080,19 +34744,25 @@
       "rva": "0x84d88",
       "size": 46,
       "ida_name": "sub_84D88",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084d88",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84dbc",
       "size": 26,
       "ida_name": "sub_84DBC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084dbc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84ddc",
       "size": 24,
       "ida_name": "sub_84DDC",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084ddc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84df4",
@@ -34110,7 +34780,9 @@
       "rva": "0x84dfe",
       "size": 18,
       "ida_name": "sub_84DFE",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084dfe",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84e30",
@@ -34130,7 +34802,9 @@
       "rva": "0x84e98",
       "size": 32,
       "ida_name": "sub_84E98",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_084e98",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x84eb8",
@@ -34174,31 +34848,41 @@
       "rva": "0x84fd0",
       "size": 56,
       "ida_name": "sub_84FD0",
-      "status": "pending_c"
+      "c_symbol": "phy_bt_clk_add_slots",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x85008",
       "size": 18,
       "ida_name": "sub_85008",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085008",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x8501c",
       "size": 20,
       "ida_name": "sub_8501C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_08501c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85030",
       "size": 20,
       "ida_name": "sub_85030",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085030",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85044",
       "size": 34,
       "ida_name": "sub_85044",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085044",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85068",
@@ -34222,13 +34906,17 @@
       "rva": "0x851ca",
       "size": 14,
       "ida_name": "sub_851CA",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0851ca",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x851d8",
       "size": 20,
       "ida_name": "sub_851D8",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_0851d8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x851f4",
@@ -34312,7 +35000,9 @@
       "rva": "0x85990",
       "size": 16,
       "ida_name": "sub_85990",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085990",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x859a4",
@@ -34330,7 +35020,9 @@
       "rva": "0x85b2e",
       "size": 14,
       "ida_name": "sub_85B2E",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085b2e",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85b44",
@@ -34342,7 +35034,9 @@
       "rva": "0x85c5c",
       "size": 16,
       "ida_name": "sub_85C5C",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085c5c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85c70",
@@ -34378,7 +35072,9 @@
       "rva": "0x85dd0",
       "size": 16,
       "ida_name": "sub_85DD0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085dd0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85de4",
@@ -34396,7 +35092,9 @@
       "rva": "0x85ea0",
       "size": 68,
       "ida_name": "sub_85EA0",
-      "status": "pending_c"
+      "c_symbol": "phy_mdm_fn_085ea0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_modem.c"
     },
     {
       "rva": "0x85eec",
@@ -38362,7 +39060,9 @@
       "rva": "0x93af0",
       "size": 54,
       "ida_name": "sub_93AF0",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_093af0",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0x93b28",
@@ -38794,7 +39494,9 @@
       "rva": "0x9500c",
       "size": 18,
       "ida_name": "sub_9500C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09500c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95024",
@@ -38830,7 +39532,9 @@
       "rva": "0x9518a",
       "size": 8,
       "ida_name": "sub_9518A",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09518a",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95192",
@@ -38848,7 +39552,9 @@
       "rva": "0x951a4",
       "size": 10,
       "ida_name": "sub_951A4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0951a4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x951ae",
@@ -38902,37 +39608,49 @@
       "rva": "0x95238",
       "size": 16,
       "ida_name": "sub_95238",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095238",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95248",
       "size": 16,
       "ida_name": "sub_95248",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095248",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95278",
       "size": 16,
       "ida_name": "sub_95278",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095278",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95288",
       "size": 16,
       "ida_name": "sub_95288",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095288",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95298",
       "size": 20,
       "ida_name": "sub_95298",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095298",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x952b0",
       "size": 22,
       "ida_name": "sub_952B0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0952b0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x952c8",
@@ -38944,7 +39662,9 @@
       "rva": "0x952dc",
       "size": 22,
       "ida_name": "sub_952DC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0952dc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x952f4",
@@ -38962,7 +39682,9 @@
       "rva": "0x954f8",
       "size": 26,
       "ida_name": "sub_954F8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0954f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95514",
@@ -38980,31 +39702,41 @@
       "rva": "0x95626",
       "size": 24,
       "ida_name": "sub_95626",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095626",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95650",
       "size": 16,
       "ida_name": "sub_95650",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095650",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95660",
       "size": 76,
       "ida_name": "sub_95660",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095660",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x956c4",
       "size": 18,
       "ida_name": "sub_956C4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0956c4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x956d8",
       "size": 16,
       "ida_name": "sub_956D8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0956d8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x956e8",
@@ -39034,25 +39766,33 @@
       "rva": "0x9580c",
       "size": 32,
       "ida_name": "sub_9580C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09580c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9582c",
       "size": 24,
       "ida_name": "sub_9582C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09582c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95844",
       "size": 34,
       "ida_name": "sub_95844",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095844",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95868",
       "size": 30,
       "ida_name": "sub_95868",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095868",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95888",
@@ -39070,19 +39810,25 @@
       "rva": "0x95918",
       "size": 58,
       "ida_name": "sub_95918",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095918",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95954",
       "size": 22,
       "ida_name": "sub_95954",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095954",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9596c",
       "size": 114,
       "ida_name": "sub_9596C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09596c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x959e0",
@@ -39124,19 +39870,25 @@
       "rva": "0x95c14",
       "size": 24,
       "ida_name": "sub_95C14",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095c14",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95c2c",
       "size": 24,
       "ida_name": "sub_95C2C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095c2c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95c44",
       "size": 16,
       "ida_name": "sub_95C44",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095c44",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95c54",
@@ -39160,61 +39912,81 @@
       "rva": "0x95d6c",
       "size": 20,
       "ida_name": "sub_95D6C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095d6c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95d80",
       "size": 20,
       "ida_name": "sub_95D80",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095d80",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95d94",
       "size": 20,
       "ida_name": "sub_95D94",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095d94",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95da8",
       "size": 42,
       "ida_name": "sub_95DA8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095da8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95dd4",
       "size": 14,
       "ida_name": "sub_95DD4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095dd4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95de4",
       "size": 32,
       "ida_name": "sub_95DE4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095de4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95e04",
       "size": 20,
       "ida_name": "sub_95E04",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095e04",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95e18",
       "size": 28,
       "ida_name": "sub_95E18",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095e18",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95e34",
       "size": 28,
       "ida_name": "sub_95E34",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095e34",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95e50",
       "size": 28,
       "ida_name": "sub_95E50",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095e50",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95e6c",
@@ -39232,13 +40004,17 @@
       "rva": "0x95eb8",
       "size": 16,
       "ida_name": "sub_95EB8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095eb8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95ec8",
       "size": 20,
       "ida_name": "sub_95EC8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095ec8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95edc",
@@ -39256,31 +40032,41 @@
       "rva": "0x95f40",
       "size": 46,
       "ida_name": "sub_95F40",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095f40",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95f78",
       "size": 20,
       "ida_name": "sub_95F78",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095f78",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95f8c",
       "size": 26,
       "ida_name": "sub_95F8C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095f8c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95fa6",
       "size": 22,
       "ida_name": "sub_95FA6",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095fa6",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95fbc",
       "size": 50,
       "ida_name": "sub_95FBC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_095fbc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x95ff0",
@@ -39304,25 +40090,33 @@
       "rva": "0x96124",
       "size": 16,
       "ida_name": "sub_96124",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096124",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96134",
       "size": 12,
       "ida_name": "sub_96134",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096134",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96140",
       "size": 28,
       "ida_name": "sub_96140",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096140",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9616c",
       "size": 16,
       "ida_name": "sub_9616C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09616c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9617c",
@@ -39340,7 +40134,9 @@
       "rva": "0x961bc",
       "size": 44,
       "ida_name": "sub_961BC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0961bc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x961e8",
@@ -39352,7 +40148,9 @@
       "rva": "0x96274",
       "size": 16,
       "ida_name": "sub_96274",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096274",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96284",
@@ -39364,7 +40162,9 @@
       "rva": "0x96294",
       "size": 24,
       "ida_name": "sub_96294",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096294",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x962ac",
@@ -39376,7 +40176,9 @@
       "rva": "0x96330",
       "size": 16,
       "ida_name": "sub_96330",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096330",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96340",
@@ -39400,7 +40202,9 @@
       "rva": "0x96444",
       "size": 18,
       "ida_name": "sub_96444",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096444",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96458",
@@ -39412,19 +40216,25 @@
       "rva": "0x96470",
       "size": 18,
       "ida_name": "sub_96470",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_read_status_158",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x96484",
       "size": 20,
       "ida_name": "sub_96484",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096484",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96498",
       "size": 18,
       "ida_name": "sub_96498",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_read_seq_state",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x964ac",
@@ -39436,19 +40246,25 @@
       "rva": "0x964c0",
       "size": 44,
       "ida_name": "sub_964C0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0964c0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x964ec",
       "size": 18,
       "ida_name": "sub_964EC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0964ec",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96510",
       "size": 18,
       "ida_name": "sub_96510",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096510",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96524",
@@ -39472,49 +40288,65 @@
       "rva": "0x9655e",
       "size": 26,
       "ida_name": "sub_9655E",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09655e",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9659a",
       "size": 26,
       "ida_name": "sub_9659A",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09659a",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x965f0",
       "size": 18,
       "ida_name": "sub_965F0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0965f0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96604",
       "size": 18,
       "ida_name": "sub_96604",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096604",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96618",
       "size": 100,
       "ida_name": "sub_96618",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096618",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9667c",
       "size": 54,
       "ida_name": "sub_9667C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09667c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x966b4",
       "size": 54,
       "ida_name": "sub_966B4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0966b4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x966ec",
       "size": 112,
       "ida_name": "sub_966EC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0966ec",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9675c",
@@ -39574,55 +40406,73 @@
       "rva": "0x96954",
       "size": 22,
       "ida_name": "sub_96954",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096954",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9696c",
       "size": 30,
       "ida_name": "sub_9696C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09696c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96998",
       "size": 20,
       "ida_name": "sub_96998",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096998",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x969ac",
       "size": 22,
       "ida_name": "sub_969AC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0969ac",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x969c4",
       "size": 28,
       "ida_name": "sub_969C4",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0969c4",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x969e0",
       "size": 22,
       "ida_name": "sub_969E0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0969e0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x969f8",
       "size": 28,
       "ida_name": "sub_969F8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0969f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96a14",
       "size": 20,
       "ida_name": "sub_96A14",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096a14",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96a28",
       "size": 14,
       "ida_name": "sub_96A28",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096a28",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96a38",
@@ -39634,13 +40484,17 @@
       "rva": "0x96a48",
       "size": 18,
       "ida_name": "sub_96A48",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096a48",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96a5c",
       "size": 24,
       "ida_name": "sub_96A5C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096a5c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96a74",
@@ -39658,7 +40512,9 @@
       "rva": "0x96a8c",
       "size": 88,
       "ida_name": "sub_96A8C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096a8c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96aec",
@@ -39682,7 +40538,9 @@
       "rva": "0x96ba0",
       "size": 34,
       "ida_name": "sub_96BA0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096ba0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96bc4",
@@ -39700,7 +40558,9 @@
       "rva": "0x96e18",
       "size": 42,
       "ida_name": "sub_96E18",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_096e18",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x96e44",
@@ -39766,7 +40626,9 @@
       "rva": "0x9717c",
       "size": 8,
       "ida_name": "sub_9717C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09717c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97184",
@@ -39820,7 +40682,9 @@
       "rva": "0x9722c",
       "size": 28,
       "ida_name": "sub_9722C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09722c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97250",
@@ -39832,19 +40696,25 @@
       "rva": "0x9725c",
       "size": 24,
       "ida_name": "sub_9725C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09725c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97274",
       "size": 12,
       "ida_name": "sub_97274",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097274",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97280",
       "size": 4,
       "ida_name": "sub_97280",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097280",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97284",
@@ -39898,31 +40768,41 @@
       "rva": "0x97690",
       "size": 14,
       "ida_name": "sub_97690",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097690",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x976a0",
       "size": 12,
       "ida_name": "sub_976A0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0976a0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x976ac",
       "size": 14,
       "ida_name": "sub_976AC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0976ac",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x976bc",
       "size": 558,
       "ida_name": "sub_976BC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_seq_setup_op",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x978ec",
       "size": 52,
       "ida_name": "sub_978EC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0978ec",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97920",
@@ -39936,7 +40816,9 @@
       "rva": "0x9796c",
       "size": 42,
       "ida_name": "sub_9796C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09796c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97998",
@@ -40014,7 +40896,9 @@
       "rva": "0x97d94",
       "size": 346,
       "ida_name": "sub_97D94",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_seq_complete_irq",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0x97ef0",
@@ -40038,55 +40922,73 @@
       "rva": "0x97f14",
       "size": 4,
       "ida_name": "sub_97F14",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f14",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f18",
       "size": 4,
       "ida_name": "sub_97F18",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f18",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f1c",
       "size": 4,
       "ida_name": "sub_97F1C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f1c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f20",
       "size": 30,
       "ida_name": "sub_97F20",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f20",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f40",
       "size": 36,
       "ida_name": "sub_97F40",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f40",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f64",
       "size": 24,
       "ida_name": "sub_97F64",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f64",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97f7c",
       "size": 36,
       "ida_name": "sub_97F7C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097f7c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97fa0",
       "size": 12,
       "ida_name": "sub_97FA0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097fa0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x97fac",
       "size": 136,
       "ida_name": "sub_97FAC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_097fac",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98034",
@@ -40098,7 +41000,9 @@
       "rva": "0x98088",
       "size": 22,
       "ida_name": "sub_98088",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098088",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x980bc",
@@ -40110,13 +41014,17 @@
       "rva": "0x980dc",
       "size": 26,
       "ida_name": "sub_980DC",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0980dc",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x980f8",
       "size": 26,
       "ida_name": "sub_980F8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0980f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98114",
@@ -40128,7 +41036,9 @@
       "rva": "0x98138",
       "size": 8,
       "ida_name": "sub_98138",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098138",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98140",
@@ -40152,7 +41062,9 @@
       "rva": "0x981b8",
       "size": 8,
       "ida_name": "sub_981B8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0981b8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x981c0",
@@ -40200,13 +41112,17 @@
       "rva": "0x983b0",
       "size": 120,
       "ida_name": "sub_983B0",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0983b0",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98428",
       "size": 4,
       "ida_name": "sub_98428",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098428",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9842c",
@@ -40224,7 +41140,9 @@
       "rva": "0x98474",
       "size": 8,
       "ida_name": "sub_98474",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098474",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9847c",
@@ -40260,7 +41178,9 @@
       "rva": "0x9876c",
       "size": 28,
       "ida_name": "sub_9876C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_09876c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x9878c",
@@ -40290,7 +41210,9 @@
       "rva": "0x987f8",
       "size": 8,
       "ida_name": "sub_987F8",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_0987f8",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98800",
@@ -40314,7 +41236,9 @@
       "rva": "0x98842",
       "size": 12,
       "ida_name": "sub_98842",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098842",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98850",
@@ -40380,13 +41304,17 @@
       "rva": "0x98d3c",
       "size": 8,
       "ida_name": "sub_98D3C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098d3c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98d4c",
       "size": 102,
       "ida_name": "sub_98D4C",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098d4c",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98db4",
@@ -40404,7 +41332,9 @@
       "rva": "0x98e60",
       "size": 8,
       "ida_name": "sub_98E60",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_fn_098e60",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_ctrl.c"
     },
     {
       "rva": "0x98e68",
@@ -42234,7 +43164,9 @@
       "rva": "0xa0d88",
       "size": 34,
       "ida_name": "sub_A0D88",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0a0d88",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0xa0dac",
@@ -42282,7 +43214,9 @@
       "rva": "0xa0f54",
       "size": 26,
       "ida_name": "sub_A0F54",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0a0f54",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0xa0f6e",
@@ -51032,7 +51966,9 @@
       "rva": "0xce910",
       "size": 14,
       "ida_name": "sub_CE910",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0ce910",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0xce920",
@@ -55424,7 +56360,9 @@
       "rva": "0xe0900",
       "size": 30,
       "ida_name": "sub_E0900",
-      "status": "pending_c"
+      "c_symbol": "osa_svc_fn_0e0900",
+      "status": "reconstructed_c",
+      "source_file": "src/osa/osa_services.c"
     },
     {
       "rva": "0xe0948",
@@ -56906,13 +57844,17 @@
       "rva": "0xe40f8",
       "size": 4,
       "ida_name": "sub_E40F8",
-      "status": "pending_c"
+      "c_symbol": "libc_util_fn_0e40f8",
+      "status": "reconstructed_c",
+      "source_file": "src/libc/bitops_math.c"
     },
     {
       "rva": "0xe40fc",
       "size": 182,
       "ida_name": "sub_E40FC",
-      "status": "pending_c"
+      "c_symbol": "libc_util_fn_0e40fc",
+      "status": "reconstructed_c",
+      "source_file": "src/libc/bitops_math.c"
     },
     {
       "rva": "0xe41bc",
@@ -56966,7 +57908,9 @@
       "rva": "0xe42cc",
       "size": 6,
       "ida_name": "sub_E42CC",
-      "status": "pending_c"
+      "c_symbol": "libc_util_fn_0e42cc",
+      "status": "reconstructed_c",
+      "source_file": "src/libc/bitops_math.c"
     },
     {
       "rva": "0xe42d8",
@@ -57820,7 +58764,9 @@
       "rva": "0xe70bc",
       "size": 20,
       "ida_name": "sub_E70BC",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e70bc",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe70d0",
@@ -57880,7 +58826,9 @@
       "rva": "0xe7458",
       "size": 42,
       "ida_name": "sub_E7458",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e7458",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe7490",
@@ -57916,13 +58864,17 @@
       "rva": "0xe7774",
       "size": 46,
       "ida_name": "sub_E7774",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e7774",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe77a8",
       "size": 52,
       "ida_name": "sub_E77A8",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e77a8",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe77e8",
@@ -58030,7 +58982,9 @@
       "rva": "0xe7de4",
       "size": 18,
       "ida_name": "sub_E7DE4",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e7de4",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe7dfc",
@@ -58048,7 +59002,9 @@
       "rva": "0xe7f0c",
       "size": 30,
       "ida_name": "sub_E7F0C",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e7f0c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe7f2c",
@@ -58108,7 +59064,9 @@
       "rva": "0xe84ea",
       "size": 36,
       "ida_name": "sub_E84EA",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e84ea",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe8510",
@@ -58174,7 +59132,9 @@
       "rva": "0xe89b0",
       "size": 6,
       "ida_name": "IRQ21_Handler",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e89b0",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe89b8",
@@ -58282,7 +59242,9 @@
       "rva": "0xe9544",
       "size": 42,
       "ida_name": "sub_E9544",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e9544",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe9574",
@@ -58306,7 +59268,9 @@
       "rva": "0xe9798",
       "size": 4,
       "ida_name": "IRQ34_Handler",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e9798",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe97a0",
@@ -58336,7 +59300,9 @@
       "rva": "0xe99e0",
       "size": 18,
       "ida_name": "sub_E99E0",
-      "status": "pending_c"
+      "c_symbol": "rtk_kern_fn_0e99e0",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/kernel_prim.c"
     },
     {
       "rva": "0xe99f2",
@@ -58552,7 +59518,9 @@
       "rva": "0xeab34",
       "size": 42,
       "ida_name": "sub_EAB34",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0eab34",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xeab68",
@@ -58570,7 +59538,9 @@
       "rva": "0xeac70",
       "size": 14,
       "ida_name": "sub_EAC70",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0eac70",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xeac84",
@@ -58618,7 +59588,9 @@
       "rva": "0xeb048",
       "size": 36,
       "ida_name": "sub_EB048",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0eb048",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xeb070",
@@ -58738,7 +59710,9 @@
       "rva": "0xebdac",
       "size": 52,
       "ida_name": "sub_EBDAC",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0ebdac",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xebde0",
@@ -58948,7 +59922,9 @@
       "rva": "0xed424",
       "size": 60,
       "ida_name": "sub_ED424",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0ed424",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xed460",
@@ -58984,7 +59960,9 @@
       "rva": "0xed8b6",
       "size": 54,
       "ida_name": "sub_ED8B6",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0ed8b6",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xed8ec",
@@ -59206,7 +60184,9 @@
       "rva": "0xeeb0c",
       "size": 46,
       "ida_name": "sub_EEB0C",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0eeb0c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xeeb3a",
@@ -59664,7 +60644,9 @@
       "rva": "0xefa0c",
       "size": 16,
       "ida_name": "sub_EFA0C",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa0c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa20",
@@ -59682,43 +60664,57 @@
       "rva": "0xefa48",
       "size": 10,
       "ida_name": "sub_EFA48",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa48",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa54",
       "size": 10,
       "ida_name": "sub_EFA54",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa54",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa60",
       "size": 10,
       "ida_name": "sub_EFA60",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa60",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa6c",
       "size": 10,
       "ida_name": "sub_EFA6C",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa6c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa78",
       "size": 10,
       "ida_name": "sub_EFA78",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa78",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa84",
       "size": 18,
       "ida_name": "sub_EFA84",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa84",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefa9c",
       "size": 18,
       "ida_name": "sub_EFA9C",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efa9c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefab4",
@@ -59730,7 +60726,9 @@
       "rva": "0xefb3c",
       "size": 14,
       "ida_name": "sub_EFB3C",
-      "status": "pending_c"
+      "c_symbol": "rtk_ep_fn_0efb3c",
+      "status": "reconstructed_c",
+      "source_file": "src/rtkit/endpoints.c"
     },
     {
       "rva": "0xefb50",
@@ -59748,7 +60746,9 @@
       "rva": "0xefb78",
       "size": 16,
       "ida_name": "sub_EFB78",
-      "status": "pending_c"
+      "c_symbol": "phy_rf_log_chan_oob",
+      "status": "reconstructed_c",
+      "source_file": "src/phy/phy_rf_seq.c"
     },
     {
       "rva": "0xefb8c",

@@ -43,6 +43,15 @@ from unicorn.arm_const import (
     UC_ARM_REG_R1,
     UC_ARM_REG_R2,
     UC_ARM_REG_R3,
+    UC_ARM_REG_R4,
+    UC_ARM_REG_R5,
+    UC_ARM_REG_R6,
+    UC_ARM_REG_R7,
+    UC_ARM_REG_R8,
+    UC_ARM_REG_R9,
+    UC_ARM_REG_R10,
+    UC_ARM_REG_R11,
+    UC_ARM_REG_R12,
     UC_ARM_REG_SP,
     UC_CPU_ARM_CORTEX_M4,
 )
@@ -62,6 +71,17 @@ AUTO_DIFF_REGIONS: tuple[tuple[int, int], ...] = (
 )
 
 ARG_REGS = (UC_ARM_REG_R0, UC_ARM_REG_R1, UC_ARM_REG_R2, UC_ARM_REG_R3)
+
+CALLEE_SAVED_SENTINELS: tuple[tuple[int, int], ...] = (
+    (UC_ARM_REG_R4, 0xDEAD0400),
+    (UC_ARM_REG_R5, 0xDEAD0500),
+    (UC_ARM_REG_R6, 0xDEAD0600),
+    (UC_ARM_REG_R7, 0xDEAD0700),
+    (UC_ARM_REG_R8, 0xDEAD0800),
+    (UC_ARM_REG_R9, 0xDEAD0900),
+    (UC_ARM_REG_R10, 0xDEAD0A00),
+    (UC_ARM_REG_R11, 0xDEAD0B00),
+)
 
 MMIO_RANGES = (
     (0x42030000, 0x4209FFFF),  # Coex / IPC MMIO (0x42034000, 0x42080000, 0x42090000)
@@ -83,7 +103,6 @@ PENDING_STUB_SPECS: tuple[tuple[int, str, int | str], ...] = (
     (0x7ECC6, "sub_7ECC6", 3),
     (0x7E9F8, "sub_7E9F8", 1),
     (0xDF764, "sub_DF764", 0),
-    (0x7E084, "sub_7E084", 4),
     (0x7EE58, "sub_7EE58", 0),
     (0x74240, "sub_74240", 1),
     (0x74256, "sub_74256", 2),
@@ -97,8 +116,6 @@ PENDING_STUB_SPECS: tuple[tuple[int, str, int | str], ...] = (
     (0x6DD70, "sub_6DD70", 1),
     (0x6DDB8, "sub_6DDB8", 0),
     (0x6DE10, "sub_6DE10", 0),
-    (0x7CC08, "sub_7CC08", 2),
-    (0x7CC8C, "sub_7CC8C", 2),
     (0x740A8, "sub_740A8", 2),
     (0x740FE, "sub_740FE", 3),
     (0x35354, "sub_35354", "crash_fmt"),
@@ -347,6 +364,7 @@ class ArmDiffMachine:
         orig = bytes(self.cpu.mem_read(addr, len(patch)))
         self.patched_rom.append((addr, orig))
         self.cpu.mem_write(addr, patch)
+        self.cpu.ctl_remove_cache(0, 0x00100000)
 
     def install_pending_link_stubs(self) -> None:
         if not self.is_raw:
@@ -359,7 +377,7 @@ class ArmDiffMachine:
         ea86e = bytes.fromhex("40f20812904207d34ff6a862c0f20e02904201d20120704700207047")
 
         for rva in (
-            0x6BDDC, 0xEAC84, 0x7ECD4, 0xDF764, 0x7E084, 0x7EE58, 0x74240, 0x74256,
+            0x6BDDC, 0xEAC84, 0x7ECD4, 0xDF764, 0x7EE58, 0x74240, 0x74256,
             0x74270, 0x74290, 0x742B2, 0x7DC92, 0x6DF3C, 0x6DC88, 0x6DD04, 0x6DD70,
             0x6DDB8, 0x6DE10, 0x740A8, 0x740FE,
             0x35354, 0xEBA60, 0x7835C, 0x7D820, 0xCF6B4, 0x96458, 0x964AC, 0x96434,
@@ -368,7 +386,7 @@ class ArmDiffMachine:
             0x2774, 0x2584, 0x4B2B0, 0x2F8C, 0x59884, 0x5688,
         ):
             self.patch_code(rva, ret0)
-        for rva in (0x7CC08, 0x7CC8C, 0x7513C):
+        for rva in (0x7513C,):
             self.patch_code(rva, ret1)
         self.patch_code(0x7ECC6, ret2)
         for rva in (0x7E9F8, 0x6C850, 0x598E8, 0x133BC, 0x188B4, 0xE7C20):
@@ -391,9 +409,11 @@ class ArmDiffMachine:
         return [bytes(self.cpu.mem_read(addr, length)) for addr, length in AUTO_DIFF_REGIONS]
 
     def reset_state(self) -> None:
-        for addr, orig in reversed(self.patched_rom):
-            self.cpu.mem_write(addr, orig)
-        self.patched_rom.clear()
+        if self.patched_rom:
+            for addr, orig in reversed(self.patched_rom):
+                self.cpu.mem_write(addr, orig)
+            self.patched_rom.clear()
+            self.cpu.ctl_remove_cache(0, 0x00100000)
         self.w1c_4d154c64 = False
         self.pending_w1c_4d154c64 = 0
         self.cpu.mem_write(0x10000000, self.base_ram_data)
@@ -457,6 +477,9 @@ class ArmDiffMachine:
         self.cpu.reg_write(UC_ARM_REG_IPSR, ipsr)
         self.cpu.reg_write(UC_ARM_REG_SP, sp)
         self.cpu.reg_write(UC_ARM_REG_LR, STOP_PC | 1)
+        self.cpu.reg_write(UC_ARM_REG_R12, 0xDEAD0C00)
+        for cs_reg, cs_sentinel in CALLEE_SAVED_SENTINELS:
+            self.cpu.reg_write(cs_reg, cs_sentinel)
 
         for reg in ARG_REGS:
             self.cpu.reg_write(reg, 0)
@@ -474,11 +497,20 @@ class ArmDiffMachine:
         if end_pc != until_pc:
             raise RuntimeError(f"execution did not stop at 0x{until_pc:08x} (pc=0x{end_pc:08x})")
 
+        end_sp = self.cpu.reg_read(UC_ARM_REG_SP)
+        callee_saved_ok = True
+        if until_pc == STOP_PC:
+            callee_saved_ok = (end_sp == sp) and all(
+                self.cpu.reg_read(cs_reg) == cs_sentinel
+                for cs_reg, cs_sentinel in CALLEE_SAVED_SENTINELS
+            )
+
         return {
             "r0": self.cpu.reg_read(UC_ARM_REG_R0),
             "r1": self.cpu.reg_read(UC_ARM_REG_R1),
             "primask": self.cpu.reg_read(UC_ARM_REG_PRIMASK),
             "basepri": self.cpu.reg_read(UC_ARM_REG_BASEPRI),
+            "callee_saved_ok": callee_saved_ok,
             "transactions": list(self.transactions),
             "stub_calls": list(self.stub_calls),
         }
@@ -1451,6 +1483,10 @@ def _run_symbol_batch(sym_batch: list[str]) -> dict[str, Any]:
             mismatches: list[str] = []
             if not disasm_ok:
                 mismatches.append("capstone_or_elf_text_vma_failed")
+            if not raw_out["callee_saved_ok"] or not elf_out["callee_saved_ok"]:
+                mismatches.append(
+                    f"callee_saved_or_sp raw_ok={raw_out['callee_saved_ok']} elf_ok={elf_out['callee_saved_ok']}"
+                )
             if spec["check_r0"] and raw_out["r0"] != elf_out["r0"]:
                 mismatches.append(f"r0 raw=0x{raw_out['r0']:08x} elf=0x{elf_out['r0']:08x}")
             if spec["check_r1"] and raw_out["r1"] != elf_out["r1"]:
@@ -1620,8 +1656,22 @@ def main() -> int:
         if default_p2.is_file():
             p2_path = default_p2
 
-    _, p2_cases = load_p2_specs(p2_path)
+    extra_stubs, p2_cases = load_p2_specs(p2_path)
     all_cases = build_cases() + p2_cases
+
+    stub_rvas = {rva & ~1 for rva, _, _ in PENDING_STUB_SPECS} | {
+        (int(es["rva"], 16) if isinstance(es["rva"], str) else int(es["rva"])) & ~1
+        for es in extra_stubs
+    }
+    overlap_stubs = sorted(
+        f"{csym}@0x{rva:06x}" for csym, rva in sym_to_rva.items() if (rva & ~1) in stub_rvas
+    )
+    if overlap_stubs:
+        print(
+            f"ERROR: {len(overlap_stubs)} reconstructed_c functions overlap PENDING_STUB_SPECS: {overlap_stubs}",
+            file=sys.stderr,
+        )
+        return 1
 
     exercised_syms: set[str] = set()
     ordered_syms: list[str] = []

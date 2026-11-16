@@ -2,6 +2,7 @@
 #include "acib/bus.h"
 #include "acib/libc.h"
 #include "acib/memmap.h"
+#include "acib/reconstructed_p2.h"
 #include "acib/regs.h"
 #include "acib/rtkit.h"
 
@@ -31,7 +32,6 @@ extern uint32_t sub_7ECD4(uint32_t ev_base, uint32_t count);
 extern uint32_t sub_7ECC6(uint32_t slot_ptr, uint32_t reg_addr, uint32_t val);
 extern uint32_t sub_7E9F8(uint32_t end_ptr);
 extern void     sub_DF764(void);
-extern void     sub_7E084(uint16_t ver_major, uint16_t ver_minor, uint16_t ver_patch, uint16_t ver_build);
 extern void     sub_7EE58(void);
 extern int      sub_74240(uint32_t log_id);
 extern void     sub_74256(uint32_t log_id, uint32_t val0);
@@ -41,8 +41,6 @@ extern void     sub_7DC92(uint32_t err_id);
 extern void     sub_6DF3C(uint32_t ext_irq);
 extern void     sub_6DD70(uint32_t lock_arg);
 extern void     sub_6DE10(void);
-extern int      sub_7CC08(uint32_t flags, uint32_t slot);
-extern int      sub_7CC8C(uint32_t flags, uint32_t slot);
 extern void     sub_740A8(uint32_t log_id, uint32_t line);
 extern void     sub_740FE(uint32_t log_id, uint32_t line, uint32_t val0);
 extern void     sub_35354(uint8_t *out_buf, uint32_t w0, uint32_t w1, uint32_t w2, uint32_t w3, uint32_t w4);
@@ -240,7 +238,7 @@ int phy_ipc_complete_async_cmd(uint32_t timeout_us, uint32_t slot)
         sub_740FE(0x0004800Au, 0x81CBu, timeout_us);
         return 0;
     }
-    if (sub_7CC08(0u, slot) == 0 || sub_7CC8C(0u, slot) == 0) {
+    if (phy_mdm_fn_07cc08(0, (int32_t)slot) == 0 || phy_mdm_fn_07cc8c(0, (int32_t)slot) == 0) {
         sub_7DC92(0x0204800Bu);
     }
     return 1;
@@ -285,7 +283,8 @@ void phy_ipc_init(void)
         uint16_t ver_patch = acib_read_unaligned_le16(ver_ptr + 4u);
         uint16_t ver_build = acib_read_unaligned_le16(ver_ptr + 6u);
 
-        sub_7E084(ver_major, ver_minor, ver_patch, ver_build);
+        (void)phy_mdm_fn_07e084((int32_t)ver_major, (int32_t)ver_minor,
+                                (int32_t)ver_patch, (int32_t)ver_build);
         phy_ipc_sync_shared_table_dekker(1u);
 
         const uint32_t *lut = (const uint32_t *)acib_addr_ptr(ACIB_RAM_MODEM_LUT_INIT_ADDR);

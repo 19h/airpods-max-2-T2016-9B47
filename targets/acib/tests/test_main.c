@@ -3,6 +3,7 @@
 #include "acib/libc.h"
 #include "acib/memmap.h"
 #include "acib/phy_ipc.h"
+#include "acib/reconstructed_p2.h"
 #include "acib/regs.h"
 #include "acib/rtkit.h"
 #include "acib/shared.h"
@@ -271,8 +272,8 @@ static void test_mac_phy_ipc_contract(void)
 
     CHECK(g_phy_ipc_state.req_addr == ACIB_PHY_MBOX_BASE);
     CHECK(g_phy_ipc_state.resp_addr == ACIB_PHY_MBOX_RESP_BASE);
-    CHECK(g_host_spy.phy_ver_calls == 1u);
-    CHECK(g_host_spy.phy_ver[0] == 0x0021u && g_host_spy.phy_ver[1] == 0x005Bu);
+    CHECK(acib_mem_read32(0x10020998u) == 0x0021u);
+    CHECK(acib_mem_read32(0x1002099Cu) == 0x005Bu);
 
     /* Verify handshake payload {3, 0x5B, 1, 0} & Dekker-synced 288B table @ +0x0C4 */
     struct acib_phy_mbox_req *req = (struct acib_phy_mbox_req *)acib_host_mbox_ptr(0x000u);
@@ -289,7 +290,7 @@ static void test_mac_phy_ipc_contract(void)
     g_host_spy.mutate_legacy_probe_on_cmd = true;
     phy_ipc_init();
     CHECK(g_phy_ipc_state.resp_addr == ACIB_PHY_MBOX_LEGACY_RESP);
-    CHECK(g_host_spy.phy_ver[0] == 0x0102u && g_host_spy.phy_ver[3] == 0x0708u);
+    CHECK(acib_mem_read32(0x10020998u) == 0x0102u && acib_mem_read32(0x100209A4u) == 0x0708u);
 
     /* 5c. Switch back to B0 layout & test Fast RSSI Scan (FRS) + 24-bit LE pair packing */
     acib_host_reset();
@@ -423,6 +424,78 @@ static void test_aci_trace_osa_and_bt_ctrl(void)
           strcmp(g_host_panic.fmt, "tcm_debug_information: init_state must be incremented consecutively!") == 0);
 }
 
+/* --- 7. Phase 2 Wave 1: W3 RF Sequencer (0x4d154038), ACI IF & BT Clock --- */
+static void test_p2_wave1_phy_rf_seq_and_osa(void)
+{
+    acib_host_reset();
+
+    /* BT 31-bit clock slot arithmetic + overflow log guard (0x084FD0) */
+    CHECK(phy_bt_clk_add_slots(0x7FFFFFC0u, 12) == 0x00000020u);
+    CHECK(phy_bt_clk_add_slots(0x00001000u, -5) == 0x00000FD8u);
+    g_host_spy.last_log_id = 0u;
+    CHECK(phy_bt_clk_add_slots(0x81234567u, 0x10000004) == 0x01234567u);
+    CHECK(g_host_spy.last_log_id == 0x56000u);
+
+    /* RF status & sequencer state MMIO accessors (0x096470 / 0x096498) */
+    acib_host_set_mmio32(0x52610158u, 0xABCD5678u);
+    acib_host_set_mmio32(0x5261015Cu, 0x99990003u);
+    CHECK(phy_rf_read_status_158() == 0x5678u);
+    CHECK(phy_rf_read_seq_state() == 0x0003u);
+
+    /* RF sequencer operation setup (0x0976BC) in mode 9 -> SEQ_RF_CTRL bits [31:29]=5 */
+    uint32_t desc_vma = 0x1002E000u;
+    acib_mem_write32(desc_vma + 0x00u, 1u);
+    acib_mem_write32(desc_vma + 0x04u, 2u);
+    acib_mem_write32(desc_vma + 0x08u, 0xCAFEBABEu);
+    acib_mem_write32(desc_vma + 0x0Cu, 0x13572468u);
+    acib_mem_write32(desc_vma + 0x10u, 0u);
+    acib_mem_write32(desc_vma + 0x14u, 9u);          /* mode = 9 */
+    acib_mem_write32(desc_vma + 0x18u, 0x00001201u); /* band = 1, chan = 0x12 */
+    acib_mem_write32(desc_vma + 0x1Cu, 0u);
+    acib_mem_write32(0x10027960u, 0x0000002Au);
+    acib_mem_write8(0x10000648u, 40u);
+    acib_host_set_mmio32(0x4D154038u, 0x12345678u);
+    CHECK(phy_rf_seq_setup_op(0u, desc_vma) == 0u);
+    CHECK(g_host_spy.last_rf_reg_id == 9u);
+    CHECK(g_host_spy.last_rf_reg_val == 0xB2345678u);
+
+    /* RF sequencer IRQ completion (0x097D94) in state 3 -> clears bit 29 of SEQ_RF_CTRL */
+    uint32_t out_clk_vma = 0x1002E100u;
+    acib_mem_write32(0x10027970u, 0x0000001Bu);
+    acib_mem_write32(0x100279FCu, 0x0Du); /* remapped to 8 */
+    acib_mem_write8(0x10027950u, 6u);     /* 6 slots -> +48 ticks */
+    acib_host_set_mmio32(0x5261015Cu, 3u);
+    acib_host_set_mmio32(0x4D154038u, 0x35AA1122u);
+    acib_host_set_mmio32(0x520D51F8u, 0x80001000u);
+    acib_host_set_mmio32(0x5261C038u, 0u);
+    (void)phy_rf_seq_complete_irq(1u, out_clk_vma);
+    CHECK(acib_mem_read32(0x10027A08u) == 0x0Cu);
+    CHECK(acib_mem_read32(out_clk_vma) == 0x00001030u);
+    CHECK(g_host_spy.last_rf_reg_id == 0x0Au);
+    CHECK(g_host_spy.last_rf_reg_val == 0x15AA1122u);
+
+    /* ACI interface status counter poll & ack (0x07A918) */
+    acib_mem_write8(0x10021DC4u, 1u);
+    acib_mem_write32(0x10021DDCu, 10u);
+    acib_host_set_mmio32(0x42440420u, 0x00000105u);
+    acib_host_set_mmio32(0x42440400u, 0x00000002u);
+    (void)phy_aci_if_poll_and_ack();
+    CHECK(acib_mem_read8(0x10021E33u) == 1u);
+    CHECK(acib_mem_read32(0x10021DDCu) == 11u);
+    CHECK(acib_mem_read32(0x10020324u) == 2u);
+    CHECK((acib_host_get_mmio32(0x42440400u) & 0x000F0000u) == 0x000F0000u);
+
+    /* 64-bit latched hardware microsecond timer (0x078B24) + uxth arg mask (0x06F9D8) */
+    acib_host_set_mmio32(0x52160024u, 0x12345678u);
+    acib_host_set_mmio32(0x52160020u, 0x9ABCDEF0u);
+    CHECK(phy_mdm_fn_078b24() == 0x123456789ABCDEF0ULL);
+    acib_mem_write32(0x1002E200u, 100u);
+    acib_mem_write16(0x1002E204u, 10u);
+    acib_mem_write32(0x1002E208u, 50u);
+    CHECK(osa_core_fn_06f9d8(0x1002E200, 102, 0x00018085u) ==
+          osa_core_fn_06f9d8(0x1002E200, 102, 0x00008085u));
+}
+
 int main(void)
 {
     test_boot_mpu_and_clocks();
@@ -431,6 +504,7 @@ int main(void)
     test_libc_and_aeabi();
     test_mac_phy_ipc_contract();
     test_aci_trace_osa_and_bt_ctrl();
+    test_p2_wave1_phy_rf_seq_and_osa();
 
     printf("acib_tests: %u/%u checks passed\n",
            s_checks_run - s_checks_failed, s_checks_run);

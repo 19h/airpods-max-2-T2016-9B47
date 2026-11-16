@@ -19,7 +19,6 @@ uint32_t sub_7ECD4(uint32_t ev_base, uint32_t count);
 uint32_t sub_7ECC6(uint32_t slot_ptr, uint32_t reg_addr, uint32_t val);
 uint32_t sub_7E9F8(uint32_t end_ptr);
 void sub_DF764(void);
-void sub_7E084(uint16_t ver_major, uint16_t ver_minor, uint16_t ver_patch, uint16_t ver_build);
 void sub_7EE58(void);
 int  sub_74240(uint32_t log_id);
 void sub_74256(uint32_t log_id, uint32_t val0);
@@ -33,8 +32,6 @@ void sub_6DD04(void);
 void sub_6DD70(uint32_t lock_arg);
 void sub_6DDB8(void);
 void sub_6DE10(void);
-int  sub_7CC08(uint32_t flags, uint32_t slot);
-int  sub_7CC8C(uint32_t flags, uint32_t slot);
 void sub_740A8(uint32_t log_id, uint32_t line);
 void sub_740FE(uint32_t log_id, uint32_t line, uint32_t val0);
 void sub_35354(uint8_t *out_buf, uint32_t w0, uint32_t w1, uint32_t w2, uint32_t w3, uint32_t w4);
@@ -91,8 +88,6 @@ ACIB_WEAK uint32_t sub_7ECC6(uint32_t slot_ptr, uint32_t reg_addr, uint32_t val)
 { (void)slot_ptr; (void)reg_addr; (void)val; return 2u; }
 ACIB_WEAK uint32_t sub_7E9F8(uint32_t end_ptr) { return end_ptr; }
 ACIB_WEAK void sub_DF764(void) {}
-ACIB_WEAK void sub_7E084(uint16_t ver_major, uint16_t ver_minor, uint16_t ver_patch, uint16_t ver_build)
-{ (void)ver_major; (void)ver_minor; (void)ver_patch; (void)ver_build; }
 ACIB_WEAK void sub_7EE58(void) {}
 ACIB_WEAK int  sub_74240(uint32_t log_id) { (void)log_id; return 0; }
 ACIB_WEAK void sub_74256(uint32_t log_id, uint32_t val0) { (void)log_id; (void)val0; }
@@ -108,8 +103,6 @@ ACIB_WEAK void sub_6DD04(void) {}
 ACIB_WEAK void sub_6DD70(uint32_t lock_arg) { (void)lock_arg; }
 ACIB_WEAK void sub_6DDB8(void) {}
 ACIB_WEAK void sub_6DE10(void) {}
-ACIB_WEAK int  sub_7CC08(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }
-ACIB_WEAK int  sub_7CC8C(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }
 ACIB_WEAK void sub_740A8(uint32_t log_id, uint32_t line) { (void)log_id; (void)line; }
 ACIB_WEAK void sub_740FE(uint32_t log_id, uint32_t line, uint32_t val0) { (void)log_id; (void)line; (void)val0; }
 ACIB_WEAK void sub_35354(uint8_t *out_buf, uint32_t w0, uint32_t w1, uint32_t w2, uint32_t w3, uint32_t w4)

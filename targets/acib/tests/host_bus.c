@@ -14,10 +14,10 @@
 #endif
 
 /* Virtual address spaces for host behavioral tests */
-static uint8_t s_vrom[0x100000];      /* 0x00000000 .. 0x000FFFFF */
-static uint8_t s_vsram[0x40000];      /* 0x10000000 .. 0x1003FFFF */
-static uint8_t s_vsocshm[0x10000];    /* 0x20000000 .. 0x2000FFFF */
-static uint8_t s_vmbox[0x1000];       /* 0x4D280000 .. 0x4D280FFF */
+static ACIB_ALIGNED(8) uint8_t s_vrom[0x100000];      /* 0x00000000 .. 0x000FFFFF */
+static ACIB_ALIGNED(8) uint8_t s_vsram[0x40000];      /* 0x10000000 .. 0x1003FFFF */
+static ACIB_ALIGNED(8) uint8_t s_vsocshm[0x10000];    /* 0x20000000 .. 0x2000FFFF */
+static ACIB_ALIGNED(8) uint8_t s_vmbox[0x1000];       /* 0x4D280000 .. 0x4D280FFF */
 
 /* Sparse MMIO register table */
 #define HOST_MMIO_SLOTS 4096u
@@ -320,7 +320,6 @@ uint32_t sub_7ECD4(uint32_t ev_base, uint32_t count);
 uint32_t sub_7ECC6(uint32_t slot_ptr, uint32_t reg_addr, uint32_t val);
 uint32_t sub_7E9F8(uint32_t end_ptr);
 void sub_DF764(void);
-void sub_7E084(uint16_t ver_major, uint16_t ver_minor, uint16_t ver_patch, uint16_t ver_build);
 void sub_7EE58(void);
 int  sub_74240(uint32_t log_id);
 void sub_74256(uint32_t log_id, uint32_t val0);
@@ -334,8 +333,6 @@ void sub_6DD04(void);
 void sub_6DD70(uint32_t lock_arg);
 void sub_6DDB8(void);
 void sub_6DE10(void);
-int  sub_7CC08(uint32_t flags, uint32_t slot);
-int  sub_7CC8C(uint32_t flags, uint32_t slot);
 void sub_740A8(uint32_t log_id, uint32_t line);
 void sub_740FE(uint32_t log_id, uint32_t line, uint32_t val0);
 void sub_35354(uint8_t *out_buf, uint32_t w0, uint32_t w1, uint32_t w2, uint32_t w3, uint32_t w4);
@@ -444,15 +441,6 @@ uint32_t sub_7E9F8(uint32_t end_ptr)
 
 void sub_DF764(void) {}
 
-void sub_7E084(uint16_t ver_major, uint16_t ver_minor, uint16_t ver_patch, uint16_t ver_build)
-{
-    g_host_spy.phy_ver[0] = ver_major;
-    g_host_spy.phy_ver[1] = ver_minor;
-    g_host_spy.phy_ver[2] = ver_patch;
-    g_host_spy.phy_ver[3] = ver_build;
-    g_host_spy.phy_ver_calls++;
-}
-
 void sub_7EE58(void) {}
 
 int sub_74240(uint32_t log_id)
@@ -507,8 +495,6 @@ void sub_6DD04(void) {}
 void sub_6DD70(uint32_t lock_arg) { (void)lock_arg; }
 void sub_6DDB8(void) {}
 void sub_6DE10(void) {}
-int  sub_7CC08(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }
-int  sub_7CC8C(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }
 void sub_740A8(uint32_t log_id, uint32_t line) { (void)line; g_host_spy.last_log_id = log_id; }
 void sub_740FE(uint32_t log_id, uint32_t line, uint32_t val0) { (void)line; (void)val0; g_host_spy.last_log_id = log_id; }
 

@@ -281,10 +281,11 @@ int rkos_timingsafe_bcmp(const void *a, const void *b, size_t len)
     return (diff != 0u) ? 1 : 0;
 }
 
-/* @shim RVA 0x5cf2 sub_5CF2 (pending_c: not shown equivalent to raw) */
-void rkos_word_copy32(uint32_t *dst, const uint32_t *src, size_t nbytes)
+/* @provenance RVA 0x5cf2 sub_5CF2 */
+uint32_t *rkos_word_copy32(uint32_t *dst, const uint32_t *src, size_t nbytes)
 {
-    while (nbytes >= 32u) {
+    while (nbytes > 31u) {
+        nbytes -= 32u;
         dst[0] = src[0];
         dst[1] = src[1];
         dst[2] = src[2];
@@ -295,17 +296,17 @@ void rkos_word_copy32(uint32_t *dst, const uint32_t *src, size_t nbytes)
         dst[7] = src[7];
         src += 8;
         dst += 8;
-        nbytes -= 32u;
     }
     size_t idx = 0u;
     while (nbytes >= 4u) {
+        nbytes -= 4u;
         dst[idx] = src[idx];
         idx++;
-        nbytes -= 4u;
     }
+    return dst;
 }
 
-/* @shim RVA 0x5d3c __memset_chk (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x5d3c __memset_chk */
 void rkos_memset_chk_fail(void)
 {
     rtkit_panic("memset_chk");

@@ -1,23 +1,11 @@
 #include "rkos/rkos.h"
 
 /*
- * Reconstructed Image4 ASN.1 DER parser (`0x057C`, `0x0582`) and Apple
- * corecrypto SHA-256 (`0x11DC8`), SHA-512/384 (`0x11F38`), `ccdigest`
- * (`0x11910`, `0x119AC`, `0x11B04`, `0x1220C`), `cchmac` (`0x11BD4`, `0x11C5C`,
- * `0x11CAE`), and HMAC-DRBG state helpers (`0x118D0`, `0x118E6`, `0x11DB8`,
- * `0x12354`, `0x1256C`, `0x125A8`).
- *
- * Firmware detail from `rkos.asm`: both SHA-256 (`0x11DC8`) and SHA-512
- * (`0x11F38`) share the 80x64-bit `K512` constant table in `ROM_RODATA` at
- * `0x00016180`, because the upper 32 bits (`offset +4` in little-endian) of the
- * first 64 `K512` constants equal the 64 `K256` round constants.
+ * Reconstructed Apple corecrypto SHA-256 (`0x11DC8`), SHA-512/384 (`0x11F38`),
+ * `ccdigest` (`0x11910`, `0x119AC`, `0x11B04`, `0x1220C`), `cchmac` (`0x11BD4`,
+ * `0x11C5C`, `0x11CAE`), and HMAC-DRBG state helpers (`0x118D0`, `0x118E6`,
+ * `0x11DB8`, `0x12354`, `0x1256C`, `0x125A8`).
  */
-
-#ifdef RKOS_HOST
-#define RKOS_DER_EARLY
-#else
-#define RKOS_DER_EARLY __attribute__((section(".text.early")))
-#endif
 
 static inline uint32_t rkos_rotr32(uint32_t x, unsigned int n)
 {
@@ -48,103 +36,6 @@ static inline uint64_t rkos_load_be64(const uint8_t *p)
     return ((uint64_t)rkos_load_be32(p) << 32) | (uint64_t)rkos_load_be32(p + 4);
 }
 
-/* @shim RVA 0x582 sub_582 (pending_c: not shown equivalent to raw) */
-RKOS_DER_EARLY int rkos_der_decode_ex(const rkos_der_input_t *in_slice,
-                                      rkos_der_tlv_t *out_tlv,
-                                      uint32_t *raw_len_out)
-{
-    uint32_t in_len = in_slice->length;
-    uint32_t base_va = in_slice->ptr_va;
-    if (in_len < 2u || base_va == 0xFFFFFFFFu) {
-        return 3;
-    }
-
-    const uint8_t *buf = (const uint8_t *)RKOS_VMA_RAW(base_va, in_len);
-    uint8_t id_byte = buf[0];
-    uint32_t tag_lo = (uint32_t)(id_byte & 0x1Fu);
-    uint32_t tag_hi = 0u;
-    uint32_t pos = 1u;
-
-    if (tag_lo == 0x1Fu) {
-        uint8_t first_sub = buf[pos];
-        if (first_sub == 0x80u || first_sub < 0x1Fu) {
-            return 3;
-        }
-        tag_lo = 0u;
-        for (;;) {
-            if (pos >= in_len) {
-                return 3;
-            }
-            uint8_t b = buf[pos++];
-            uint32_t next_hi = (tag_hi << 7) | (tag_lo >> 25);
-            tag_lo = (tag_lo << 7) | (uint32_t)(b & 0x7Fu);
-            if ((b & 0x80u) == 0u) {
-                tag_hi = next_hi;
-                break;
-            }
-            tag_hi = next_hi;
-            if ((in_len - pos) < 1u || (tag_hi >> 25) != 0u) {
-                return 3;
-            }
-        }
-        if ((tag_hi >> 22) != 0u || pos >= in_len) {
-            return 3;
-        }
-    }
-
-    out_tlv->tag_number_lo = tag_lo;
-    out_tlv->tag_hi_and_cls = tag_hi | (((uint32_t)(id_byte & 0xE0u)) << 24);
-
-    uint8_t len_byte = buf[pos++];
-    uint32_t rem = in_len - pos;
-
-    if ((len_byte & 0x80u) == 0u) {
-        uint32_t val_len = (uint32_t)len_byte;
-        if (raw_len_out == NULL && rem < val_len) {
-            return 3;
-        }
-        uint32_t clamped = (rem < val_len) ? rem : val_len;
-        out_tlv->content_va = base_va + pos;
-        out_tlv->content_len = clamped;
-        if (raw_len_out != NULL) {
-            *raw_len_out = val_len;
-        }
-        return 0;
-    }
-
-    uint32_t len_octets = (uint32_t)(len_byte & 0x7Fu);
-    if (len_octets == 0u || len_octets > 4u || rem < len_octets) {
-        return 3;
-    }
-    if (buf[pos] == 0u) {
-        return 3;
-    }
-
-    uint32_t long_len = 0u;
-    for (uint32_t i = 0u; i < len_octets; i++) {
-        long_len = (long_len << 8) | (uint32_t)buf[pos++];
-    }
-    rem = in_len - pos;
-
-    if (long_len < 0x80u || (raw_len_out == NULL && long_len > rem)) {
-        return 3;
-    }
-
-    uint32_t clamped = (long_len < rem) ? long_len : rem;
-    out_tlv->content_va = base_va + pos;
-    out_tlv->content_len = clamped;
-    if (raw_len_out != NULL) {
-        *raw_len_out = long_len;
-    }
-    return 0;
-}
-
-/* @provenance RVA 0x57c sub_57C */
-RKOS_DER_EARLY int rkos_der_decode(const rkos_der_input_t *in_slice, rkos_der_tlv_t *out_tlv)
-{
-    return rkos_der_decode_ex(in_slice, out_tlv, NULL);
-}
-
 /* @provenance RVA 0x118d0 sub_118D0 */
 void rkos_sec_init_flag(uint32_t *out_zero)
 {
@@ -156,13 +47,13 @@ void rkos_sec_init_flag(uint32_t *out_zero)
 }
 
 /* @provenance RVA 0x118e6 sub_118E6 */
-int rkos_cc_cmp_safe(size_t len, const void *a, const void *b)
+int rkos_cc_cmp_safe(size_t len, const void *lhs_buf, const void *rhs_buf)
 {
     if (len == 0u) {
         return 1;
     }
-    const uint8_t *pa = (const uint8_t *)a;
-    const uint8_t *pb = (const uint8_t *)b;
+    const uint8_t *pa = (const uint8_t *)lhs_buf;
+    const uint8_t *pb = (const uint8_t *)rhs_buf;
     uint8_t acc = 0u;
 
     while (len > 0u) {
@@ -207,42 +98,42 @@ void rkos_sha256_compress(uint32_t state[8], size_t nblocks, const void *data)
             w[i] = w[i - 16u] + s0 + w[i - 7u] + s1;
         }
 
-        uint32_t a = state[0];
-        uint32_t b = state[1];
-        uint32_t c = state[2];
-        uint32_t d = state[3];
-        uint32_t e = state[4];
-        uint32_t f = state[5];
-        uint32_t g = state[6];
-        uint32_t h = state[7];
+        uint32_t st_a = state[0];
+        uint32_t st_b = state[1];
+        uint32_t st_c = state[2];
+        uint32_t st_d = state[3];
+        uint32_t st_e = state[4];
+        uint32_t st_f = state[5];
+        uint32_t st_g = state[6];
+        uint32_t st_h = state[7];
 
         for (unsigned int i = 0u; i < 64u; i++) {
-            uint32_t sigma1 = rkos_rotr32(e, 6u) ^ rkos_rotr32(e, 11u) ^ rkos_rotr32(e, 25u);
-            uint32_t ch = (e & f) ^ ((~e) & g);
+            uint32_t sigma1 = rkos_rotr32(st_e, 6u) ^ rkos_rotr32(st_e, 11u) ^ rkos_rotr32(st_e, 25u);
+            uint32_t ch = (st_e & st_f) ^ ((~st_e) & st_g);
             uint32_t k_i = k512_words[i * 2u + 1u];
-            uint32_t temp1 = h + sigma1 + ch + k_i + w[i];
-            uint32_t sigma0 = rkos_rotr32(a, 2u) ^ rkos_rotr32(a, 13u) ^ rkos_rotr32(a, 22u);
-            uint32_t maj = (a & b) | ((a | b) & c);
+            uint32_t temp1 = st_h + sigma1 + ch + k_i + w[i];
+            uint32_t sigma0 = rkos_rotr32(st_a, 2u) ^ rkos_rotr32(st_a, 13u) ^ rkos_rotr32(st_a, 22u);
+            uint32_t maj = (st_a & st_b) | ((st_a | st_b) & st_c);
             uint32_t temp2 = sigma0 + maj;
 
-            h = g;
-            g = f;
-            f = e;
-            e = d + temp1;
-            d = c;
-            c = b;
-            b = a;
-            a = temp1 + temp2;
+            st_h = st_g;
+            st_g = st_f;
+            st_f = st_e;
+            st_e = st_d + temp1;
+            st_d = st_c;
+            st_c = st_b;
+            st_b = st_a;
+            st_a = temp1 + temp2;
         }
 
-        state[0] += a;
-        state[1] += b;
-        state[2] += c;
-        state[3] += d;
-        state[4] += e;
-        state[5] += f;
-        state[6] += g;
-        state[7] += h;
+        state[0] += st_a;
+        state[1] += st_b;
+        state[2] += st_c;
+        state[3] += st_d;
+        state[4] += st_e;
+        state[5] += st_f;
+        state[6] += st_g;
+        state[7] += st_h;
         in += 64u;
     }
 }
@@ -269,41 +160,41 @@ void rkos_sha512_compress(uint64_t state[8], size_t nblocks, const void *data)
             w[i] = w[i - 16u] + s0 + w[i - 7u] + s1;
         }
 
-        uint64_t a = state[0];
-        uint64_t b = state[1];
-        uint64_t c = state[2];
-        uint64_t d = state[3];
-        uint64_t e = state[4];
-        uint64_t f = state[5];
-        uint64_t g = state[6];
-        uint64_t h = state[7];
+        uint64_t st_a = state[0];
+        uint64_t st_b = state[1];
+        uint64_t st_c = state[2];
+        uint64_t st_d = state[3];
+        uint64_t st_e = state[4];
+        uint64_t st_f = state[5];
+        uint64_t st_g = state[6];
+        uint64_t st_h = state[7];
 
         for (unsigned int i = 0u; i < 80u; i++) {
-            uint64_t sigma1 = rkos_rotr64(e, 14u) ^ rkos_rotr64(e, 18u) ^ rkos_rotr64(e, 41u);
-            uint64_t ch = (e & f) ^ ((~e) & g);
-            uint64_t temp1 = h + sigma1 + ch + k512[i] + w[i];
-            uint64_t sigma0 = rkos_rotr64(a, 28u) ^ rkos_rotr64(a, 34u) ^ rkos_rotr64(a, 39u);
-            uint64_t maj = (a & b) | ((a | b) & c);
+            uint64_t sigma1 = rkos_rotr64(st_e, 14u) ^ rkos_rotr64(st_e, 18u) ^ rkos_rotr64(st_e, 41u);
+            uint64_t ch = (st_e & st_f) ^ ((~st_e) & st_g);
+            uint64_t temp1 = st_h + sigma1 + ch + k512[i] + w[i];
+            uint64_t sigma0 = rkos_rotr64(st_a, 28u) ^ rkos_rotr64(st_a, 34u) ^ rkos_rotr64(st_a, 39u);
+            uint64_t maj = (st_a & st_b) | ((st_a | st_b) & st_c);
             uint64_t temp2 = sigma0 + maj;
 
-            h = g;
-            g = f;
-            f = e;
-            e = d + temp1;
-            d = c;
-            c = b;
-            b = a;
-            a = temp1 + temp2;
+            st_h = st_g;
+            st_g = st_f;
+            st_f = st_e;
+            st_e = st_d + temp1;
+            st_d = st_c;
+            st_c = st_b;
+            st_b = st_a;
+            st_a = temp1 + temp2;
         }
 
-        state[0] += a;
-        state[1] += b;
-        state[2] += c;
-        state[3] += d;
-        state[4] += e;
-        state[5] += f;
-        state[6] += g;
-        state[7] += h;
+        state[0] += st_a;
+        state[1] += st_b;
+        state[2] += st_c;
+        state[3] += st_d;
+        state[4] += st_e;
+        state[5] += st_f;
+        state[6] += st_g;
+        state[7] += st_h;
         in += 128u;
     }
 }
@@ -315,6 +206,16 @@ static void rkos_digest_invoke_compress(const rkos_ccdigest_info_t *di,
         rkos_sha256_compress((uint32_t *)state_ptr, nblocks, blocks);
     } else if (di->block_size == 128u) {
         rkos_sha512_compress((uint64_t *)state_ptr, nblocks, blocks);
+    }
+}
+
+static void rkos_digest_invoke_final(uint32_t di_va, const rkos_ccdigest_info_t *di,
+                                     void *ctx, uint8_t *digest)
+{
+    if (di->block_size == 64u) {
+        rkos_ccdigest_final_64be(di_va, ctx, digest);
+    } else {
+        rkos_ccdigest_final_128be(di_va, ctx, digest);
     }
 }
 
@@ -450,48 +351,54 @@ void rkos_ccdigest_oneshot(uint32_t di_va, size_t len, const void *data, void *d
     const void *iv = RKOS_VMA_RAW(di->initial_state, di->state_size);
     rkos_memcpy(ctx + 8u, iv, di->state_size);
     rkos_ccdigest_update(di_va, ctx, len, data);
-
-    if (di->block_size == 64u) {
-        rkos_ccdigest_final_64be(di_va, ctx, (uint8_t *)digest);
-    } else {
-        rkos_ccdigest_final_128be(di_va, ctx, (uint8_t *)digest);
-    }
+    rkos_digest_invoke_final(di_va, di, ctx, (uint8_t *)digest);
     rkos_memset(ctx, 0, sizeof(ctx));
 }
 
-/* @shim RVA 0x11cae sub_11CAE (pending_c: not shown equivalent to raw) */
-void rkos_cchmac_init(uint32_t di_va, void *hctx, size_t key_len, const void *key)
+/* @provenance RVA 0x11cae sub_11CAE */
+int rkos_cchmac_init(uint32_t di_va, void *hctx, size_t key_len, const void *key)
 {
     const rkos_ccdigest_info_t *di = RKOS_VMA_PTR(const rkos_ccdigest_info_t *, di_va);
     uint8_t *hc = (uint8_t *)hctx;
-    size_t inner_off = (di->state_size + di->block_size + 0x13u) & ~7u;
+    uint8_t *state_ptr = hc + 8u;
+    uint8_t *pad_buf = hc + 8u + di->state_size;
+    const uint8_t *key_bytes = (const uint8_t *)key;
     const void *iv = RKOS_VMA_RAW(di->initial_state, di->state_size);
+    size_t used_key_len = key_len;
 
-    uint8_t key_block[128];
-    rkos_memset(key_block, 0, sizeof(key_block));
-    if (key_len > di->block_size) {
-        rkos_ccdigest_oneshot(di_va, key_len, key, key_block);
-    } else if (key_len > 0u) {
-        rkos_memcpy(key_block, key, key_len);
+    if (key_len <= di->block_size) {
+        for (size_t idx = 0u; idx < key_len; idx++) {
+            pad_buf[idx] = (uint8_t)(key_bytes[idx] ^ 0x5Cu);
+        }
+    } else {
+        (void)memcpy_thunk(state_ptr, iv, di->state_size);
+        *(uint64_t *)(void *)hc = 0ULL;
+        *(uint32_t *)(void *)(pad_buf + di->block_size) = 0u;
+        rkos_ccdigest_update(di_va, hc, key_len, key);
+        rkos_digest_invoke_final(di_va, di, hc, pad_buf);
+        used_key_len = di->output_size;
+        for (size_t idx = 0u; idx < used_key_len; idx++) {
+            pad_buf[idx] ^= 0x5Cu;
+        }
     }
 
-    uint8_t pad[128];
-    for (uint32_t i = 0u; i < di->block_size; i++) {
-        pad[i] = (uint8_t)(key_block[i] ^ 0x5Cu);
+    if (di->block_size > used_key_len) {
+        (void)rkos_memset(pad_buf + used_key_len, 0x5C, di->block_size - used_key_len);
     }
-    rkos_memcpy(hc + inner_off, iv, di->state_size);
-    rkos_digest_invoke_compress(di, hc + inner_off, 1u, pad);
 
-    for (uint32_t i = 0u; i < di->block_size; i++) {
-        pad[i] = (uint8_t)(key_block[i] ^ 0x36u);
+    size_t outer_off = (di->block_size + di->state_size + 0x13u) & ~7u;
+    (void)memcpy_thunk(hc + outer_off, iv, di->state_size);
+    rkos_digest_invoke_compress(di, hc + outer_off, 1u, pad_buf);
+
+    for (uint32_t idx = 0u; idx < di->block_size; idx++) {
+        pad_buf[idx] ^= 0x6Au;
     }
-    rkos_memset(hc, 0, inner_off);
-    rkos_memcpy(hc + 8u, iv, di->state_size);
-    rkos_digest_invoke_compress(di, hc + 8u, 1u, pad);
+
+    (void)memcpy_thunk(state_ptr, iv, di->state_size);
+    rkos_digest_invoke_compress(di, state_ptr, 1u, pad_buf);
     *(uint64_t *)(void *)hc = (uint64_t)di->block_size * 8ULL;
-
-    rkos_memset(key_block, 0, sizeof(key_block));
-    rkos_memset(pad, 0, sizeof(pad));
+    *(uint32_t *)(void *)(pad_buf + di->block_size) = 0u;
+    return 0;
 }
 
 /* @provenance RVA 0x11c5c sub_11C5C */
@@ -499,25 +406,16 @@ void rkos_cchmac_final(uint32_t di_va, void *hctx, uint8_t *mac_out)
 {
     const rkos_ccdigest_info_t *di = RKOS_VMA_PTR(const rkos_ccdigest_info_t *, di_va);
     uint8_t *hc = (uint8_t *)hctx;
-    size_t inner_off = (di->state_size + di->block_size + 0x13u) & ~7u;
+    size_t outer_off = (di->state_size + di->block_size + 0x13u) & ~7u;
     uint8_t inner_digest[64];
 
-    if (di->block_size == 64u) {
-        rkos_ccdigest_final_64be(di_va, hc, inner_digest);
-    } else {
-        rkos_ccdigest_final_128be(di_va, hc, inner_digest);
-    }
+    rkos_digest_invoke_final(di_va, di, hc, inner_digest);
 
-    rkos_memset(hc, 0, inner_off);
-    rkos_memcpy(hc + 8u, hc + inner_off, di->state_size);
+    rkos_memset(hc, 0, outer_off);
+    rkos_memcpy(hc + 8u, hc + outer_off, di->state_size);
     *(uint64_t *)(void *)hc = (uint64_t)di->block_size * 8ULL;
     rkos_ccdigest_update(di_va, hc, di->output_size, inner_digest);
-
-    if (di->block_size == 64u) {
-        rkos_ccdigest_final_64be(di_va, hc, mac_out);
-    } else {
-        rkos_ccdigest_final_128be(di_va, hc, mac_out);
-    }
+    rkos_digest_invoke_final(di_va, di, hc, mac_out);
     rkos_memset(inner_digest, 0, sizeof(inner_digest));
 }
 
@@ -527,29 +425,37 @@ void rkos_cchmac_oneshot(uint32_t di_va, size_t key_len, const void *key,
 {
     uint8_t hctx[384];
     rkos_memset(hctx, 0, sizeof(hctx));
-    rkos_cchmac_init(di_va, hctx, key_len, key);
+    (void)rkos_cchmac_init(di_va, hctx, key_len, key);
     rkos_ccdigest_update(di_va, hctx, data_len, data);
     rkos_cchmac_final(di_va, hctx, mac_out);
     rkos_memset(hctx, 0, sizeof(hctx));
 }
 
-/* @shim RVA 0x11db8 sub_11DB8 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x11db8 sub_11DB8 */
 void rkos_crypto_panic_str(const char *msg)
 {
     rtkit_panic("%s", msg);
 }
 
-/* @shim RVA 0x1256c sub_1256C (pending_c: not shown equivalent to raw) */
-void rkos_drbg_clear(uint32_t drbg_va)
+/* @provenance RVA 0x1256c sub_1256C */
+uint32_t rkos_drbg_clear(uint32_t drbg_va)
 {
     uint8_t *ctx = (uint8_t *)RKOS_VMA_RAW(drbg_va, 0x90u);
-    rkos_memset(ctx + 0x04u, 0, 0x40u);
-    rkos_memset(ctx + 0x44u, 0, 0x40u);
-    *(uint32_t *)(void *)(ctx + 0x88u) = 0xFFFFFFFFu;
+#ifdef RKOS_HOST
+    (void)rkos_memset(ctx + 0x04u, 0, 0x40u);
+    (void)rkos_memset(ctx + 0x44u, 0, 0x40u);
+#else
+    uint32_t fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x200008A0u);
+    (void)rkos_call_fn3(0x200008A0u, fn_va, drbg_va + 0x04u, 0u, 0x40u);
+    fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x200008A0u);
+    (void)rkos_call_fn3(0x200008A0u, fn_va, drbg_va + 0x44u, 0u, 0x40u);
+#endif
     *(uint32_t *)(void *)(ctx + 0x8Cu) = 0xFFFFFFFFu;
+    *(uint32_t *)(void *)(ctx + 0x88u) = 0xFFFFFFFFu;
+    return 0xFFFFFFFFu;
 }
 
-/* @shim RVA 0x125a8 sub_125A8 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x125a8 sub_125A8 */
 int rkos_drbg_need_reseed(uint32_t drbg_va)
 {
     const uint32_t *ctx = RKOS_VMA_PTR(const uint32_t *, drbg_va);
@@ -558,5 +464,5 @@ int rkos_drbg_need_reseed(uint32_t drbg_va)
         return 0;
     }
     uint64_t counter = ((uint64_t)ctx[0x8Cu / 4u] << 32) | (uint64_t)ctx[0x88u / 4u];
-    return (counter > 0x10000ULL) ? 1 : 0;
+    return (counter > 0x0001000000000000ULL) ? 1 : 0;
 }

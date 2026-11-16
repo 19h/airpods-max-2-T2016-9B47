@@ -2,8 +2,8 @@
 
 /*
  * Reconstructed ARMv7E-M NVIC, BASEPRI/PRIMASK masking, IRQ vector table
- * registration/dispatch, and recursive heap critical section routines
- * (`0x3470..0x3988`, `0x50B4`, `0x5124`).
+ * registration/dispatch, NVIC controller lifecycle (`0x3838`), and recursive
+ * heap critical section routines (`0x3470..0x3988`, `0x50B4`, `0x5124`).
  */
 
 static inline uint32_t rkos_irq_count_read(void)
@@ -22,7 +22,7 @@ uint32_t rkos_irq_save_and_raise_basepri(void)
     return prev;
 }
 
-/* @shim RVA 0x3488 sub_3488 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x3488 sub_3488 */
 int rkos_primask_disable_if_enabled(void)
 {
     if (rkos_arch_get_primask() != 0u) {
@@ -32,7 +32,7 @@ int rkos_primask_disable_if_enabled(void)
     return 1;
 }
 
-/* @shim RVA 0x349a sub_349A (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x349a sub_349A */
 int rkos_irq_enable_all(void)
 {
     rkos_arch_set_primask(0u);
@@ -50,7 +50,7 @@ int rkos_irq_are_enabled(void)
     return (rkos_arch_get_primask() == 0u) ? 1 : 0;
 }
 
-/* @shim RVA 0x357c sub_357C (pending_c: not shown equivalent to raw) */
+/* @shim RVA 0x357c sub_357C (pending_c: infinite WFI idle loop) */
 void rkos_cpu_wfi_idle(void)
 {
     for (;;) {
@@ -67,13 +67,12 @@ uint32_t rkos_get_ipsr_num(void)
     return rkos_arch_get_ipsr();
 }
 
-/* @shim RVA 0x35bc sub_35BC (pending_c: not shown equivalent to raw) */
-int rkos_nvic_set_enable_state(int self_unused, uint32_t vec, int enable)
+/* @provenance RVA 0x35bc sub_35BC */
+int rkos_nvic_set_enable_state(int bit_seed, uint32_t vec, int enable)
 {
-    (void)self_unused;
     uint32_t ext_irq = vec - 16u;
     uint32_t word_idx = ext_irq >> 5;
-    uint32_t bit_mask = 1u << (ext_irq & 31u);
+    uint32_t bit_mask = ((uint32_t)bit_seed) << (ext_irq & 31u);
 
     uint32_t cur_iser = RKOS_REG32_READ(RKOS_NVIC_ISER_BASE + word_idx * 4u) & bit_mask;
     int was_enabled = (cur_iser != 0u) ? 1 : 0;
@@ -96,9 +95,10 @@ int rkos_nvic_set_enable_state(int self_unused, uint32_t vec, int enable)
     return was_enabled;
 }
 
-/* @shim RVA 0x359c sub_359C (pending_c: not shown equivalent to raw) */
-int rkos_nvic_is_enabled(uint32_t self_va, uint32_t vec)
+/* @provenance RVA 0x359c sub_359C */
+int rkos_nvic_set_enable(uint32_t self_va, uint32_t vec, int enable)
 {
+    (void)self_va;
     if (vec == 2u) {
         return 1;
     }
@@ -107,10 +107,7 @@ int rkos_nvic_is_enabled(uint32_t self_va, uint32_t vec)
         if (vec == 15u) {
             return 1;
         }
-        uint32_t ext_irq = vec - 16u;
-        uint32_t word = RKOS_REG32_READ(RKOS_NVIC_ISER_BASE + (ext_irq >> 5) * 4u);
-        (void)self_va;
-        return ((word >> (ext_irq & 31u)) & 1u) != 0u ? 1 : 0;
+        return rkos_nvic_set_enable_state(1, vec, enable);
     }
     return 0;
 }
@@ -175,7 +172,7 @@ uint32_t rkos_nvic_set_priority(uint32_t self_va, uint32_t vec, uint32_t prio_le
 uint32_t rkos_host_invoke_irq_cb(uint32_t fn_va, uint32_t ctx_va);
 #endif
 
-/* @shim RVA 0x36f8 IRQ_CommonHandler (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x36f8 IRQ_CommonHandler */
 uint32_t IRQ_CommonHandler(void)
 {
     uint32_t ipsr = rkos_arch_get_ipsr();
@@ -284,6 +281,102 @@ int rkos_nvic_get_noop(void)
     return 0;
 }
 
+/* @provenance RVA 0x3838 sub_3838 */
+uint32_t rkos_nvic_drv_op(uint32_t self_va, uint32_t op, uint32_t arg2, uint32_t arg3)
+{
+    uint32_t cmd = op - 1u;
+    if (cmd > 7u) {
+        return 0x80000003u;
+    }
+
+    uint32_t *self = RKOS_VMA_PTR(uint32_t *, self_va);
+    switch (cmd) {
+    case 0u: {
+        uint32_t ictr = RKOS_REG32_READ(RKOS_SCS_ICTR);
+        uint32_t extra_lines = (ictr << 5) & 0x1E0u;
+        if (extra_lines >= 0x1D0u) {
+            extra_lines = 0x1D0u;
+        }
+        uint32_t max_irqs = extra_lines + 0x20u;
+        uint32_t irq_cnt = rkos_irq_count_read();
+        if (irq_cnt > max_irqs) {
+            return 0x80000001u;
+        }
+
+        uint32_t shpr3 = RKOS_REG32_READ(RKOS_SCB_SHPR3);
+        RKOS_REG32_WRITE(RKOS_SCB_SHPR3, (shpr3 & 0x00FFFFFFu) | 0x80000000u);
+
+        uint32_t ipr_words_hw = max_irqs >> 2;
+        for (uint32_t idx = 0u; idx < ipr_words_hw; idx++) {
+            RKOS_REG32_WRITE(RKOS_NVIC_IPR_BASE + idx * 4u, 0x80808080u);
+        }
+        RKOS_REG32_WRITE(RKOS_SCB_VTOR, RKOS_RUNTIME_VTOR_BASE);
+
+        uint32_t iser_cnt = (irq_cnt >> 5) + 1u;
+        uint32_t ipr_cnt = (irq_cnt >> 2) + 1u;
+        self[7] = ipr_cnt;
+        self[9] = iser_cnt;
+
+        uint32_t iser_buf = rtkit_malloc(4u * iser_cnt);
+        self[8] = iser_buf;
+        if (iser_buf == 0u) {
+            return 0x80000005u;
+        }
+        uint32_t ipr_buf = rtkit_malloc(4u * self[7]);
+        self[6] = ipr_buf;
+        if (ipr_buf == 0u) {
+            return 0x80000005u;
+        }
+        return 0u;
+    }
+    case 1u:
+    case 2u:
+        return 0u;
+    case 3u: {
+        uint32_t iser_cnt = self[9];
+        for (uint32_t idx = 0u; idx < iser_cnt; idx++) {
+            *RKOS_VMA_PTR(uint32_t *, self[8] + 4u * idx) =
+                RKOS_REG32_READ(RKOS_NVIC_ISER_BASE + 4u * idx);
+        }
+        uint32_t ipr_cnt = self[7];
+        for (uint32_t idx = 0u; idx < ipr_cnt; idx++) {
+            *RKOS_VMA_PTR(uint32_t *, self[6] + 4u * idx) =
+                RKOS_REG32_READ(RKOS_NVIC_IPR_BASE + 4u * idx);
+        }
+        if (arg2 <= 7u) {
+            for (uint32_t idx = 0u; idx < iser_cnt; idx++) {
+                RKOS_REG32_WRITE(RKOS_NVIC_ICER_BASE + 4u * idx, 0xFFFFFFFFu);
+                RKOS_REG32_WRITE(RKOS_NVIC_ICPR_BASE + 4u * idx, 0xFFFFFFFFu);
+            }
+        }
+        return 0u;
+    }
+    case 4u: {
+        uint32_t iser_cnt = self[9];
+        for (uint32_t idx = 0u; idx < iser_cnt; idx++) {
+            RKOS_REG32_WRITE(RKOS_NVIC_ISER_BASE + 4u * idx,
+                             *RKOS_VMA_PTR(const uint32_t *, self[8] + 4u * idx));
+        }
+        uint32_t ipr_cnt = self[7];
+        for (uint32_t idx = 0u; idx < ipr_cnt; idx++) {
+            RKOS_REG32_WRITE(RKOS_NVIC_IPR_BASE + 4u * idx,
+                             *RKOS_VMA_PTR(const uint32_t *, self[6] + 4u * idx));
+        }
+        return 0u;
+    }
+    case 5u:
+    case 6u:
+        return 0x80000003u;
+    case 7u: {
+        uint32_t vtbl_va = self[0];
+        *RKOS_VMA_PTR(uint32_t *, arg3) = *RKOS_VMA_PTR(const uint32_t *, vtbl_va + 4u * arg2);
+        return 0u;
+    }
+    default:
+        return 0x80000003u;
+    }
+}
+
 /* @provenance RVA 0x3988 sub_3988 */
 int rkos_nvic_is_active(uint32_t self_va, uint32_t vec)
 {
@@ -303,7 +396,7 @@ int rkos_nvic_is_active(uint32_t self_va, uint32_t vec)
     return 0;
 }
 
-/* @shim RVA 0x50b4 crit_enter (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x50b4 crit_enter */
 uint32_t crit_enter(void)
 {
     uint32_t lock_res = mutex_lock(0x2001DE24u);
@@ -317,8 +410,8 @@ uint32_t crit_enter(void)
     return lock_res;
 }
 
-/* @shim RVA 0x5124 crit_exit (pending_c: not shown equivalent to raw) */
-void crit_exit(uint32_t state)
+/* @provenance RVA 0x5124 crit_exit */
+uint32_t crit_exit(uint32_t state)
 {
-    rkos_spinlock_release(0x2001DE24u, state);
+    return rkos_spinlock_release(0x2001DE24u, state);
 }

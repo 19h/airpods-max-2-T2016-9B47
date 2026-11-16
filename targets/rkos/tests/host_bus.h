@@ -28,5 +28,9 @@ const char *rkos_host_uart_tx_log(void);
 void rkos_host_on_panic(const char *msg);
 void rkos_host_on_halt(uint32_t code);
 uint32_t rkos_host_invoke_irq_cb(uint32_t fn_va, uint32_t ctx_va);
+uint32_t rkos_host_invoke_fn4_cb(uint32_t fn_va, uint32_t arg0, uint32_t arg1,
+                                 uint32_t arg2, uint32_t arg3);
+uint32_t rkos_host_invoke_mux_write(uint32_t fn_va, uint32_t dev_va, uint32_t mode,
+                                    const uint8_t *buf, uint32_t *io_len);
 
 #endif /* RKOS_HOST_BUS_H */

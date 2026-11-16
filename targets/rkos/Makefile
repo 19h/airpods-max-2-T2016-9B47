@@ -43,7 +43,7 @@ ARM_CFLAGS := \
 	-mfloat-abi=hard \
 	-mfpu=fpv4-sp-d16 \
 	-std=c11 \
-	-Os \
+	-Oz \
 	-ffreestanding \
 	-fno-builtin \
 	-fno-common \
@@ -76,8 +76,11 @@ ARM_SRCS := \
 	src/image.c \
 	src/state.c \
 	src/shims/arch_entry.c \
+	src/rtkit/vtable_dispatch.c \
 	src/libc/string.c \
 	src/libc/printf_stdlib.c \
+	src/img4/img4_der.c \
+	src/crypto/aes_ccn_drbg.c \
 	src/kernel/heap.c \
 	src/kernel/crypto_der.c \
 	src/kernel/sched_sync.c \

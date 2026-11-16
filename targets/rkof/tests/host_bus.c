@@ -17,6 +17,8 @@ static uint8_t g_w3_top_buf[0x1000];      /* 0x4D140000..0x4D140FFF */
 static uint8_t g_w3_modem_buf[0x2000];    /* 0x4D154000..0x4D155FFF */
 static uint8_t g_phy_sram_buf[0x20000];   /* 0x4D280000..0x4D29FFFF */
 static uint8_t g_scs_buf[0x2000];         /* 0xE000E000..0xE000FFFF */
+static uint8_t g_misc_mmio_buf[0x10000];  /* Fallback for 0x40000000..0x5FFFFFFF */
+static uint32_t g_host_scratch_off = 0u;
 static uint32_t g_scratch_rtsi;
 static uint8_t g_zero_thread_sentinel[64];
 
@@ -150,7 +152,36 @@ void *rkof_host_translate_ptr(uintptr_t addr)
     if (addr >= 0xE000E000u && addr < 0xE0010000u) {
         return g_scs_buf + (addr - 0xE000E000u);
     }
+    if (addr >= 0x40000000u && addr < 0x60000000u) {
+        return g_misc_mmio_buf + (addr & 0xFFFCu);
+    }
     return (void *)addr;
+}
+
+uint32_t rkof_host_scratch_frame(uint32_t byte_size);
+uint32_t rkof_host_scratch_frame(uint32_t byte_size)
+{
+    uint32_t aligned = (byte_size + 7u) & ~7u;
+    if (aligned > 0x8000u) {
+        aligned = 0x8000u;
+    }
+    if (g_host_scratch_off + aligned > 0x10000u) {
+        g_host_scratch_off = 0u;
+    }
+    uint32_t guest_addr = 0x200EC000u + g_host_scratch_off;
+    g_host_scratch_off += aligned;
+    return guest_addr;
+}
+
+uint32_t rkof_host_vcall(uint32_t fn_addr, uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg3);
+uint32_t rkof_host_vcall(uint32_t fn_addr, uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg3)
+{
+    (void)fn_addr;
+    (void)arg0;
+    (void)arg1;
+    (void)arg2;
+    (void)arg3;
+    return 1u;
 }
 
 uint32_t rkof_host_mmio_read32(uintptr_t addr)

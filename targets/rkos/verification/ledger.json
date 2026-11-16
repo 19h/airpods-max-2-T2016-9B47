@@ -5,11 +5,11 @@
  "raw_sha256": "adf98c119724a5c6bec397f70fd08d65b3108c261cf0e6ad4b81ede766f18ecf",
  "summary": {
   "total_functions": 864,
-  "reconstructed_c": 103,
+  "reconstructed_c": 222,
   "retained_native": 0,
-  "pending_c": 761,
-  "reconstructed_c_pct": 11.92,
-  "c_shims_linked": 77,
+  "pending_c": 642,
+  "reconstructed_c_pct": 25.69,
+  "c_shims_linked": 32,
   "claim_rule": "reconstructed_c requires >=1 direct matched Unicorn differential case vs raw by RVA, zero diverging cases, AND stub-mutation defeat across bx_lr/ret0/ret1 unless raw bytes are literally identical to that stub (tools/verify_claims.py); retained_native requires byte-identical original instructions (none carried)."
  },
  "functions": [
@@ -93,7 +93,7 @@
    "subsystem": "image4_img4_manifest",
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_decode",
-   "source_file": "src/kernel/crypto_der.c",
+   "source_file": "src/img4/img4_der.c",
    "evidence": [
     "der_high_tag_999",
     "der_oct_long128",
@@ -109,11 +109,10 @@
    "size": 400,
    "ida_name": "sub_582",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_der_decode_ex",
-   "source_file": "src/kernel/crypto_der.c",
-   "c_shim": "rkos_der_decode_ex",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x712",
@@ -121,8 +120,10 @@
    "size": 354,
    "ida_name": "sub_712",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_decode_raw",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x876",
@@ -130,8 +131,10 @@
    "size": 82,
    "ida_name": "sub_876",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_parse_u32",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x8c8",
@@ -139,8 +142,10 @@
    "size": 74,
    "ida_name": "sub_8C8",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_parse_u64",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x8f0",
@@ -157,8 +162,10 @@
    "size": 24,
    "ida_name": "sub_938",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_slice_to_bounds",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x950",
@@ -166,8 +173,10 @@
    "size": 112,
    "ida_name": "sub_950",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_next_tlv",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x9c0",
@@ -175,8 +184,10 @@
    "size": 134,
    "ida_name": "sub_9C0",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_parse_sequence",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xa46",
@@ -184,8 +195,10 @@
    "size": 450,
    "ida_name": "sub_A46",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_parse_sequence_body",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xc08",
@@ -193,8 +206,10 @@
    "size": 72,
    "ida_name": "sub_C08",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_der_find_tag_in_bounds",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xc50",
@@ -202,8 +217,10 @@
    "size": 58,
    "ida_name": "sub_C50",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_cmp_fourcc",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xc8c",
@@ -211,8 +228,10 @@
    "size": 22,
    "ida_name": "sub_C8C",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_decode_im4m_signed",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xcac",
@@ -220,8 +239,10 @@
    "size": 82,
    "ida_name": "sub_CAC",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_decode_typed_seq",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xd00",
@@ -229,8 +250,10 @@
    "size": 22,
    "ida_name": "sub_D00",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_decode_im4m_unsigned",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xd20",
@@ -238,8 +261,10 @@
    "size": 22,
    "ida_name": "sub_D20",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_decode_im4c_signed",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xd40",
@@ -247,8 +272,10 @@
    "size": 22,
    "ida_name": "sub_D40",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_decode_im4c_unsigned",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xd60",
@@ -256,8 +283,10 @@
    "size": 132,
    "ida_name": "sub_D60",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_parse_prop_entry",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xde4",
@@ -265,8 +294,10 @@
    "size": 58,
    "ida_name": "sub_DE4",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_find_prop_in_bounds",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xe0e",
@@ -274,8 +305,10 @@
    "size": 56,
    "ida_name": "sub_E0E",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_find_prop_in_slice",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xe38",
@@ -283,8 +316,10 @@
    "size": 236,
    "ida_name": "sub_E38",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_get_manb_and_manp",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xf32",
@@ -301,8 +336,10 @@
    "size": 142,
    "ida_name": "sub_F48",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_lookup_obj_prop",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0xfd0",
@@ -310,8 +347,10 @@
    "size": 108,
    "ida_name": "sub_FD0",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_get_obj_octet_prop",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x101c",
@@ -319,8 +358,10 @@
    "size": 18,
    "ida_name": "sub_101C",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_init_im4m_signed",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x1034",
@@ -328,8 +369,10 @@
    "size": 164,
    "ida_name": "sub_1034",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_init_manifest_ctx",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x10f8",
@@ -355,8 +398,10 @@
    "size": 8,
    "ida_name": "sub_111C",
    "subsystem": "image4_img4_manifest",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_img4_zero_item32",
+   "source_file": "src/img4/img4_der.c",
+   "evidence": []
   },
   {
    "rva": "0x112c",
@@ -382,11 +427,10 @@
    "size": 14,
    "ida_name": "sub_1140",
    "subsystem": "libc_mem_str_div64",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_stack_guard_init",
    "source_file": "src/rtkit/boot.c",
-   "c_shim": "rkos_stack_guard_init",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x1158",
@@ -394,11 +438,10 @@
    "size": 10,
    "ida_name": "__stack_chk_fail",
    "subsystem": "libc_mem_str_div64",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "__stack_chk_fail",
    "source_file": "src/rtkit/boot.c",
-   "c_shim": "__stack_chk_fail",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x1168",
@@ -838,8 +881,10 @@
    "size": 140,
    "ida_name": "sub_1880",
    "subsystem": "libc_mem_str_div64",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_cbc_decrypt",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x190c",
@@ -847,8 +892,10 @@
    "size": 124,
    "ida_name": "sub_190C",
    "subsystem": "libc_mem_str_div64",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_cbc_encrypt",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1988",
@@ -856,8 +903,10 @@
    "size": 496,
    "ida_name": "sub_1988",
    "subsystem": "libc_mem_str_div64",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_enc",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1b80",
@@ -865,8 +914,10 @@
    "size": 10,
    "ida_name": "sub_1B80",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_enc128",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1b8c",
@@ -874,8 +925,10 @@
    "size": 10,
    "ida_name": "sub_1B8C",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_enc192",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1b98",
@@ -883,8 +936,10 @@
    "size": 10,
    "ida_name": "sub_1B98",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_enc256",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1ba4",
@@ -892,8 +947,10 @@
    "size": 94,
    "ida_name": "sub_1BA4",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_dec",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1c08",
@@ -901,8 +958,10 @@
    "size": 22,
    "ida_name": "sub_1C08",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_dec128",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1c20",
@@ -910,8 +969,10 @@
    "size": 22,
    "ida_name": "sub_1C20",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_dec192",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1c38",
@@ -919,8 +980,10 @@
    "size": 22,
    "ida_name": "sub_1C38",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_key_expand_dec256",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1c50",
@@ -928,8 +991,10 @@
    "size": 60,
    "ida_name": "sub_1C50",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_setup_enc",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1c8c",
@@ -937,8 +1002,10 @@
    "size": 60,
    "ida_name": "sub_1C8C",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_setup_dec",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1cc8",
@@ -946,8 +1013,10 @@
    "size": 266,
    "ida_name": "sub_1CC8",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_ccm_decrypt",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1dd4",
@@ -955,8 +1024,10 @@
    "size": 124,
    "ida_name": "sub_1DD4",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_ctr_crypt",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1e50",
@@ -964,8 +1035,10 @@
    "size": 552,
    "ida_name": "sub_1E50",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_decrypt_block",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2080",
@@ -973,8 +1046,10 @@
    "size": 106,
    "ida_name": "sub_2080",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_add",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x20ec",
@@ -982,8 +1057,10 @@
    "size": 44,
    "ida_name": "sub_20EC",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_add1",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2118",
@@ -991,8 +1068,10 @@
    "size": 236,
    "ida_name": "sub_2118",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_addmul1",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2204",
@@ -1000,8 +1079,10 @@
    "size": 48,
    "ida_name": "sub_2204",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_cmp",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2234",
@@ -1009,8 +1090,10 @@
    "size": 48,
    "ida_name": "sub_2234",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_sub1",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2264",
@@ -1018,8 +1101,10 @@
    "size": 158,
    "ida_name": "sub_2264",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_mul1",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2304",
@@ -1027,8 +1112,10 @@
    "size": 36,
    "ida_name": "sub_2304",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_n",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2328",
@@ -1036,8 +1123,10 @@
    "size": 50,
    "ida_name": "sub_2328",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_set",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x235c",
@@ -1045,8 +1134,10 @@
    "size": 116,
    "ida_name": "sub_235C",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_sub",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x23d0",
@@ -1054,8 +1145,10 @@
    "size": 150,
    "ida_name": "sub_23D0",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ccn_shift_right",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x2468",
@@ -1063,8 +1156,10 @@
    "size": 258,
    "ida_name": "sub_2468",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_ccm_encrypt",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x256c",
@@ -1072,8 +1167,10 @@
    "size": 552,
    "ida_name": "sub_256C",
    "subsystem": "stage1_boot_loader",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_aes_encrypt_block",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x279c",
@@ -1093,11 +1190,10 @@
    "size": 76,
    "ida_name": "sub_2C58",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_mark_allocated",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_mark_allocated",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x2cac",
@@ -1105,11 +1201,10 @@
    "size": 194,
    "ida_name": "heap_free_impl",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "heap_free_impl",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "heap_free_impl",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x2d84",
@@ -1117,11 +1212,10 @@
    "size": 422,
    "ida_name": "heap_alloc_or_coalesce",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "heap_alloc_or_coalesce",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "heap_alloc_or_coalesce",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x2f3c",
@@ -1160,11 +1254,10 @@
    "size": 36,
    "ida_name": "sub_2F70",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_unmark_allocated",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_unmark_allocated",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x2f94",
@@ -1172,11 +1265,10 @@
    "size": 144,
    "ida_name": "sub_2F94",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_mark_free",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_mark_free",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x3030",
@@ -1184,11 +1276,10 @@
    "size": 108,
    "ida_name": "sub_3030",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_freelist_unlink",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_freelist_unlink",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x30a0",
@@ -1196,11 +1287,10 @@
    "size": 58,
    "ida_name": "sub_30A0",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_coalesce_pair",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_coalesce_pair",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x30dc",
@@ -1208,11 +1298,10 @@
    "size": 118,
    "ida_name": "sub_30DC",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_freelist_insert",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_freelist_insert",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x3154",
@@ -1220,11 +1309,10 @@
    "size": 96,
    "ida_name": "sub_3154",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_unmark_free",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_unmark_free",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x31b8",
@@ -1247,11 +1335,10 @@
    "size": 38,
    "ida_name": "sub_31C0",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_range_in_regions",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_heap_range_in_regions",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x31e8",
@@ -1259,11 +1346,10 @@
    "size": 220,
    "ida_name": "heap_alloc_impl",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "heap_alloc_impl",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "heap_alloc_impl",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x32c4",
@@ -1271,11 +1357,10 @@
    "size": 6,
    "ida_name": "heap_free_blk",
    "subsystem": "kernel_heap",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "heap_free_blk",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "heap_free_blk",
-   "rationale": "C body diverges from raw under Unicorn differential execution; kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x32cc",
@@ -1310,11 +1395,10 @@
    "size": 18,
    "ida_name": "sub_3488",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_primask_disable_if_enabled",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "rkos_primask_disable_if_enabled",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x349a",
@@ -1322,11 +1406,10 @@
    "size": 12,
    "ida_name": "sub_349A",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_irq_enable_all",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "rkos_irq_enable_all",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x34a8",
@@ -1372,11 +1455,10 @@
    "size": 126,
    "ida_name": "rtkit_sched_switch",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rtkit_sched_switch",
    "source_file": "src/kernel/sched_sync.c",
-   "c_shim": "rtkit_sched_switch",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x357c",
@@ -1412,11 +1494,10 @@
    "size": 32,
    "ida_name": "sub_359C",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
-   "c_symbol": "rkos_nvic_is_enabled",
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_nvic_set_enable",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "rkos_nvic_is_enabled",
-   "rationale": "C body diverges from raw under Unicorn differential execution; kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x35bc",
@@ -1424,11 +1505,10 @@
    "size": 90,
    "ida_name": "sub_35BC",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_nvic_set_enable_state",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "rkos_nvic_set_enable_state",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x3620",
@@ -1462,11 +1542,10 @@
    "size": 54,
    "ida_name": "IRQ_CommonHandler",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "IRQ_CommonHandler",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "IRQ_CommonHandler",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x373c",
@@ -1568,8 +1647,10 @@
    "size": 320,
    "ida_name": "sub_3838",
    "subsystem": "nvic_irq_dispatch",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_nvic_drv_op",
+   "source_file": "src/rtkit/irq.c",
+   "evidence": []
   },
   {
    "rva": "0x3988",
@@ -1645,8 +1726,10 @@
    "size": 28,
    "ida_name": "sub_3B3C",
    "subsystem": "exception_panic_boot",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_crit_lock_once",
+   "source_file": "src/rtkit/boot.c",
+   "evidence": []
   },
   {
    "rva": "0x3b58",
@@ -1654,11 +1737,10 @@
    "size": 820,
    "ida_name": "sub_3B58",
    "subsystem": "exception_panic_boot",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_unwind_frame",
    "source_file": "src/rtkit/boot.c",
-   "c_shim": "rkos_unwind_frame",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x3eac",
@@ -1666,11 +1748,10 @@
    "size": 52,
    "ida_name": "sub_3EAC",
    "subsystem": "exception_panic_boot",
-   "classification": "pending_c",
-   "c_symbol": "rkos_unwind_current",
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_unwind_callsite_pc",
    "source_file": "src/rtkit/boot.c",
-   "c_shim": "rkos_unwind_current",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x3ee0",
@@ -2427,11 +2508,10 @@
    "size": 400,
    "ida_name": "sub_4F1C",
    "subsystem": "kernel_heap_api",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_kernel_heap_add_region",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_kernel_heap_add_region",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x50b4",
@@ -2439,11 +2519,10 @@
    "size": 94,
    "ida_name": "crit_enter",
    "subsystem": "kernel_heap_api",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "crit_enter",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "crit_enter",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5124",
@@ -2451,11 +2530,10 @@
    "size": 10,
    "ida_name": "crit_exit",
    "subsystem": "kernel_heap_api",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "crit_exit",
    "source_file": "src/rtkit/irq.c",
-   "c_shim": "crit_exit",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5134",
@@ -2463,11 +2541,10 @@
    "size": 34,
    "ida_name": "sub_5134",
    "subsystem": "kernel_heap_api",
-   "classification": "pending_c",
-   "c_symbol": "rkos_assert_status_ok",
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_heap_disable_checks",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_assert_status_ok",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x515c",
@@ -2488,11 +2565,10 @@
    "size": 376,
    "ida_name": "sub_5184",
    "subsystem": "kernel_heap_api",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_realloc",
    "source_file": "src/kernel/heap.c",
-   "c_shim": "rkos_realloc",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5304",
@@ -2539,11 +2615,10 @@
    "size": 194,
    "ida_name": "sub_53F0",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_strtoull_scanner",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_strtoull_scanner",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x54bc",
@@ -2551,11 +2626,10 @@
    "size": 172,
    "ida_name": "sub_54BC",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_strtol_parse_base",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_strtol_parse_base",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5568",
@@ -2579,11 +2653,10 @@
    "size": 30,
    "ida_name": "sub_5592",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_printf",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_printf",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x55b0",
@@ -2591,11 +2664,10 @@
    "size": 32,
    "ida_name": "sub_55B0",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_vprintf",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_vprintf",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x55d4",
@@ -2603,11 +2675,10 @@
    "size": 18,
    "ida_name": "sub_55D4",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_console_putc",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_console_putc",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x55e0",
@@ -2615,11 +2686,10 @@
    "size": 1268,
    "ida_name": "sub_55E0",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_vprintf_core",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_vprintf_core",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5ae8",
@@ -2673,11 +2743,10 @@
    "size": 40,
    "ida_name": "sub_5BD0",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_snprintf_putc",
    "source_file": "src/libc/printf_stdlib.c",
-   "c_shim": "rkos_snprintf_putc",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5bf8",
@@ -2751,11 +2820,10 @@
    "size": 64,
    "ida_name": "sub_5CF2",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_word_copy32",
    "source_file": "src/libc/string.c",
-   "c_shim": "rkos_word_copy32",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5d34",
@@ -2779,11 +2847,10 @@
    "size": 10,
    "ida_name": "__memset_chk",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_memset_chk_fail",
    "source_file": "src/libc/string.c",
-   "c_shim": "rkos_memset_chk_fail",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x5d4c",
@@ -2834,8 +2901,10 @@
    "size": 104,
    "ida_name": "sub_5DD8",
    "subsystem": "libc_printf_crc32_strtol",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_console_mux_putc",
+   "source_file": "src/libc/printf_stdlib.c",
+   "evidence": []
   },
   {
    "rva": "0x5e48",
@@ -7200,8 +7269,10 @@
    "size": 18,
    "ida_name": "sub_1090C",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_unwind_task",
+   "source_file": "src/kernel/sched_sync.c",
+   "evidence": []
   },
   {
    "rva": "0x1091e",
@@ -7209,8 +7280,10 @@
    "size": 14,
    "ida_name": "sub_1091E",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_unwind_frames_cnt",
+   "source_file": "src/kernel/sched_sync.c",
+   "evidence": []
   },
   {
    "rva": "0x10930",
@@ -7218,11 +7291,10 @@
    "size": 8,
    "ida_name": "sub_10930",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_spinlock_release",
    "source_file": "src/kernel/sched_sync.c",
-   "c_shim": "rkos_spinlock_release",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x10938",
@@ -7243,8 +7315,10 @@
    "size": 48,
    "ida_name": "sub_10968",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_task_clear_yield_check_preempt",
+   "source_file": "src/kernel/sched_sync.c",
+   "evidence": []
   },
   {
    "rva": "0x1099c",
@@ -7252,8 +7326,10 @@
    "size": 46,
    "ida_name": "sub_1099C",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_task_recalc_priority",
+   "source_file": "src/kernel/sched_sync.c",
+   "evidence": []
   },
   {
    "rva": "0x109d0",
@@ -7261,11 +7337,10 @@
    "size": 52,
    "ida_name": "sub_109D0",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_sched_tailq_remove",
    "source_file": "src/kernel/sched_sync.c",
-   "c_shim": "rkos_sched_tailq_remove",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x10a10",
@@ -7561,11 +7636,10 @@
    "size": 322,
    "ida_name": "sub_113E0",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_mem_region_register",
    "source_file": "src/kernel/sched_sync.c",
-   "c_shim": "rkos_mem_region_register",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x11528",
@@ -7586,11 +7660,10 @@
    "size": 42,
    "ida_name": "sub_11604",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_mem_region_apply_table",
    "source_file": "src/kernel/sched_sync.c",
-   "c_shim": "rkos_mem_region_apply_table",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x11634",
@@ -7652,8 +7725,10 @@
    "size": 16,
    "ida_name": "sub_118B4",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_ref_mutex_dec_unlock",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x118c4",
@@ -7661,8 +7736,10 @@
    "size": 10,
    "ida_name": "sub_118C4",
    "subsystem": "rtkit_scheduler_sync_mpu",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_crypto_fips_abort",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x118d0",
@@ -7773,11 +7850,10 @@
    "size": 266,
    "ida_name": "sub_11CAE",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_cchmac_init",
    "source_file": "src/kernel/crypto_der.c",
-   "c_shim": "rkos_cchmac_init",
-   "rationale": "C body diverges from raw under Unicorn differential execution; kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x11db8",
@@ -7785,11 +7861,10 @@
    "size": 12,
    "ida_name": "sub_11DB8",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_crypto_panic_str",
    "source_file": "src/kernel/crypto_der.c",
-   "c_shim": "rkos_crypto_panic_str",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x11dc8",
@@ -7849,8 +7924,10 @@
    "size": 134,
    "ida_name": "sub_12374",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_drbg_hmac_init",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x123f4",
@@ -7858,8 +7935,10 @@
    "size": 288,
    "ida_name": "__memcpy_chk",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_drbg_hmac_generate",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12520",
@@ -7867,8 +7946,10 @@
    "size": 12,
    "ida_name": "sub_12520",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_drbg_hmac_reseed",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12526",
@@ -7876,8 +7957,10 @@
    "size": 62,
    "ida_name": "sub_12526",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_drbg_hmac_reseed_body",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x1256c",
@@ -7885,11 +7968,10 @@
    "size": 56,
    "ida_name": "sub_1256C",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_clear",
    "source_file": "src/kernel/crypto_der.c",
-   "c_shim": "rkos_drbg_clear",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x125a8",
@@ -7897,11 +7979,10 @@
    "size": 34,
    "ida_name": "sub_125A8",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
+   "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_need_reseed",
    "source_file": "src/kernel/crypto_der.c",
-   "c_shim": "rkos_drbg_need_reseed",
-   "rationale": "C body not shown equivalent to raw (no direct differential case; verifier-rtk #18 audit); kept only as a link/boot shim"
+   "evidence": []
   },
   {
    "rva": "0x125cc",
@@ -7909,8 +7990,10 @@
    "size": 298,
    "ida_name": "sub_125CC",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_drbg_hmac_update",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12700",
@@ -8035,8 +8118,10 @@
    "size": 10,
    "ida_name": "sub_127B0",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_take_and_dec_field58",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x127c0",
@@ -8053,8 +8138,10 @@
    "size": 8,
    "ida_name": "sub_127C8",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_bzero32",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x127d0",
@@ -8269,8 +8356,10 @@
    "size": 6,
    "ida_name": "sub_128FE",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_bzero_len",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12904",
@@ -8431,8 +8520,10 @@
    "size": 16,
    "ida_name": "sub_129B6",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_bitmap_shift_word",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x129c6",
@@ -8503,8 +8594,10 @@
    "size": 10,
    "ida_name": "outlined_sub_12A1A",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_umul_u32_u64",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12a24",
@@ -8566,8 +8659,10 @@
    "size": 8,
    "ida_name": "sub_12A64",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_is_zero_u32",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12a6e",
@@ -8602,8 +8697,10 @@
    "size": 6,
    "ida_name": "sub_12A96",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_memcpy16",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12a9c",
@@ -8611,8 +8708,10 @@
    "size": 10,
    "ida_name": "sub_12A9C",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_pack_low2_and_idx",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12aa6",
@@ -8638,8 +8737,10 @@
    "size": 6,
    "ida_name": "sub_12AB8",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_const_256",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12abe",
@@ -8656,8 +8757,10 @@
    "size": 10,
    "ida_name": "sub_12ACE",
    "subsystem": "corecrypto_sha_hmac_drbg_ecdsa",
-   "classification": "pending_c",
-   "rationale": "Higher-layer Image4 X.509/ECDSA, QSPI/SPIDMA hardware state machine, or RTBuddy/MPU driver routine pending C11 reconstruction"
+   "classification": "reconstructed_c",
+   "c_symbol": "rkos_deref_table_slot",
+   "source_file": "src/crypto/aes_ccn_drbg.c",
+   "evidence": []
   },
   {
    "rva": "0x12ad8",

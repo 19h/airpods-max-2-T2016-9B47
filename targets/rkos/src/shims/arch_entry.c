@@ -208,4 +208,87 @@ void rkos_halt_spin(void)
     );
 }
 
+/* Freestanding ARM EABI 64-bit shift helpers emitted by Clang under `-Oz` */
+uint64_t __aeabi_llsl(uint64_t val, int shift);
+uint64_t __aeabi_llsr(uint64_t val, int shift);
+int64_t __aeabi_lasr(int64_t val, int shift);
+
+uint64_t __aeabi_llsl(uint64_t val, int shift)
+{
+    union {
+        uint64_t u64;
+        uint32_t w[2];
+    } in_u = { .u64 = val }, out_u = { .u64 = 0ULL };
+
+    if (shift <= 0) {
+        return val;
+    }
+    if (shift >= 64) {
+        return 0ULL;
+    }
+    if (shift >= 32) {
+        out_u.w[0] = 0u;
+        out_u.w[1] = in_u.w[0] << (uint32_t)(shift - 32);
+    } else {
+        uint32_t sh = (uint32_t)shift;
+        out_u.w[0] = in_u.w[0] << sh;
+        out_u.w[1] = (in_u.w[1] << sh) | (in_u.w[0] >> (32u - sh));
+    }
+    return out_u.u64;
+}
+
+uint64_t __aeabi_llsr(uint64_t val, int shift)
+{
+    union {
+        uint64_t u64;
+        uint32_t w[2];
+    } in_u = { .u64 = val }, out_u = { .u64 = 0ULL };
+
+    if (shift <= 0) {
+        return val;
+    }
+    if (shift >= 64) {
+        return 0ULL;
+    }
+    if (shift >= 32) {
+        out_u.w[0] = in_u.w[1] >> (uint32_t)(shift - 32);
+        out_u.w[1] = 0u;
+    } else {
+        uint32_t sh = (uint32_t)shift;
+        out_u.w[0] = (in_u.w[0] >> sh) | (in_u.w[1] << (32u - sh));
+        out_u.w[1] = in_u.w[1] >> sh;
+    }
+    return out_u.u64;
+}
+
+int64_t __aeabi_lasr(int64_t val, int shift)
+{
+    union {
+        int64_t s64;
+        struct {
+            uint32_t lo;
+            int32_t  hi;
+        } w;
+    } in_u = { .s64 = val }, out_u = { .s64 = 0 };
+
+    if (shift <= 0) {
+        return val;
+    }
+    if (shift >= 64) {
+        int32_t sign = in_u.w.hi >> 31;
+        out_u.w.lo = (uint32_t)sign;
+        out_u.w.hi = sign;
+        return out_u.s64;
+    }
+    if (shift >= 32) {
+        out_u.w.lo = (uint32_t)(in_u.w.hi >> (shift - 32));
+        out_u.w.hi = in_u.w.hi >> 31;
+    } else {
+        uint32_t sh = (uint32_t)shift;
+        out_u.w.lo = (in_u.w.lo >> sh) | ((uint32_t)in_u.w.hi << (32u - sh));
+        out_u.w.hi = in_u.w.hi >> sh;
+    }
+    return out_u.s64;
+}
+
 #endif /* !RKOS_HOST */

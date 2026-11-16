@@ -22,6 +22,13 @@ import sys
 from elftools.elf.elffile import ELFFile
 
 
+STUB_RAW_BYTES = {
+    "bx_lr": b"\x70\x47",
+    "ret_0": b"\x00\x20\x70\x47",
+    "ret_1": b"\x01\x20\x70\x47",
+}
+
+
 def scan_region_ptrs(blob: bytes, inv_func_rvas: set[int], bridged_rvas: set[int]) -> dict[str, int]:
     odd_rom = 0
     func_ptrs = 0
@@ -108,8 +115,20 @@ def main() -> int:
                 errors.append(f"RVA mismatch for {csym}: ledger={hex(rva)} sem={minfo['rva']}")
             if not minfo.get("survived_stub_check", False):
                 errors.append(f"reconstructed_c {csym} failed 3-stub mutation check: {minfo.get('killed')}")
+            lit_kind = minfo.get("literal_raw_stub_identity")
+            if lit_kind is not None:
+                sz = int(fn["size"])
+                exp_b = STUB_RAW_BYTES.get(lit_kind)
+                if exp_b is None or raw[rva : rva + sz] != exp_b:
+                    errors.append(
+                        f"reconstructed_c {csym} ({fn['rva']}) claims literal_raw_stub_identity={lit_kind} "
+                        f"but raw[{hex(rva)}:{hex(rva + sz)}]={raw[rva : rva + sz].hex()}"
+                    )
+                led_lits = led.get("literal_raw_stub_identities", {})
+                if led_lits.get(csym, {}).get("stub_kind") != lit_kind:
+                    errors.append(f"reconstructed_c {csym} literal_raw_stub_identity missing/mismatched in ledger.json")
             actual_cases = passed_cases_by_sym.get(csym, [])
-            if ev != actual_cases:
+            if set(ev) != set(actual_cases) or len(ev) != len(actual_cases):
                 errors.append(f"evidence mismatch for {csym}: ledger={ev} actual={actual_cases}")
         elif st == "retained_native":
             ret_checked += 1

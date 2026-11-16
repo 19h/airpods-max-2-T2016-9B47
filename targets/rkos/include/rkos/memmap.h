@@ -116,13 +116,22 @@
 void *rkos_host_translate(uint32_t addr, size_t size);
 uint32_t rkos_host_mmio_read32(uint32_t addr);
 void rkos_host_mmio_write32(uint32_t addr, uint32_t val);
+uint16_t rkos_host_mmio_read16(uint32_t addr);
+void rkos_host_mmio_write16(uint32_t addr, uint16_t val);
 uint8_t rkos_host_mmio_read8(uint32_t addr);
 void rkos_host_mmio_write8(uint32_t addr, uint8_t val);
+uint32_t rkos_host_invoke_irq_cb(uint32_t fn_va, uint32_t ctx_va);
+uint32_t rkos_host_invoke_fn4_cb(uint32_t fn_va, uint32_t arg0, uint32_t arg1,
+                                 uint32_t arg2, uint32_t arg3);
+uint32_t rkos_host_invoke_mux_write(uint32_t fn_va, uint32_t dev_va, uint32_t mode,
+                                    const uint8_t *buf, uint32_t *io_len);
 
 #define RKOS_VMA_PTR(type, addr)   ((type)rkos_host_translate((uint32_t)(addr), sizeof(*(type)0)))
 #define RKOS_VMA_RAW(addr, sz)     rkos_host_translate((uint32_t)(addr), (sz))
 #define RKOS_REG32_READ(addr)      rkos_host_mmio_read32((uint32_t)(addr))
 #define RKOS_REG32_WRITE(addr, v)  rkos_host_mmio_write32((uint32_t)(addr), (uint32_t)(v))
+#define RKOS_REG16_READ(addr)      rkos_host_mmio_read16((uint32_t)(addr))
+#define RKOS_REG16_WRITE(addr, v)  rkos_host_mmio_write16((uint32_t)(addr), (uint16_t)(v))
 #define RKOS_REG8_READ(addr)       rkos_host_mmio_read8((uint32_t)(addr))
 #define RKOS_REG8_WRITE(addr, v)   rkos_host_mmio_write8((uint32_t)(addr), (uint8_t)(v))
 #else
@@ -130,6 +139,8 @@ void rkos_host_mmio_write8(uint32_t addr, uint8_t val);
 #define RKOS_VMA_RAW(addr, sz)     ((void *)(uintptr_t)(addr))
 #define RKOS_REG32_READ(addr)      (*(volatile uint32_t *)(uintptr_t)(addr))
 #define RKOS_REG32_WRITE(addr, v)  (*(volatile uint32_t *)(uintptr_t)(addr) = (uint32_t)(v))
+#define RKOS_REG16_READ(addr)      (*(volatile uint16_t *)(uintptr_t)(addr))
+#define RKOS_REG16_WRITE(addr, v)  (*(volatile uint16_t *)(uintptr_t)(addr) = (uint16_t)(v))
 #define RKOS_REG8_READ(addr)       (*(volatile uint8_t *)(uintptr_t)(addr))
 #define RKOS_REG8_WRITE(addr, v)   (*(volatile uint8_t *)(uintptr_t)(addr) = (uint8_t)(v))
 #endif

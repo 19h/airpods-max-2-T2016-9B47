@@ -14,19 +14,19 @@ void rkos_host_on_halt(uint32_t code);
 #define RKOS_BOOT_EARLY __attribute__((section(".text.early")))
 #endif
 
-/* @shim RVA 0x1140 sub_1140 (pending_c: not shown equivalent to raw) */
-RKOS_BOOT_EARLY void rkos_stack_guard_init(void)
+/* @provenance RVA 0x1140 sub_1140 */
+RKOS_BOOT_EARLY void *rkos_stack_guard_init(void)
 {
     uint32_t guard_len = *RKOS_VMA_PTR(const uint32_t *, 0x00016404u);
     const void *src = RKOS_VMA_RAW(0x00016408u, guard_len);
     void *dst = RKOS_VMA_RAW(RKOS_STACK_GUARD_VA, guard_len);
-    (void)memcpy_thunk(dst, src, guard_len);
+    return memcpy_thunk(dst, src, guard_len);
 }
 
-/* @shim RVA 0x1158 __stack_chk_fail (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x1158 __stack_chk_fail */
 RKOS_BOOT_EARLY void __stack_chk_fail(void)
 {
-    rtkit_panic("stk fail");
+    rtkit_panic("stk_fail");
 }
 
 /* @provenance RVA 0x3b20 sub_3B20 */
@@ -43,40 +43,272 @@ uint32_t rkos_stack_paint_words(uint32_t base_va, uint32_t byte_len)
     return base_va;
 }
 
-/* @shim RVA 0x3b58 sub_3B58 (pending_c: not shown equivalent to raw) */
-uint32_t rkos_unwind_frame(uint32_t fp, uint32_t sp_low, uint32_t sp_high,
-                           uint32_t *out_pcs, uint32_t max_frames)
+/* @provenance RVA 0x3b3c sub_3B3C */
+int rkos_crit_lock_once(uint32_t *state_out)
 {
-    uint32_t count = 0u;
-    while (count < max_frames) {
-        if ((fp & 3u) != 0u || fp < sp_low || fp + 8u > sp_high) {
-            break;
-        }
-        const uint32_t *frame = RKOS_VMA_PTR(const uint32_t *, fp);
-        uint32_t next_fp = frame[0];
-        uint32_t saved_lr = frame[1];
-        if (saved_lr == 0u) {
-            break;
-        }
-        if (out_pcs != NULL) {
-            out_pcs[count] = saved_lr & ~1u;
-        }
-        count++;
-        if (next_fp <= fp) {
-            break;
-        }
-        fp = next_fp;
+    uint32_t prev_basepri = rkos_irq_save_and_raise_basepri();
+    if (*state_out != 0u) {
+        return 0x20002;
     }
-    return count;
+    *state_out = prev_basepri + 1u;
+    return 0;
 }
 
-/* @shim RVA 0x3eac sub_3EAC (pending_c: not shown equivalent to raw) */
-uint32_t rkos_unwind_current(uint32_t *out_pcs, uint32_t max_frames)
+/* @provenance RVA 0x3eac sub_3EAC */
+uint32_t rkos_unwind_callsite_pc(uint32_t lr_val)
 {
-    uint32_t sp_low = RKOS_STATE_PSP_BASE;
-    uint32_t sp_high = RKOS_STATE_PLAT_BASE;
-    uint32_t fp = rkos_arch_get_psp();
-    return rkos_unwind_frame(fp, sp_low, sp_high, out_pcs, max_frames);
+    uint32_t clean_lr = lr_val & ~1u;
+    uint32_t cand = clean_lr - 2u;
+    if (!rkos_mem_region_is_ram(cand)) {
+        return clean_lr - 3u;
+    }
+    uint16_t hw = *RKOS_VMA_PTR(const uint16_t *, cand);
+    if ((hw & 0xFF87u) != 0x4780u) {
+        cand = clean_lr - 4u;
+        if (!rkos_mem_region_is_ram(cand)) {
+            return clean_lr - 3u;
+        }
+    }
+    return cand;
+}
+
+static inline uint32_t rkos_load_u32_unaligned(uint32_t va)
+{
+    const uint8_t *bytes = (const uint8_t *)RKOS_VMA_RAW(va, 4u);
+    return (uint32_t)bytes[0] |
+           ((uint32_t)bytes[1] << 8) |
+           ((uint32_t)bytes[2] << 16) |
+           ((uint32_t)bytes[3] << 24);
+}
+
+/* @provenance RVA 0x3b58 sub_3B58 */
+int rkos_unwind_frame(uint32_t exc_frame_va, uint32_t *out_frames,
+                      uint32_t max_frames, uint32_t *out_count)
+{
+    if (max_frames == 0u) {
+        *out_count = 0u;
+        return (int)0x80000004u;
+    }
+    if (max_frames == 1u) {
+        out_frames[0] = 0x7FFFFF01u;
+        out_frames[1] = 0u;
+        *out_count = 1u;
+        return (int)0x80000004u;
+    }
+
+    uint32_t count = 0u;
+    uint32_t *cursor = out_frames;
+    uint32_t fp = 0u;
+
+    if (exc_frame_va != 0u) {
+        uint32_t hdr = *RKOS_VMA_PTR(const uint32_t *, exc_frame_va);
+        bool basic_frame = ((hdr & 0x10u) != 0u);
+        uint32_t pc_off = basic_frame ? 0x40u : 0x80u;
+        uint32_t r7_off = basic_frame ? 0x14u : 0x54u;
+        uint32_t lr_off = basic_frame ? 0x3Cu : 0x7Cu;
+
+        uint32_t fault_pc = *RKOS_VMA_PTR(const uint32_t *, exc_frame_va + pc_off);
+        out_frames[0] = fault_pc;
+        out_frames[1] = 0u;
+        cursor = out_frames + 2;
+        count = 1u;
+        fp = *RKOS_VMA_PTR(const uint32_t *, exc_frame_va + r7_off);
+
+        if (fp != 0x77777700u) {
+            uint32_t lr_val = *RKOS_VMA_PTR(const uint32_t *, exc_frame_va + lr_off);
+            if (rkos_mem_region_is_ram(lr_val)) {
+                uint32_t cur_pc = rkos_mem_region_is_ram(fault_pc) ? fault_pc : lr_val;
+                uint32_t callee_start = 0u;
+
+                if (lr_val >= 4u) {
+                    uint32_t call_addr = (lr_val & ~1u) - 4u;
+                    if (rkos_mem_region_is_ram(call_addr)) {
+                        uint32_t insn = rkos_load_u32_unaligned(call_addr);
+                        if ((lr_val & 1u) == 0u) {
+                            if ((insn & 0x0F000000u) == 0x0B000000u ||
+                                (insn & 0xFE000000u) == 0xFA000000u) {
+                                uint32_t disp = ((insn & 0x00800000u) != 0u)
+                                                    ? (0xFC000000u | (insn << 2))
+                                                    : ((insn << 2) & 0x03FFFFFCu);
+                                uint32_t extra = ((insn & 0xFE000000u) == 0xFA000000u)
+                                                     ? (((insn >> 23) & 2u) + 8u)
+                                                     : 8u;
+                                uint32_t off = extra + disp;
+                                if (off != 0u && rkos_mem_region_is_ram(call_addr + off)) {
+                                    callee_start = call_addr + off;
+                                }
+                            }
+                        } else if ((insn & 0xC000F800u) == 0xC000F000u) {
+                            uint32_t j1 = (insn >> 29) & 1u;
+                            uint32_t j2 = (insn >> 27) & 1u;
+                            uint32_t sign_bit = (insn >> 10) & 1u;
+                            uint32_t disp = ((insn << 12) & 0x003FF000u) +
+                                            ((insn >> 15) & 0xFFEu);
+                            if (j1 == sign_bit) {
+                                disp += 0x00800000u;
+                            }
+                            if (j2 == sign_bit) {
+                                disp += 0x00400000u;
+                            }
+                            if (sign_bit != 0u) {
+                                disp += 0xFF000000u;
+                            }
+                            if ((insn & 0x10000000u) == 0u) {
+                                disp &= ~2u;
+                            }
+                            uint32_t off = disp + 4u;
+                            if (off != 0u && rkos_mem_region_is_ram(call_addr + off)) {
+                                callee_start = call_addr + off;
+                            }
+                        }
+                    }
+                }
+
+                if (callee_start != 0u && callee_start < cur_pc) {
+                    uint32_t scan_pc = cur_pc & ~1u;
+                    bool lr_pushed = false;
+                    if ((cur_pc & 1u) == 0u) {
+                        for (uint32_t steps = 0u; steps < 2500u; steps++) {
+                            scan_pc -= 4u;
+                            if (!rkos_mem_region_is_ram(scan_pc)) {
+                                lr_pushed = true;
+                                break;
+                            }
+                            uint32_t op = rkos_load_u32_unaligned(scan_pc);
+                            if (op == 0xE52DE004u || (op & ~0x0000BFFFU) == 0xE92D4000u) {
+                                lr_pushed = true;
+                                break;
+                            }
+                            if (scan_pc <= callee_start) {
+                                break;
+                            }
+                            if (steps == 2499u) {
+                                lr_pushed = true;
+                            }
+                        }
+                    } else {
+                        for (uint32_t steps = 0u; steps < 2500u; steps++) {
+                            scan_pc -= 2u;
+                            if (!rkos_mem_region_is_ram(scan_pc)) {
+                                lr_pushed = true;
+                                break;
+                            }
+                            uint8_t hi_b = *RKOS_VMA_PTR(const uint8_t *, scan_pc + 1u);
+                            if (hi_b == 0xB5u) {
+                                lr_pushed = true;
+                                break;
+                            }
+                            uint32_t op32 = rkos_load_u32_unaligned(scan_pc);
+                            if ((op32 & ~0x1FFF0000u) == 0x4000E92Du) {
+                                lr_pushed = true;
+                                break;
+                            }
+                            if (scan_pc <= callee_start) {
+                                break;
+                            }
+                            if (steps == 2499u) {
+                                lr_pushed = true;
+                            }
+                        }
+                    }
+                    if (!lr_pushed) {
+                        out_frames[2] = rkos_unwind_callsite_pc(lr_val);
+                        out_frames[3] = 0u;
+                        cursor = out_frames + 4;
+                        count = 2u;
+                    }
+                }
+            }
+        }
+    } else {
+#ifdef RKOS_HOST
+        fp = 0x2002EFF0u;
+#else
+        fp = (uint32_t)(uintptr_t)__builtin_frame_address(0);
+#endif
+    }
+
+    uint32_t limit = max_frames - 1u;
+    uint32_t term_code = 0u;
+    int status = 0;
+
+    for (;;) {
+        if (term_code != 0u) {
+            break;
+        }
+        if (fp == 0u) {
+            term_code = 2u;
+            break;
+        }
+        if (fp < 4u || !rkos_mem_region_is_ro(fp) || !rkos_mem_region_is_ro(fp + 4u)) {
+            term_code = 3u;
+            break;
+        }
+
+        uint32_t saved_lr = *RKOS_VMA_PTR(const uint32_t *, fp + 4u);
+        if (saved_lr >= 0xFFFFFF80u) {
+            uint32_t psp_va = rkos_arch_get_psp();
+            term_code = 0u;
+            if (count >= limit) {
+                term_code = 1u;
+                status = (int)0x80000004u;
+                break;
+            }
+            cursor[0] = saved_lr;
+            cursor[1] = 0u;
+            if ((saved_lr & 8u) != 0u) {
+                if (count + 1u >= limit) {
+                    cursor += 2;
+                    count += 1u;
+                    term_code = 1u;
+                    status = (int)0x80000004u;
+                    break;
+                }
+                cursor[2] = rkos_unwind_callsite_pc(*RKOS_VMA_PTR(const uint32_t *, psp_va + 0x18u));
+                cursor[3] = 0u;
+                if (count + 2u >= limit) {
+                    cursor += 4;
+                    count += 2u;
+                    term_code = 1u;
+                    status = (int)0x80000004u;
+                    break;
+                }
+                cursor[4] = rkos_unwind_callsite_pc(*RKOS_VMA_PTR(const uint32_t *, psp_va + 0x14u));
+                cursor[5] = 0u;
+                cursor += 6;
+                count += 3u;
+            } else {
+                cursor += 2;
+                count += 1u;
+            }
+            fp = *RKOS_VMA_PTR(const uint32_t *, fp);
+            continue;
+        }
+
+        uint32_t next_fp = *RKOS_VMA_PTR(const uint32_t *, fp);
+        if ((fp & 0xFFFFFF00u) == 0x77777700u || (next_fp & 0xFFFFFF00u) == 0x77777700u) {
+            *out_count = count;
+            return 0;
+        }
+
+        term_code = rkos_mem_region_is_ram(saved_lr) ? 0u : 4u;
+        if (count >= limit) {
+            term_code = 1u;
+            status = (int)0x80000004u;
+            break;
+        }
+        cursor[0] = rkos_unwind_callsite_pc(saved_lr);
+        cursor[1] = 0u;
+        cursor += 2;
+        count += 1u;
+        fp = next_fp;
+    }
+
+    cursor[0] = 0x7FFFFF00u | term_code;
+    cursor[1] = 0u;
+    count += 1u;
+    *out_count = count;
+    return status;
 }
 
 /* @shim RVA 0x10334 rtkit_reboot_halt (pending_c: not shown equivalent to raw) */
@@ -437,7 +669,10 @@ void rtkit_boot_stage2(void)
 void rtkit_main(void)
 {
     uint32_t status = rkos_remap_build_table(0u, 0x490000u, RKOS_REMAP_CFG_VA, 9u);
-    rkos_assert_status_ok(status);
+    if ((status & 0x90000000u) != 0u) {
+        rtkit_panic("remap:%x", status);
+    }
+    (void)rkos_heap_disable_checks();
 
     uint32_t log_obj = cxx_operator_new(0x10u);
     uint32_t *obj_words = RKOS_VMA_PTR(uint32_t *, log_obj);

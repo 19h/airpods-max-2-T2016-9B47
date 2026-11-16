@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "aopf/cpu.h"
 #include "aopf/shared.h"
 
 /* Boot, stack guard & VM/MPU non-overlap verification (src/rtkit/boot.c) */
@@ -27,15 +28,15 @@ void rtk_idle_wfi_loop(void);
 void rtk_start(void);
 
 /* Panic, assert & unimplemented-method traps (src/rtkit/exception.c) */
-void rtk_panic(const char *fmt, ...);
-void pmgr_invalid_powerstate_panic(void *dev, int bad_state);
-void rtk_assert_fail_hex(const char *file_name, uint32_t line_no, uint32_t status_hex);
-void rtk_assert_fail(const char *file_name, int line_no, const char *expr);
-void rtk_assert_laguna_ok(int line_no, uint64_t val_lhs, uint64_t val_rhs);
-void rtk_assert_line_fail(const char *file_name, uint32_t line_no);
-void laguna_assert_fail(const char *file_name, uint32_t line_no);
-void laguna_assert(const char *file_name, uint32_t line_no, int cond);
-uint32_t rtk_unimplemented_method(void);
+AOPF_NOINLINE void rtk_panic(const char *fmt, ...);
+AOPF_NOINLINE void pmgr_invalid_powerstate_panic(void *dev, int bad_state);
+AOPF_NOINLINE void rtk_assert_fail_hex(const char *file_name, uint32_t line_no, uint32_t status_hex);
+AOPF_NOINLINE void rtk_assert_fail(const char *file_name, int line_no, const char *expr);
+AOPF_NOINLINE void rtk_assert_laguna_ok(int line_no, uint64_t val_lhs, uint64_t val_rhs);
+AOPF_NOINLINE void rtk_assert_line_fail(const char *file_name, uint32_t line_no);
+AOPF_NOINLINE void laguna_assert_fail(const char *file_name, uint32_t line_no);
+AOPF_NOINLINE void laguna_assert(const char *file_name, uint32_t line_no, int cond);
+AOPF_NOINLINE uint32_t rtk_unimplemented_method(void);
 uint32_t rtk_device_claim_mmio(rtk_dev_hdr_t *dev);
 void rtk_fault_entry(uint32_t *exc_frame, uint32_t exc_return);
 
@@ -67,9 +68,9 @@ int nvic_is_irq_active(rtk_nvic_dev_t *dev, uint32_t irq);
 uint32_t rtk_spinlock_acquire(volatile uint32_t *lock_word);
 void rtk_spinlock_release(volatile uint32_t *lock_word);
 uint32_t rtk_fastlock_trylock(volatile uint32_t *lock_word);
-uint32_t rtk_fastlock_lock(volatile uint32_t *lock_word);
-uint32_t rtk_fastlock_unlock(volatile uint32_t *lock_word);
-void rtk_fastlock_unlock_if_zero(volatile uint32_t *lock_word, uint32_t prev_status);
+AOPF_NOINLINE uint32_t rtk_fastlock_lock(volatile uint32_t *lock_word);
+AOPF_NOINLINE uint32_t rtk_fastlock_unlock(volatile uint32_t *lock_word);
+AOPF_NOINLINE void rtk_fastlock_unlock_if_zero(volatile uint32_t *lock_word, uint32_t prev_status);
 size_t rtk_stack_unused_bytes(const uint32_t *stack_bottom, size_t stack_bytes);
 uint32_t rtk_readyq_highest_prio(uint32_t ready_bitmap);
 

@@ -88,10 +88,14 @@ PENDING_STUB_SPECS: tuple[tuple[int, str, int | str], ...] = (
     (0x74240, "sub_74240", 1),
     (0x74256, "sub_74256", 2),
     (0x74270, "sub_74270", 3),
+    (0x74290, "sub_74290", 4),
     (0x742B2, "sub_742B2", 5),
     (0x7DC92, "sub_7DC92", 1),
     (0x6DF3C, "sub_6DF3C", 1),
+    (0x6DC88, "sub_6DC88", 0),
+    (0x6DD04, "sub_6DD04", 0),
     (0x6DD70, "sub_6DD70", 1),
+    (0x6DDB8, "sub_6DDB8", 0),
     (0x6DE10, "sub_6DE10", 0),
     (0x7CC08, "sub_7CC08", 2),
     (0x7CC8C, "sub_7CC8C", 2),
@@ -356,7 +360,8 @@ class ArmDiffMachine:
 
         for rva in (
             0x6BDDC, 0xEAC84, 0x7ECD4, 0xDF764, 0x7E084, 0x7EE58, 0x74240, 0x74256,
-            0x74270, 0x742B2, 0x7DC92, 0x6DF3C, 0x6DD70, 0x6DE10, 0x740A8, 0x740FE,
+            0x74270, 0x74290, 0x742B2, 0x7DC92, 0x6DF3C, 0x6DC88, 0x6DD04, 0x6DD70,
+            0x6DDB8, 0x6DE10, 0x740A8, 0x740FE,
             0x35354, 0xEBA60, 0x7835C, 0x7D820, 0xCF6B4, 0x96458, 0x964AC, 0x96434,
             0x707F0, 0xDECFC, 0x2F78, 0x71540, 0xE696A, 0x71240, 0xEBA64, 0x7076C,
             0x77A44, 0x73F20, 0x7B1C4, 0x74F10, 0x6AFB0, 0x776E0, 0x69978, 0x4B5C2,
@@ -1213,30 +1218,19 @@ def _make_default_arena_blob() -> bytes:
     """Deterministic 16 KB scratch arena (0x1002E000..0x10031FFF) with valid nested pointers."""
     buf = bytearray(0x4000)
     # Blocks 0..3 at +0x0000, +0x0800, +0x1000, +0x1800 hold struct/packet headers
-    # with valid nested 32-bit pointers into sub-blocks at +0x2000..+0x3C00.
+    # with valid nested 32-bit pointers into sub-blocks at +0x2000..+0x3C00 whose low
+    # 16 bits are small offsets (0x0020..0x03E0) so both 32-bit pointer derefs and
+    # 16-bit length/offset reads stay safely in-bounds.
     for blk in range(4):
         base_off = blk * 0x800
-        sub_ptr0 = 0x10030000 + blk * 0x400
-        sub_ptr1 = 0x10031000 + blk * 0x400
-        # Populate words: mix of valid sub-pointers and distinct non-zero scalar fields
-        struct.pack_into(
-            "<8I",
-            buf,
-            base_off,
-            sub_ptr0,
-            sub_ptr1,
-            0x00020001 + blk,
-            0x00100004 + blk * 3,
-            sub_ptr0 + 0x80,
-            sub_ptr1 + 0x80,
-            0x00000012 + blk * 5,
-            0x00000003 + blk,
-        )
-        for i in range(0x20, 0x800):
-            buf[base_off + i] = ((i * 13 + blk * 29 + 7) & 0x7F) | (0x80 if (i & 7) == 5 else 0)
+        for w in range(16):
+            sub_ptr = 0x10030020 + blk * 0x400 + w * 0x20
+            struct.pack_into("<I", buf, base_off + w * 4, sub_ptr)
+        for i in range(0x40, 0x800):
+            buf[base_off + i] = ((i * 13 + blk * 29 + 7) % 120) + 2
     # Populate sub-blocks (+0x2000..+0x3FFF) with realistic non-zero payload bytes
     for i in range(0x2000, 0x4000):
-        buf[i] = (i * 17 + 0x23) & 0xFF
+        buf[i] = ((i * 17 + 0x23) % 250) + 2
     # Ensure NUL terminators every 64 bytes in +0x3800..+0x3FFF for C-string safety
     for i in range(0x383F, 0x4000, 64):
         buf[i] = 0
@@ -1254,13 +1248,11 @@ def _apply_declarative_setup(m: ArmDiffMachine, vspec: dict[str, Any]) -> None:
         # Variant arena with distinct values & high bits set
         alt = bytes((b ^ 0x5A) for b in DEFAULT_ARENA_BLOB[:0x2000]) + DEFAULT_ARENA_BLOB[0x2000:]
         m.write_bytes(SCRATCH, alt)
-        # Re-restore valid nested pointers at +0x0000..+0x181F
+        # Re-restore valid nested pointers at +0x0000..+0x183F
         for blk in range(4):
             base = SCRATCH + blk * 0x800
-            m.write_u32(base + 0x00, 0x10030200 + blk * 0x400)
-            m.write_u32(base + 0x04, 0x10031200 + blk * 0x400)
-            m.write_u32(base + 0x10, 0x10030280 + blk * 0x400)
-            m.write_u32(base + 0x14, 0x10031280 + blk * 0x400)
+            for w in range(16):
+                m.write_u32(base + w * 4, 0x10030220 + blk * 0x400 + w * 0x20)
 
     for addr_raw, hex_s in vspec.get("mem_hex", ()):
         addr = int(addr_raw, 16) if isinstance(addr_raw, str) else int(addr_raw)

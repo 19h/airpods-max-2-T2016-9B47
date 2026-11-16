@@ -24,10 +24,14 @@ void sub_7EE58(void);
 int  sub_74240(uint32_t log_id);
 void sub_74256(uint32_t log_id, uint32_t val0);
 void sub_74270(uint32_t log_id, uint32_t val0, uint32_t val1);
+void sub_74290(uint32_t log_id, uint32_t val0, uint32_t val1, uint32_t val2);
 void sub_742B2(uint32_t log_id, uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3);
 void sub_7DC92(uint32_t err_id);
 void sub_6DF3C(uint32_t ext_irq);
+void sub_6DC88(void);
+void sub_6DD04(void);
 void sub_6DD70(uint32_t lock_arg);
+void sub_6DDB8(void);
 void sub_6DE10(void);
 int  sub_7CC08(uint32_t flags, uint32_t slot);
 int  sub_7CC8C(uint32_t flags, uint32_t slot);
@@ -93,11 +97,16 @@ ACIB_WEAK void sub_7EE58(void) {}
 ACIB_WEAK int  sub_74240(uint32_t log_id) { (void)log_id; return 0; }
 ACIB_WEAK void sub_74256(uint32_t log_id, uint32_t val0) { (void)log_id; (void)val0; }
 ACIB_WEAK void sub_74270(uint32_t log_id, uint32_t val0, uint32_t val1) { (void)log_id; (void)val0; (void)val1; }
+ACIB_WEAK void sub_74290(uint32_t log_id, uint32_t val0, uint32_t val1, uint32_t val2)
+{ (void)log_id; (void)val0; (void)val1; (void)val2; }
 ACIB_WEAK void sub_742B2(uint32_t log_id, uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3)
 { (void)log_id; (void)val0; (void)val1; (void)val2; (void)val3; }
 ACIB_WEAK void sub_7DC92(uint32_t err_id) { (void)err_id; }
 ACIB_WEAK void sub_6DF3C(uint32_t ext_irq) { (void)ext_irq; }
+ACIB_WEAK void sub_6DC88(void) {}
+ACIB_WEAK void sub_6DD04(void) {}
 ACIB_WEAK void sub_6DD70(uint32_t lock_arg) { (void)lock_arg; }
+ACIB_WEAK void sub_6DDB8(void) {}
 ACIB_WEAK void sub_6DE10(void) {}
 ACIB_WEAK int  sub_7CC08(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }
 ACIB_WEAK int  sub_7CC8C(uint32_t flags, uint32_t slot) { (void)flags; (void)slot; return 1; }

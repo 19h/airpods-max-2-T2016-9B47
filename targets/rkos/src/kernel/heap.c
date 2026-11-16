@@ -3,14 +3,6 @@
 /*
  * Reconstructed hardened RTKitOS stage-1 kernel heap (`0x2C58..0x32C4`,
  * `0x4B58`, `0x4F1C`, `0x5134..0x53B4`, `0x6B58..0x768C`).
- *
- * Security invariants enforced identically to `../../rkos`:
- *   - Per-block header cookie: `__stack_chk_guard ^ blk_va ^ MAGIC`
- *     (`0x40DA110C` allocated, `0x1BADF4EE` free+scrubbed, `0xF4EE705E` free+raw)
- *   - Per-heap count + XOR-sum invariants over both allocated and free blocks
- *   - Free-block zero-fill scrubbing and use-after-free detection (`Freeblk nonzero:%p`)
- *   - Double-free detection (`Dblfree:%p`) and boundary footer checks (`!Heapblk:%p`)
- *   - Sorted ascending best-fit free list with high-end carving and coalescing
  */
 
 #ifdef RKOS_HOST
@@ -43,7 +35,7 @@ uint32_t rkos_heap_init_struct(uint32_t heap_va)
     return heap_va;
 }
 
-/* @shim RVA 0x31c0 sub_31C0 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x31c0 sub_31C0 */
 RKOS_HEAP_EARLY int rkos_heap_range_in_regions(uint32_t heap_va, uint32_t start_va, uint32_t end_va)
 {
     const rkos_heap_t *heap = RKOS_VMA_PTR(const rkos_heap_t *, heap_va);
@@ -88,7 +80,7 @@ RKOS_HEAP_EARLY int rkos_heap_blk_alloc_valid(uint32_t heap_va, uint32_t blk_va)
     return rkos_heap_span_valid(heap_va, blk_va, blk->size_and_flags & ~3u);
 }
 
-/* @shim RVA 0x2c58 sub_2C58 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x2c58 sub_2C58 */
 RKOS_HEAP_EARLY uint32_t rkos_heap_mark_allocated(uint32_t heap_va, uint32_t blk_va,
                                                   uint32_t byte_size, int track_usage)
 {
@@ -114,7 +106,7 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_mark_allocated(uint32_t heap_va, uint32_t blk
     return blk_va;
 }
 
-/* @shim RVA 0x2f70 sub_2F70 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x2f70 sub_2F70 */
 RKOS_HEAP_EARLY uint32_t rkos_heap_unmark_allocated(uint32_t heap_va, uint32_t blk_va, int track_usage)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
@@ -129,19 +121,19 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_unmark_allocated(uint32_t heap_va, uint32_t b
     return heap_va;
 }
 
-/* @shim RVA 0x2f94 sub_2F94 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x2f94 sub_2F94 */
 RKOS_HEAP_EARLY uint32_t rkos_heap_mark_free(uint32_t heap_va, uint32_t blk_va, uint32_t byte_size)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
     rkos_heap_blk_t *blk = RKOS_VMA_PTR(rkos_heap_blk_t *, blk_va);
     uint32_t clean_sz = byte_size & ~3u;
-    uint32_t scrub_len = clean_sz - 0x14u;
+    uint32_t scrub_len = byte_size - 0x14u;
 
-    blk->size_and_flags = (blk->size_and_flags & 2u) | clean_sz | 1u;
+    blk->size_and_flags = (blk->size_and_flags & 2u) | byte_size | 1u;
     *rkos_u32_at(blk_va + clean_sz + 4u) |= 2u;
     blk->meta0_or_prev = 0u;
     blk->meta1_or_next = 0u;
-    *rkos_u32_at(blk_va + clean_sz - 4u) = clean_sz;
+    *rkos_u32_at(blk_va + (blk->size_and_flags & ~3u) - 4u) = byte_size;
 
     if (!rkos_heap_span_valid(heap_va, blk_va + 0x10u, scrub_len)) {
         rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)blk_va);
@@ -161,7 +153,7 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_mark_free(uint32_t heap_va, uint32_t blk_va, 
     return blk_va;
 }
 
-/* @shim RVA 0x3154 sub_3154 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x3154 sub_3154 */
 RKOS_HEAP_EARLY uint32_t rkos_heap_unmark_free(uint32_t heap_va, uint32_t blk_va)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
@@ -183,7 +175,7 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_unmark_free(uint32_t heap_va, uint32_t blk_va
     return heap->free_xor_cookie;
 }
 
-/* @shim RVA 0x3030 sub_3030 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x3030 sub_3030 */
 RKOS_HEAP_EARLY int rkos_heap_freelist_unlink(uint32_t heap_va, uint32_t blk_va)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
@@ -200,7 +192,10 @@ RKOS_HEAP_EARLY int rkos_heap_freelist_unlink(uint32_t heap_va, uint32_t blk_va)
     if (prev_va != 0u) {
         rkos_heap_blk_t *prev = RKOS_VMA_PTR(rkos_heap_blk_t *, prev_va);
         uint32_t psz = prev->size_and_flags & ~3u;
-        if (prev->meta1_or_next != blk_va || *rkos_u32_at(prev_va + psz - 4u) != psz) {
+        if (prev->meta1_or_next != blk_va) {
+            rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)blk_va);
+        }
+        if (*rkos_u32_at(prev_va + psz - 4u) != psz) {
             rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)prev_va);
         }
         prev->meta1_or_next = next_va;
@@ -214,7 +209,10 @@ RKOS_HEAP_EARLY int rkos_heap_freelist_unlink(uint32_t heap_va, uint32_t blk_va)
     if (next_va != 0u) {
         rkos_heap_blk_t *next = RKOS_VMA_PTR(rkos_heap_blk_t *, next_va);
         uint32_t nsz = next->size_and_flags & ~3u;
-        if (next->meta0_or_prev != blk_va || *rkos_u32_at(next_va + nsz - 4u) != nsz) {
+        if (next->meta0_or_prev != blk_va) {
+            rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)blk_va);
+        }
+        if (*rkos_u32_at(next_va + nsz - 4u) != nsz) {
             rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)next_va);
         }
         next->meta0_or_prev = prev_va;
@@ -225,12 +223,13 @@ RKOS_HEAP_EARLY int rkos_heap_freelist_unlink(uint32_t heap_va, uint32_t blk_va)
     return 0;
 }
 
-/* @shim RVA 0x30dc sub_30DC (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x30dc sub_30DC */
 RKOS_HEAP_EARLY uint32_t rkos_heap_freelist_insert(uint32_t heap_va, uint32_t blk_va)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
     rkos_heap_blk_t *blk = RKOS_VMA_PTR(rkos_heap_blk_t *, blk_va);
     uint32_t bsz = blk->size_and_flags & ~3u;
+    uint32_t ret_val = heap_va;
 
     uint32_t prev_va = 0u;
     uint32_t cur_va = heap->free_head_va;
@@ -240,9 +239,11 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_freelist_insert(uint32_t heap_va, uint32_t bl
         rkos_heap_blk_t *cur = RKOS_VMA_PTR(rkos_heap_blk_t *, cur_va);
         uint32_t csz = cur->size_and_flags & ~3u;
         if (csz >= bsz) {
-            if (*rkos_u32_at(cur_va + csz - 4u) != csz) {
+            uint32_t footer = *rkos_u32_at(cur_va + csz - 4u);
+            if (footer != csz) {
                 rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)cur_va);
             }
+            ret_val = footer;
             cur->meta0_or_prev = blk_va;
             blk->meta1_or_next = cur_va;
             break;
@@ -258,19 +259,20 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_freelist_insert(uint32_t heap_va, uint32_t bl
     if (prev_va != 0u) {
         rkos_heap_blk_t *prev = RKOS_VMA_PTR(rkos_heap_blk_t *, prev_va);
         uint32_t psz = prev->size_and_flags & ~3u;
-        if (*rkos_u32_at(prev_va + psz - 4u) != psz) {
+        uint32_t pfooter = *rkos_u32_at(prev_va + psz - 4u);
+        if (pfooter != psz) {
             rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)prev_va);
         }
+        ret_val = psz;
         prev->meta1_or_next = blk_va;
         blk->meta0_or_prev = prev_va;
     } else {
         heap->free_head_va = blk_va;
-        blk->meta0_or_prev = 0u;
     }
-    return heap_va;
+    return ret_val;
 }
 
-/* @shim RVA 0x30a0 sub_30A0 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x30a0 sub_30A0 */
 RKOS_HEAP_EARLY uint32_t rkos_heap_coalesce_pair(uint32_t heap_va, uint32_t left_va, uint32_t right_va)
 {
     rkos_heap_blk_t *left = RKOS_VMA_PTR(rkos_heap_blk_t *, left_va);
@@ -282,11 +284,12 @@ RKOS_HEAP_EARLY uint32_t rkos_heap_coalesce_pair(uint32_t heap_va, uint32_t left
     return rkos_heap_mark_free(heap_va, left_va, combined);
 }
 
-/* @shim RVA 0x2d84 heap_alloc_or_coalesce (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x2d84 heap_alloc_or_coalesce */
 RKOS_HEAP_EARLY uint32_t heap_alloc_or_coalesce(uint32_t heap_va)
 {
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
-    if ((heap->check_enabled & 1u) == 0u) {
+    uint32_t chk_flag = ((uint32_t)heap->check_enabled) << 31;
+    if (chk_flag == 0u) {
         return 0u;
     }
 
@@ -338,10 +341,11 @@ RKOS_HEAP_EARLY uint32_t heap_alloc_or_coalesce(uint32_t heap_va)
                 rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)cur_va);
             }
 
-            if (bsz < RKOS_HEAP_MIN_BLOCK || cur_va + bsz > end_va) {
+            uint32_t next_va = cur_va + bsz;
+            if (next_va <= cur_va || next_va > end_va) {
                 rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)cur_va);
             }
-            cur_va += bsz;
+            cur_va = next_va;
         }
     }
 
@@ -353,9 +357,13 @@ RKOS_HEAP_EARLY uint32_t heap_alloc_or_coalesce(uint32_t heap_va)
     uint32_t list_count = 0u;
     uint32_t list_xor = 0u;
     uint32_t prev_va = 0u;
-    uint32_t node_va = heap->free_head_va;
+    uint32_t slot_va = heap_va + 0x48u;
 
-    while (node_va != 0u) {
+    for (;;) {
+        uint32_t node_va = *rkos_u32_at(slot_va);
+        if (node_va == 0u) {
+            break;
+        }
         list_count++;
         if (list_count > seen_free) {
             rtkit_panic("Inconsist heap");
@@ -366,28 +374,28 @@ RKOS_HEAP_EARLY uint32_t heap_alloc_or_coalesce(uint32_t heap_va)
         }
         list_xor ^= node_va;
         prev_va = node_va;
-        node_va = node->meta1_or_next;
+        slot_va = node_va + 0x0Cu;
     }
 
     if (list_count != seen_free || list_xor != seen_free_xor) {
         rtkit_panic("Inconsist heap");
     }
-    return heap_va + 0x48u;
+    return slot_va;
 }
 
-/* @shim RVA 0x31e8 heap_alloc_impl (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x31e8 heap_alloc_impl */
 RKOS_HEAP_EARLY uint32_t heap_alloc_impl(uint32_t heap_va, uint32_t size,
                                          uint32_t arg2, uint32_t arg3)
 {
     (void)arg2;
     (void)arg3;
-    heap_alloc_or_coalesce(heap_va);
+    (void)heap_alloc_or_coalesce(heap_va);
     if (size > 0xFFFFFFE8u) {
         return 0u;
     }
 
     uint32_t req = (size + 0x17u) & ~7u;
-    if (req < RKOS_HEAP_MIN_BLOCK) {
+    if (req <= RKOS_HEAP_MIN_BLOCK) {
         req = RKOS_HEAP_MIN_BLOCK;
     }
 
@@ -405,44 +413,47 @@ RKOS_HEAP_EARLY uint32_t heap_alloc_impl(uint32_t heap_va, uint32_t size,
     }
 
     if (cur_va == 0u) {
-        heap_alloc_or_coalesce(heap_va);
+        (void)heap_alloc_or_coalesce(heap_va);
         return 0u;
     }
 
-    rkos_heap_freelist_unlink(heap_va, cur_va);
+    (void)rkos_heap_freelist_unlink(heap_va, cur_va);
     uint32_t chosen_va = cur_va;
 
     if (cur_sz >= req + RKOS_HEAP_MIN_BLOCK) {
+        uint32_t orig_sf = RKOS_VMA_PTR(const rkos_heap_blk_t *, cur_va)->size_and_flags;
+        (void)rkos_heap_unmark_free(heap_va, cur_va);
         uint32_t rem_sz = cur_sz - req;
-        rkos_heap_unmark_free(heap_va, cur_va);
         chosen_va = cur_va + rem_sz;
-        rkos_heap_blk_t *carved = RKOS_VMA_PTR(rkos_heap_blk_t *, chosen_va);
-        carved->size_and_flags = 0u;
-        rkos_heap_mark_allocated(heap_va, chosen_va, req, 1);
-        rkos_heap_mark_free(heap_va, cur_va, rem_sz);
-        rkos_heap_freelist_insert(heap_va, cur_va);
+        (void)rkos_heap_mark_allocated(heap_va, chosen_va, (orig_sf & ~3u) - rem_sz, 1);
+        (void)rkos_heap_mark_free(heap_va, cur_va, rem_sz);
+        (void)rkos_heap_freelist_insert(heap_va, cur_va);
     } else {
-        rkos_heap_unmark_free(heap_va, cur_va);
-        rkos_heap_mark_allocated(heap_va, cur_va, cur_sz, 1);
+        (void)rkos_heap_unmark_free(heap_va, cur_va);
+        (void)rkos_heap_mark_allocated(heap_va, cur_va, cur_sz, 1);
     }
 
     rkos_heap_blk_t *chosen = RKOS_VMA_PTR(rkos_heap_blk_t *, chosen_va);
     uint32_t cur_task = *rkos_u32_at(RKOS_CURRENT_TASK_VA);
-    if (cur_task == 0u || cur_task == 4u) {
+    if (cur_task == 4u) {
         chosen->meta0_or_prev = 0xFFFFFFFFu;
     } else {
         chosen->meta0_or_prev = *rkos_u32_at(cur_task + 8u);
     }
-    chosen->meta1_or_next = 0u;
 
-    heap_alloc_or_coalesce(heap_va);
+    uint32_t frames[8];
+    (void)rkos_bzero32(frames);
+    (void)rkos_unwind_task(0u, frames, 4u);
+    chosen->meta1_or_next = frames[4];
+
+    (void)heap_alloc_or_coalesce(heap_va);
     return chosen_va + RKOS_HEAP_HDR_SIZE;
 }
 
-/* @shim RVA 0x2cac heap_free_impl (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x2cac heap_free_impl */
 RKOS_HEAP_EARLY uint32_t heap_free_impl(uint32_t heap_va, uint32_t ptr_va, int track_usage)
 {
-    heap_alloc_or_coalesce(heap_va);
+    (void)heap_alloc_or_coalesce(heap_va);
     uint32_t blk_va = ptr_va - RKOS_HEAP_HDR_SIZE;
 
     if (!rkos_heap_blk_min_valid(heap_va, blk_va)) {
@@ -459,40 +470,40 @@ RKOS_HEAP_EARLY uint32_t heap_free_impl(uint32_t heap_va, uint32_t ptr_va, int t
     }
 
     uint32_t bsz = blk->size_and_flags & ~3u;
-    rkos_heap_unmark_allocated(heap_va, blk_va, track_usage);
-    rkos_heap_mark_free(heap_va, blk_va, bsz);
+    (void)rkos_heap_unmark_allocated(heap_va, blk_va, track_usage);
+    (void)rkos_heap_mark_free(heap_va, blk_va, bsz);
 
     uint32_t next_va = blk_va + (blk->size_and_flags & ~3u);
     if ((*rkos_u32_at(next_va + 4u) & 1u) != 0u) {
-        rkos_heap_freelist_unlink(heap_va, next_va);
-        rkos_heap_coalesce_pair(heap_va, blk_va, next_va);
+        (void)rkos_heap_freelist_unlink(heap_va, next_va);
+        (void)rkos_heap_coalesce_pair(heap_va, blk_va, next_va);
     }
 
     uint32_t merged_va = blk_va;
     if ((blk->size_and_flags & 2u) != 0u) {
         uint32_t prev_sz = *rkos_u32_at(blk_va - 4u);
         uint32_t prev_va = blk_va - prev_sz;
-        rkos_heap_freelist_unlink(heap_va, prev_va);
-        rkos_heap_coalesce_pair(heap_va, prev_va, blk_va);
+        (void)rkos_heap_freelist_unlink(heap_va, prev_va);
+        (void)rkos_heap_coalesce_pair(heap_va, prev_va, blk_va);
         merged_va = prev_va;
     }
 
-    rkos_heap_freelist_insert(heap_va, merged_va);
+    (void)rkos_heap_freelist_insert(heap_va, merged_va);
     return heap_alloc_or_coalesce(heap_va);
 }
 
-/* @shim RVA 0x32c4 heap_free_blk (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x32c4 heap_free_blk */
 RKOS_HEAP_EARLY uint32_t heap_free_blk(uint32_t heap_va, uint32_t ptr_va)
 {
     return heap_free_impl(heap_va, ptr_va, 1);
 }
 
-/* @shim RVA 0x4f1c sub_4F1C (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x4f1c sub_4F1C */
 uint32_t rkos_kernel_heap_add_region(uint32_t base_va, uint32_t size_bytes)
 {
     uint32_t irq_state = crit_enter();
     if (base_va == 0u || size_bytes < 0x400u) {
-        crit_exit(irq_state);
+        (void)crit_exit(irq_state);
         return 0x80000001u;
     }
 
@@ -500,46 +511,87 @@ uint32_t rkos_kernel_heap_add_region(uint32_t base_va, uint32_t size_bytes)
     rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, heap_va);
     uint32_t rcount = heap->region_count;
 
-    for (uint32_t i = 0u; i < rcount; i++) {
-        uint32_t rbase = heap->regions[i].base_va;
-        uint32_t rsize = heap->regions[i].size_bytes;
-        if (rbase + rsize > base_va && base_va + size_bytes > rbase) {
-            crit_exit(irq_state);
+    uint32_t sentinel_va = ((base_va + size_bytes - 8u) & ~7u) - 0x10u;
+    uint32_t first_blk_va = ((base_va + 0x17u) & ~7u) - 0x10u;
+    uint32_t usable_span = sentinel_va - first_blk_va;
+    uint32_t merged_base = base_va;
+    uint32_t merged_size = size_bytes;
+    uint32_t left_idx = 0xFFFFFFFFu;
+    uint32_t right_idx = 0xFFFFFFFFu;
+
+    for (uint32_t idx = 0u; idx < rcount; idx++) {
+        uint32_t rbase = heap->regions[idx].base_va;
+        uint32_t rsize = heap->regions[idx].size_bytes;
+        uint32_t rend = rbase + rsize;
+        uint32_t cand_end = merged_base + size_bytes;
+
+        if (rend > merged_base && cand_end > rbase) {
+            (void)crit_exit(irq_state);
             return 0x8000000Du;
+        }
+        if (rend == merged_base) {
+            uint32_t span_end = first_blk_va + usable_span;
+            merged_size += rsize;
+            merged_base = rbase;
+            first_blk_va = ((rend - 8u) & ~7u) - 0x10u;
+            usable_span = span_end - first_blk_va;
+            left_idx = idx;
+        } else if (cand_end == rbase) {
+            merged_size += rsize;
+            usable_span = ((rbase + 0x17u) & ~7u) + usable_span - sentinel_va - 0x10u;
+            sentinel_va = 0u;
+            right_idx = idx;
         }
     }
 
-    if (rcount >= 8u) {
-        crit_exit(irq_state);
-        return 0x80000005u;
+    uint32_t had_left = left_idx + 1u;
+    if (left_idx != 0xFFFFFFFFu && right_idx != 0xFFFFFFFFu) {
+        heap->regions[left_idx].base_va = merged_base;
+        heap->regions[left_idx].size_bytes = merged_size;
+        uint32_t last_idx = rcount - 1u;
+        heap->regions[right_idx] = heap->regions[last_idx];
+        heap->regions[last_idx].base_va = 0u;
+        heap->regions[last_idx].size_bytes = 0u;
+        heap->region_count = last_idx;
+    } else if (left_idx != 0xFFFFFFFFu) {
+        heap->regions[left_idx].base_va = merged_base;
+        heap->regions[left_idx].size_bytes = merged_size;
+    } else if (right_idx != 0xFFFFFFFFu) {
+        heap->regions[right_idx].base_va = merged_base;
+        heap->regions[right_idx].size_bytes = merged_size;
+    } else {
+        if (rcount > 7u) {
+            (void)crit_exit(irq_state);
+            return 0x80000005u;
+        }
+        heap->regions[rcount].base_va = merged_base;
+        heap->regions[rcount].size_bytes = merged_size;
+        heap->region_count = rcount + 1u;
     }
 
-    uint32_t first_blk_va = ((base_va + 0x17u) & ~7u) - 0x10u;
-    uint32_t sentinel_va  = ((base_va + size_bytes - 8u) & ~7u) - 0x10u;
-    uint32_t usable_span  = sentinel_va - first_blk_va;
-
-    heap->regions[rcount].base_va = base_va;
-    heap->regions[rcount].size_bytes = size_bytes;
-    heap->region_count = rcount + 1u;
-
-    rkos_memset(RKOS_VMA_RAW(sentinel_va, RKOS_HEAP_MIN_BLOCK), 0, RKOS_HEAP_MIN_BLOCK);
-    rkos_heap_blk_t *first_blk = RKOS_VMA_PTR(rkos_heap_blk_t *, first_blk_va);
-    first_blk->size_and_flags = 0u;
-    rkos_heap_mark_allocated(heap_va, first_blk_va, usable_span, 0);
-    first_blk->size_and_flags &= ~2u;
-    heap_free_impl(heap_va, first_blk_va + RKOS_HEAP_HDR_SIZE, 0);
+    if (sentinel_va != 0u) {
+        rkos_memset(RKOS_VMA_RAW(sentinel_va, RKOS_HEAP_MIN_BLOCK), 0, RKOS_HEAP_MIN_BLOCK);
+    }
+    (void)rkos_heap_mark_allocated(heap_va, first_blk_va, usable_span, 0);
+    if (had_left == 0u) {
+        RKOS_VMA_PTR(rkos_heap_blk_t *, first_blk_va)->size_and_flags &= ~2u;
+    }
+    (void)heap_free_impl(heap_va, first_blk_va + RKOS_HEAP_HDR_SIZE, 0);
     heap->total_bytes += size_bytes;
 
-    crit_exit(irq_state);
+    (void)crit_exit(irq_state);
     return 0u;
 }
 
-/* @shim RVA 0x5134 sub_5134 (pending_c: not shown equivalent to raw) */
-void rkos_assert_status_ok(uint32_t status)
+/* @provenance RVA 0x5134 sub_5134 */
+uint32_t rkos_heap_disable_checks(void)
 {
-    if ((status & 0x90000000u) != 0u) {
-        rtkit_panic("!mempool init");
+    uint32_t irq_state = crit_enter();
+    rkos_heap_t *heap = RKOS_VMA_PTR(rkos_heap_t *, rkos_kernel_heap_va());
+    if ((heap->check_enabled & 1u) != 0u) {
+        heap->check_enabled = 0u;
     }
+    return crit_exit(irq_state);
 }
 
 /* @provenance RVA 0x515c rtkit_malloc */
@@ -547,38 +599,87 @@ uint32_t rtkit_malloc(uint32_t size)
 {
     uint32_t irq_state = crit_enter();
     uint32_t ptr_va = heap_alloc_impl(rkos_kernel_heap_va(), size, 0u, 0u);
-    crit_exit(irq_state);
+    (void)crit_exit(irq_state);
     return ptr_va;
 }
 
-/* @shim RVA 0x5184 sub_5184 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x5184 sub_5184 */
 uint32_t rkos_realloc(uint32_t ptr_va, uint32_t new_size)
 {
-    if (ptr_va == 0u) {
-        return rtkit_malloc(new_size);
-    }
-    if (new_size == 0u) {
-        rtkit_free(ptr_va);
-        return 0u;
+    uint32_t irq_state = crit_enter();
+    uint32_t heap_va = rkos_kernel_heap_va();
+
+    if (ptr_va != 0u) {
+        (void)heap_alloc_or_coalesce(heap_va);
+        if (new_size <= 0xFFFFFFE8u) {
+            uint32_t blk_va = ptr_va - RKOS_HEAP_HDR_SIZE;
+            if (!rkos_heap_blk_min_valid(heap_va, blk_va) ||
+                !rkos_heap_blk_alloc_valid(heap_va, blk_va)) {
+                rtkit_panic("!Heapblk:%p", (const void *)(uintptr_t)blk_va);
+            }
+
+            uint32_t req = (new_size + 0x17u) & ~7u;
+            if (req <= RKOS_HEAP_MIN_BLOCK) {
+                req = RKOS_HEAP_MIN_BLOCK;
+            }
+
+            rkos_heap_blk_t *blk = RKOS_VMA_PTR(rkos_heap_blk_t *, blk_va);
+            uint32_t cur_sf = blk->size_and_flags;
+            uint32_t cur_sz = cur_sf & ~3u;
+            int need_reloc = 0;
+
+            if (req > cur_sz) {
+                uint32_t next_va = blk_va + cur_sz;
+                uint32_t next_sf = *rkos_u32_at(next_va + 4u);
+                uint32_t next_sz = next_sf & ~3u;
+                if ((next_sf & 1u) == 0u || (cur_sz + next_sz) < req) {
+                    need_reloc = 1;
+                } else {
+                    (void)rkos_heap_freelist_unlink(heap_va, next_va);
+                    uint32_t refreshed_cur_sf = blk->size_and_flags;
+                    uint32_t refreshed_next_sf = *rkos_u32_at(next_va + 4u);
+                    (void)rkos_heap_unmark_free(heap_va, next_va);
+                    (void)rkos_heap_unmark_allocated(heap_va, blk_va, 1);
+                    (void)rkos_heap_mark_allocated(heap_va, blk_va,
+                                                   (refreshed_next_sf & ~3u) + (refreshed_cur_sf & ~3u), 1);
+                    cur_sf = blk->size_and_flags;
+                    cur_sz = cur_sf & ~3u;
+                }
+            }
+
+            if (!need_reloc) {
+                if (cur_sz >= req + RKOS_HEAP_MIN_BLOCK) {
+                    (void)rkos_heap_unmark_allocated(heap_va, blk_va, 1);
+                    uint32_t split_va = blk_va + req;
+                    (void)rkos_heap_mark_free(heap_va, split_va, (cur_sf & ~3u) - req);
+                    RKOS_VMA_PTR(rkos_heap_blk_t *, split_va)->size_and_flags &= ~2u;
+                    (void)rkos_heap_mark_allocated(heap_va, blk_va, req, 1);
+
+                    uint32_t split_sz = RKOS_VMA_PTR(const rkos_heap_blk_t *, split_va)->size_and_flags & ~3u;
+                    uint32_t after_va = split_va + split_sz;
+                    if ((*rkos_u32_at(after_va + 4u) & 1u) != 0u) {
+                        (void)rkos_heap_freelist_unlink(heap_va, after_va);
+                        (void)rkos_heap_coalesce_pair(heap_va, split_va, after_va);
+                    }
+                    (void)rkos_heap_freelist_insert(heap_va, split_va);
+                }
+                (void)heap_alloc_or_coalesce(heap_va);
+                (void)crit_exit(irq_state);
+                return ptr_va;
+            }
+        }
     }
 
-    uint32_t raw_ptr_va = ptr_va;
-    if (*rkos_u32_at(ptr_va - 4u) == RKOS_HEAP_ALIGN_MAGIC) {
-        raw_ptr_va = *rkos_u32_at(ptr_va - 8u);
+    uint32_t new_va = heap_alloc_impl(rkos_kernel_heap_va(), new_size, 0u, 0u);
+    if (ptr_va != 0u && new_va != 0u) {
+        uint32_t old_sf = *rkos_u32_at(ptr_va - 12u);
+        uint32_t old_payload = (old_sf & ~3u) - RKOS_HEAP_HDR_SIZE;
+        uint32_t copy_len = (new_size < old_payload) ? new_size : old_payload;
+        (void)memcpy_thunk(RKOS_VMA_RAW(new_va, copy_len),
+                           RKOS_VMA_RAW(ptr_va, copy_len), copy_len);
+        (void)heap_free_blk(rkos_kernel_heap_va(), ptr_va);
     }
-
-    uint32_t blk_va = raw_ptr_va - RKOS_HEAP_HDR_SIZE;
-    rkos_heap_blk_t *blk = RKOS_VMA_PTR(rkos_heap_blk_t *, blk_va);
-    uint32_t old_total = blk->size_and_flags & ~3u;
-    uint32_t old_payload = old_total - (ptr_va - blk_va);
-
-    uint32_t new_va = rtkit_malloc(new_size);
-    if (new_va == 0u) {
-        return 0u;
-    }
-    uint32_t copy_len = (old_payload < new_size) ? old_payload : new_size;
-    rkos_memcpy(RKOS_VMA_RAW(new_va, copy_len), RKOS_VMA_RAW(ptr_va, copy_len), copy_len);
-    rtkit_free(ptr_va);
+    (void)crit_exit(irq_state);
     return new_va;
 }
 
@@ -596,7 +697,7 @@ uint32_t rkos_calloc(uint32_t count, uint32_t size)
             rkos_memset(RKOS_VMA_RAW(ptr_va, total), 0, total);
         }
     }
-    crit_exit(irq_state);
+    (void)crit_exit(irq_state);
     return ptr_va;
 }
 
@@ -611,7 +712,7 @@ uint32_t rkos_memalign(uint32_t align, uint32_t size)
     uint32_t extra = 0u;
     if (align >= 9u) {
         if (size > 0xFFFFFFF8u - align) {
-            crit_exit(irq_state);
+            (void)crit_exit(irq_state);
             return 0u;
         }
         extra = align + 7u;
@@ -624,7 +725,7 @@ uint32_t rkos_memalign(uint32_t align, uint32_t size)
         *rkos_u32_at(aligned_va - 8u) = raw_va;
         *rkos_u32_at(aligned_va - 4u) = RKOS_HEAP_ALIGN_MAGIC;
     }
-    crit_exit(irq_state);
+    (void)crit_exit(irq_state);
     return aligned_va;
 }
 
@@ -640,7 +741,7 @@ void rtkit_free(uint32_t ptr_va)
     }
     uint32_t irq_state = crit_enter();
     (void)heap_free_blk(rkos_kernel_heap_va(), raw_va);
-    crit_exit(irq_state);
+    (void)crit_exit(irq_state);
 }
 
 /* @provenance RVA 0x7684 j_rtkit_malloc */

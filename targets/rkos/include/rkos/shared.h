@@ -68,6 +68,16 @@ typedef struct {
     uint32_t content_len;     /* +0x0C: clamped/validated content length */
 } rkos_der_tlv_t; /* 0x10 bytes */
 
+typedef struct {
+    uint32_t out_offset;      /* +0x00: byte offset into output struct */
+    uint32_t reserved04;      /* +0x04 */
+    uint32_t tag_lo;          /* +0x08 */
+    uint32_t tag_hi;          /* +0x0C */
+    uint16_t flags;           /* +0x10: bit0=opt, bit1=any, bit2=skip, bit3=raw_tlv */
+    uint16_t reserved12;      /* +0x12 */
+    uint32_t reserved14;      /* +0x14 */
+} rkos_der_spec_t; /* 0x18 bytes */
+
 /* 5. FTAB ('rkosftab') header & file entry structures */
 typedef struct {
     uint32_t generation;      /* +0x00 */

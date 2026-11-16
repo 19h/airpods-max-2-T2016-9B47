@@ -133,24 +133,45 @@ static inline void *acib_addr_ptr_or_null(uint32_t addr)
     return (addr == 0u) ? (void *)0 : acib_addr_ptr(addr);
 }
 
-/* Address-mapped SRAM / ROM scalar load & store helpers (32-bit ARM + 64-bit Host safe) */
+static inline bool acib_is_periph_mmio_addr(uint32_t addr)
+{
+    return (addr >= 0x40000000u) && (addr < 0x4D280000u || addr >= 0x4D281000u);
+}
+
+/* Address-mapped SRAM / ROM / dynamic-MMIO scalar load & store helpers */
 static inline uint8_t acib_mem_read8(uint32_t addr)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        return acib_mmio_read8(addr);
+    }
+#endif
     return *(const uint8_t *)acib_addr_ptr(addr);
 }
 
 static inline int8_t acib_mem_read_s8(uint32_t addr)
 {
-    return *(const int8_t *)acib_addr_ptr(addr);
+    return (int8_t)acib_mem_read8(addr);
 }
 
 static inline void acib_mem_write8(uint32_t addr, uint8_t val)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        acib_mmio_write8(addr, val);
+        return;
+    }
+#endif
     *(uint8_t *)acib_addr_ptr(addr) = val;
 }
 
 static inline uint16_t acib_mem_read16(uint32_t addr)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        return acib_mmio_read16(addr);
+    }
+#endif
     uint16_t val;
     __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
     return val;
@@ -158,18 +179,27 @@ static inline uint16_t acib_mem_read16(uint32_t addr)
 
 static inline int16_t acib_mem_read_s16(uint32_t addr)
 {
-    int16_t val;
-    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
-    return val;
+    return (int16_t)acib_mem_read16(addr);
 }
 
 static inline void acib_mem_write16(uint32_t addr, uint16_t val)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        acib_mmio_write16(addr, val);
+        return;
+    }
+#endif
     __builtin_memcpy(acib_addr_ptr(addr), &val, sizeof(val));
 }
 
 static inline uint32_t acib_mem_read32(uint32_t addr)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        return acib_mmio_read32(addr);
+    }
+#endif
     uint32_t val;
     __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
     return val;
@@ -177,13 +207,17 @@ static inline uint32_t acib_mem_read32(uint32_t addr)
 
 static inline int32_t acib_mem_read_s32(uint32_t addr)
 {
-    int32_t val;
-    __builtin_memcpy(&val, acib_addr_ptr(addr), sizeof(val));
-    return val;
+    return (int32_t)acib_mem_read32(addr);
 }
 
 static inline void acib_mem_write32(uint32_t addr, uint32_t val)
 {
+#if defined(ACIB_HOST_TEST)
+    if (acib_is_periph_mmio_addr(addr)) {
+        acib_mmio_write32(addr, val);
+        return;
+    }
+#endif
     __builtin_memcpy(acib_addr_ptr(addr), &val, sizeof(val));
 }
 
@@ -263,6 +297,49 @@ static inline uint64_t acib_ld_u64(const void *base, uint32_t off)
 static inline void acib_st_u64(void *base, uint32_t off, uint64_t val)
 {
     __builtin_memcpy((uint8_t *)base + off, &val, sizeof(val));
+}
+
+/* Expression-returning store helpers (single address evaluation, zero extensions) */
+static inline uint8_t acib_mem_write8_ret(uint32_t addr, uint8_t val)
+{
+    acib_mem_write8(addr, val);
+    return val;
+}
+
+static inline uint16_t acib_mem_write16_ret(uint32_t addr, uint16_t val)
+{
+    acib_mem_write16(addr, val);
+    return val;
+}
+
+static inline uint32_t acib_mem_write32_ret(uint32_t addr, uint32_t val)
+{
+    acib_mem_write32(addr, val);
+    return val;
+}
+
+static inline uint64_t acib_mem_write64_ret(uint32_t addr, uint64_t val)
+{
+    acib_mem_write64(addr, val);
+    return val;
+}
+
+static inline uint8_t acib_mmio_write8_ret(uint32_t addr, uint8_t val)
+{
+    acib_mmio_write8(addr, val);
+    return val;
+}
+
+static inline uint16_t acib_mmio_write16_ret(uint32_t addr, uint16_t val)
+{
+    acib_mmio_write16(addr, val);
+    return val;
+}
+
+static inline uint32_t acib_mmio_write32_ret(uint32_t addr, uint32_t val)
+{
+    acib_mmio_write32(addr, val);
+    return val;
 }
 
 #endif /* ACIB_BUS_H */

@@ -228,7 +228,8 @@ static void test_hardened_heap(void)
 
     uint32_t heap_va = *RKOS_VMA_PTR(const uint32_t *, 0x20001078u);
     CHECK(heap_va == 0x2001DC38u, "lazy g_kernel_heap pointer at 0x2001DC38");
-    CHECK(heap_alloc_or_coalesce(heap_va) == heap_va + 0x48u, "heap integrity & coalesce pass");
+    CHECK(heap_alloc_or_coalesce(heap_va) == g_state_plat.kernel_heap.free_head_va + 0x0Cu,
+          "heap integrity & coalesce pass");
     CHECK(g_state_plat.kernel_heap.alloc_count == 0u &&
           g_state_plat.kernel_heap.used_bytes == 0u,
           "all heap blocks cleanly returned to free list");
@@ -273,9 +274,9 @@ static void test_nvic_sched_mutex(void)
 
     /* NVIC enable/pending/priority + IRQ_CommonHandler dispatch */
     const uint32_t vec = 20u; /* External IRQ 4 */
-    CHECK(rkos_nvic_is_enabled(0u, vec) == 0, "NVIC vec 20 initially disabled");
-    (void)rkos_nvic_set_enable_state(0, vec, 1);
-    CHECK(rkos_nvic_is_enabled(0u, vec) == 1, "NVIC vec 20 enabled");
+    CHECK(RKOS_REG32_READ(RKOS_NVIC_ISER_BASE) == 0u, "NVIC vec 20 initially disabled");
+    (void)rkos_nvic_set_enable(0u, vec, 1);
+    CHECK((RKOS_REG32_READ(RKOS_NVIC_ISER_BASE) & (1u << 4)) != 0u, "NVIC vec 20 enabled");
     CHECK(rkos_nvic_set_pending(0u, vec) == 0u && rkos_nvic_is_pending(0u, vec) == 1,
           "NVIC vec 20 pended");
     CHECK(rkos_nvic_clear_pending(0u, vec) == 0u && rkos_nvic_is_pending(0u, vec) == 0,
@@ -401,7 +402,12 @@ static void test_platform_ftab_bmid_crashlog(void)
     CHECK(rkos_ftab_stream_seek(stream_va, 0x2001u) == 0x80000001u,
           "rkos_ftab_stream_seek out-of-range rejected");
 
-    /* Crashlog banner + CLHE dump */
+    /* Crashlog banner + CLHE dump (wire host UART mux at 0x20000718) */
+    *RKOS_VMA_PTR(uint32_t *, 0x2000071Cu) = 0x02003200u;
+    *RKOS_VMA_PTR(uint32_t *, 0x20000720u) = 1u;
+    *RKOS_VMA_PTR(uint32_t *, 0x02003200u) = 0x02003210u;
+    *RKOS_VMA_PTR(uint32_t *, 0x02003210u) = 0x02003220u;
+    *RKOS_VMA_PTR(uint32_t *, 0x02003224u) = 0x00018081u;
     *RKOS_VMA_PTR(uint32_t *, RKOS_CRASHLOG_STATE_VA + 0x18u) = 0x20022000u;
     crashlog_print_banner(NULL);
     CHECK(strstr(rkos_host_uart_tx_log(), "RTKit:") != NULL &&

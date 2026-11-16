@@ -143,4 +143,37 @@ static inline int32_t acib_arm_asr32(int32_t v, uint32_t shift)
     return (int32_t)res;
 }
 
+/* Defined ARMv7E-M hardware UDIV / SDIV semantics (DIV_0_TRP == 0 -> 0) */
+static inline uint32_t acib_arm_udiv32(uint32_t n, uint32_t d)
+{
+    return (d == 0u) ? 0u : (n / d);
+}
+
+static inline int32_t acib_arm_sdiv32(int32_t n, int32_t d)
+{
+    if (d == 0) {
+        return 0;
+    }
+    if ((uint32_t)n == 0x80000000u && d == -1) {
+        return (int32_t)0x80000000u;
+    }
+    return n / d;
+}
+
+static inline uint32_t acib_arm_umod32(uint32_t n, uint32_t d)
+{
+    return (d == 0u) ? n : (n % d);
+}
+
+static inline int32_t acib_arm_smod32(int32_t n, int32_t d)
+{
+    if (d == 0) {
+        return n;
+    }
+    if ((uint32_t)n == 0x80000000u && d == -1) {
+        return 0;
+    }
+    return n % d;
+}
+
 #endif /* ACIB_CPU_H */

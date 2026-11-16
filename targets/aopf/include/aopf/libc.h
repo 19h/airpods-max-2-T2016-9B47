@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "aopf/cpu.h"
 #include "aopf/shared.h"
 
 /* Memory & string primitives (src/libc/string.c) */
@@ -67,23 +68,23 @@ void rtk_heap_init_free_hdr(rtk_heap_block_t *blk, uint32_t byte_size);
 void rtk_heap_unlink_block(rtk_heap_ctx_t *heap, rtk_heap_block_t *blk);
 void rtk_heap_insert_block(rtk_heap_ctx_t *heap, rtk_heap_block_t *blk);
 void *rtk_heap_alloc(rtk_heap_ctx_t *heap, size_t req_size);
-void rtk_heap_free_block(rtk_heap_ctx_t *heap, void *ptr);
-void rtk_heap_lock_release(uint32_t prev_status);
-void *rtk_malloc(size_t req_size);
-void *rtk_calloc(size_t count, size_t elem_size);
-void *rtk_realloc(void *old_ptr, size_t new_size);
-void *rtk_memalign(size_t alignment, size_t req_size);
-void rtk_free(void *ptr);
+AOPF_NOINLINE void rtk_heap_free_block(rtk_heap_ctx_t *heap, void *ptr);
+AOPF_NOINLINE void rtk_heap_lock_release(uint32_t prev_status);
+AOPF_NOINLINE void *rtk_malloc(size_t req_size);
+AOPF_NOINLINE void *rtk_calloc(size_t count, size_t elem_size);
+AOPF_NOINLINE void *rtk_realloc(void *old_ptr, size_t new_size);
+AOPF_NOINLINE void *rtk_memalign(size_t alignment, size_t req_size);
+AOPF_NOINLINE void rtk_free(void *ptr);
 
-int rtk_cxa_guard_acquire(uint8_t *guard_obj);
-void rtk_cxa_guard_unlock(void);
-void rtk_cxa_guard_release(uint8_t *guard_obj);
-void rtk_cxa_pure_virtual(void);
-void *rtk_cxx_operator_new(size_t req_size);
-void *rtk_cxx_operator_new_array(size_t req_size);
-void rtk_cxx_operator_delete(void *ptr);
-void rtk_cxx_operator_delete_array(void *ptr);
-void *rtk_cxx_malloc_thunk(size_t req_size);
-void rtk_cxx_free_thunk(void *ptr);
+AOPF_NOINLINE int rtk_cxa_guard_acquire(uint8_t *guard_obj);
+AOPF_NOINLINE void rtk_cxa_guard_unlock(void);
+AOPF_NOINLINE void rtk_cxa_guard_release(uint8_t *guard_obj);
+AOPF_NOINLINE void rtk_cxa_pure_virtual(void);
+AOPF_NOINLINE void *rtk_cxx_operator_new(size_t req_size);
+AOPF_NOINLINE void *rtk_cxx_operator_new_array(size_t req_size);
+AOPF_NOINLINE void rtk_cxx_operator_delete(void *ptr);
+AOPF_NOINLINE void rtk_cxx_operator_delete_array(void *ptr);
+AOPF_NOINLINE void *rtk_cxx_malloc_thunk(size_t req_size);
+AOPF_NOINLINE void rtk_cxx_free_thunk(void *ptr);
 
 #endif /* AOPF_LIBC_H */

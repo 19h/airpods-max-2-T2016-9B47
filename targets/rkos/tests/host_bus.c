@@ -87,6 +87,21 @@ void rkos_host_bus_reset(void)
     }
 
     memset(g_host_rom, 0, sizeof(g_host_rom));
+    {
+        uint32_t *rom_vecs = (uint32_t *)(void *)g_host_rom;
+        rom_vecs[1] = 0x00000109u;
+        rom_vecs[2] = 0x000002E1u;
+        for (size_t i = 3u; i <= 10u; i++) {
+            rom_vecs[i] = 0x00000291u;
+        }
+        rom_vecs[11] = 0x00000375u;
+        rom_vecs[12] = 0x00000291u;
+        rom_vecs[13] = 0x00000291u;
+        rom_vecs[14] = 0x00000375u;
+        for (size_t i = 15u; i < 48u; i++) {
+            rom_vecs[i] = 0x000034D9u;
+        }
+    }
     memcpy(g_host_rom + RKOS_RTKIT_HDR_BASE, g_rkos_rtkit_hdr, RKOS_RTKIT_HDR_SIZE);
     memcpy(g_host_rom + RKOS_ROM_RODATA_BASE, g_rkos_rodata, RKOS_ROM_RODATA_SIZE);
 
@@ -245,6 +260,22 @@ void rkos_host_mmio_write32(uint32_t addr, uint32_t val)
     }
 }
 
+uint16_t rkos_host_mmio_read16(uint32_t addr)
+{
+    uint32_t aligned = addr & ~3u;
+    uint32_t shift = (addr & 2u) * 8u;
+    return (uint16_t)((rkos_host_mmio_read32(aligned) >> shift) & 0xFFFFu);
+}
+
+void rkos_host_mmio_write16(uint32_t addr, uint16_t val)
+{
+    uint32_t aligned = addr & ~3u;
+    uint32_t shift = (addr & 2u) * 8u;
+    uint32_t cur = rkos_host_mmio_read32(aligned);
+    uint32_t next = (cur & ~(0xFFFFu << shift)) | ((uint32_t)val << shift);
+    rkos_host_mmio_write32(aligned, next);
+}
+
 uint8_t rkos_host_mmio_read8(uint32_t addr)
 {
     uint32_t aligned = addr & ~3u;
@@ -295,6 +326,28 @@ uint32_t rkos_host_invoke_irq_cb(uint32_t fn_va, uint32_t ctx_va)
         if (idx < g_host_cb_count && g_host_cbs[idx] != NULL) {
             return (uint32_t)g_host_cbs[idx](ctx_va);
         }
+    }
+    return 0xFFFFFFFFu;
+}
+
+uint32_t rkos_host_invoke_fn4_cb(uint32_t fn_va, uint32_t arg0, uint32_t arg1,
+                                 uint32_t arg2, uint32_t arg3)
+{
+    (void)arg1;
+    (void)arg2;
+    (void)arg3;
+    return rkos_host_invoke_irq_cb(fn_va, arg0);
+}
+
+uint32_t rkos_host_invoke_mux_write(uint32_t fn_va, uint32_t dev_va, uint32_t mode,
+                                    const uint8_t *buf, uint32_t *io_len)
+{
+    (void)dev_va;
+    (void)mode;
+    if (fn_va == 0x00018081u && buf != NULL && io_len != NULL && *io_len > 0u) {
+        rkos_host_mmio_write32(RKOS_MMIO_UART_BASE + 0x20u, (uint32_t)buf[0]);
+        *io_len = 1u;
+        return 0u;
     }
     return 0xFFFFFFFFu;
 }

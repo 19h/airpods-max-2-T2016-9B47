@@ -23,45 +23,46 @@ static inline uint32_t rkos_clz32(uint32_t val)
     return n;
 }
 
-/* @shim RVA 0x34f4 rtkit_sched_switch (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x34f4 rtkit_sched_switch */
 uint32_t rtkit_sched_switch(uint32_t current_sp)
 {
-    uint32_t *resched_va = RKOS_VMA_PTR(uint32_t *, 0x2001DDE8u);
-    if ((*resched_va & 1u) == 0u) {
+    uint8_t *resched_byte = RKOS_VMA_PTR(uint8_t *, 0x2001DDE8u);
+    if ((*resched_byte & 1u) == 0u) {
         return current_sp;
     }
 
-    *(uint8_t *)(void *)resched_va = 0u;
+    *resched_byte = 0u;
     uint32_t saved_basepri = rkos_irq_save_and_raise_basepri();
 
     uint32_t *cur_task_slot = RKOS_VMA_PTR(uint32_t *, RKOS_CURRENT_TASK_VA);
     uint32_t cur_va = *cur_task_slot;
-    uint32_t *preempt_slot = RKOS_VMA_PTR(uint32_t *, 0x2001DDFCu);
+    uint8_t *preempt_byte = RKOS_VMA_PTR(uint8_t *, 0x2001DDFCu);
     uint32_t ready_mask = *RKOS_VMA_PTR(const uint32_t *, 0x2001DCD0u);
 
     uint32_t save_sp_va = 0u;
     uint32_t load_sp_va = 0u;
 
-    uint8_t cur_state = (cur_va != 0u) ? *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x16u) : 0u;
-    if (cur_state != 0u && (*preempt_slot = 1u, ready_mask == 0u)) {
+    uint8_t cur_state = *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x16u);
+    if (cur_state != 0u && (*preempt_byte = 1u, ready_mask == 0u)) {
         save_sp_va = 0u;
         load_sp_va = 0u;
-    } else if (ready_mask != 0u) {
-        uint32_t top_prio = 31u - rkos_clz32(ready_mask);
+    } else {
+        uint32_t top_prio = (31u - rkos_clz32(ready_mask)) & 0xFFu;
         uint32_t next_va = *RKOS_VMA_PTR(const uint32_t *, 0x2001DCD8u + 8u * top_prio);
 
-        if (next_va != 0u && next_va != cur_va) {
-            *preempt_slot = 1u;
+        if (next_va == cur_va) {
+            save_sp_va = 0u;
+            load_sp_va = 0u;
+        } else {
+            *preempt_byte = 1u;
             *cur_task_slot = next_va;
-            if (cur_va != 0u) {
-                save_sp_va = *RKOS_VMA_PTR(const uint32_t *, cur_va + 0x28u);
-            }
+            save_sp_va = *RKOS_VMA_PTR(const uint32_t *, cur_va + 0x28u);
             load_sp_va = *RKOS_VMA_PTR(const uint32_t *, next_va + 0x28u);
             cur_va = next_va;
         }
-        uint8_t next_state = (cur_va != 0u) ? *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x16u) : 0u;
-        if ((*preempt_slot & 1u) != 0u && next_state == 0u) {
-            *preempt_slot = 0u;
+        if ((*preempt_byte & 1u) != 0u &&
+            *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x16u) == 0u) {
+            *preempt_byte = 0u;
         }
     }
 
@@ -95,7 +96,7 @@ uint32_t rkos_sched_tailq_enqueue(uint32_t node_va, uint32_t prio)
     return 0x2001DCD4u;
 }
 
-/* @shim RVA 0x109d0 sub_109D0 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x109d0 sub_109D0 */
 uint32_t rkos_sched_tailq_remove(uint32_t next_va, uint32_t prev_link_va, uint32_t prio)
 {
     uint32_t *ready_mask = RKOS_VMA_PTR(uint32_t *, 0x2001DCD0u);
@@ -114,6 +115,70 @@ uint32_t rkos_sched_tailq_remove(uint32_t next_va, uint32_t prev_link_va, uint32
     }
     (*ready_cnt)--;
     return 0x2001DCD4u;
+}
+
+/* @provenance RVA 0x1091e sub_1091E */
+uint32_t rkos_unwind_frames_cnt(uint32_t exc_frame_va, uint32_t *out_frames, uint32_t max_frames)
+{
+    uint32_t count = 0u;
+    (void)rkos_unwind_frame(exc_frame_va, out_frames, max_frames, &count);
+    return count;
+}
+
+/* @provenance RVA 0x1090c sub_1090C */
+uint32_t rkos_unwind_task(uint32_t task_va, uint32_t *out_frames, uint32_t max_frames)
+{
+    uint32_t exc_frame_va = 0u;
+    if (task_va != 0u && task_va != *RKOS_VMA_PTR(const uint32_t *, RKOS_CURRENT_TASK_VA)) {
+        uint32_t sp_slot_va = *RKOS_VMA_PTR(const uint32_t *, task_va + 0x28u);
+        exc_frame_va = *RKOS_VMA_PTR(const uint32_t *, sp_slot_va);
+    }
+    return rkos_unwind_frames_cnt(exc_frame_va, out_frames, max_frames);
+}
+
+/* @provenance RVA 0x10968 sub_10968 */
+bool rkos_task_clear_yield_check_preempt(uint32_t task_va)
+{
+    uint8_t *task_bytes = RKOS_VMA_PTR(uint8_t *, task_va);
+    if (task_bytes[0x16] == 0u) {
+        return false;
+    }
+    task_bytes[0x16] = 0u;
+
+    uint32_t cur_va = *RKOS_VMA_PTR(const uint32_t *, RKOS_CURRENT_TASK_VA);
+    if (cur_va == task_va) {
+        return false;
+    }
+
+    uint8_t cur_yield = *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x16u);
+    if (cur_yield != 0u) {
+        return true;
+    }
+    uint8_t cur_prio = (cur_va == 4u) ? 0u : *RKOS_VMA_PTR(const uint8_t *, cur_va + 0x14u);
+    return task_bytes[0x14] > cur_prio;
+}
+
+/* @provenance RVA 0x1099c sub_1099C */
+uint32_t rkos_task_recalc_priority(uint32_t task_va)
+{
+    uint8_t *task_bytes = RKOS_VMA_PTR(uint8_t *, task_va);
+    uint8_t max_prio = task_bytes[0x15];
+    uint32_t node_va = *RKOS_VMA_PTR(const uint32_t *, 0x2000083Cu);
+
+    while (node_va != 0u) {
+        uint32_t lock_ptr_va = *RKOS_VMA_PTR(const uint32_t *, node_va + 0x0Cu);
+        uint32_t owner_word = *RKOS_VMA_PTR(const uint32_t *, lock_ptr_va);
+        if ((owner_word & ~3u) == task_va) {
+            uint8_t waiter_prio = *RKOS_VMA_PTR(const uint8_t *, node_va + 0x14u);
+            if (waiter_prio > max_prio) {
+                max_prio = waiter_prio;
+            }
+        }
+        node_va = *RKOS_VMA_PTR(const uint32_t *, node_va);
+    }
+
+    task_bytes[0x14] = max_prio;
+    return (uint32_t)max_prio;
 }
 
 /* @provenance RVA 0x108e4 sub_108E4 */
@@ -220,12 +285,13 @@ int mutex_unlock(uint32_t mutex_va)
     return rkos_mutex_unlock_slow_impl(mutex_va);
 }
 
-/* @shim RVA 0x10930 sub_10930 (pending_c: not shown equivalent to raw) */
-void rkos_spinlock_release(uint32_t lock_va, uint32_t prev_state)
+/* @provenance RVA 0x10930 sub_10930 */
+uint32_t rkos_spinlock_release(uint32_t lock_va, uint32_t prev_state)
 {
     if (prev_state == 0u) {
-        (void)mutex_unlock(lock_va);
+        return (uint32_t)mutex_unlock(lock_va);
     }
+    return lock_va;
 }
 
 /* @provenance RVA 0x11634 sub_11634 */
@@ -316,11 +382,11 @@ uint32_t rkos_mem_region_ensure_init(void)
     return 2u;
 }
 
-/* @shim RVA 0x113e0 sub_113E0 (pending_c: not shown equivalent to raw) */
-uint32_t rkos_mem_region_register(uint32_t slot, uint32_t base, uint32_t size)
+/* @provenance RVA 0x113e0 sub_113E0 */
+uint32_t rkos_mem_region_register(int32_t slot, uint32_t base, uint32_t size)
 {
     (void)rkos_mem_region_ensure_init();
-    if (slot > 8u) {
+    if (slot > 8) {
         return 0x80000001u;
     }
 
@@ -347,7 +413,7 @@ uint32_t rkos_mem_region_register(uint32_t slot, uint32_t base, uint32_t size)
                 uint32_t n_base = node[0];
                 uint32_t n_size = node[1] & 0x0FFFFFFFu;
                 if (end_addr > n_base && base < n_base + n_size) {
-                    rkos_spinlock_release(0x2001DDDCu, lock_state);
+                    (void)rkos_spinlock_release(0x2001DDDCu, lock_state);
                     return 0x8000000Du;
                 }
                 cur_va = node[3];
@@ -355,9 +421,10 @@ uint32_t rkos_mem_region_register(uint32_t slot, uint32_t base, uint32_t size)
         }
     }
 
-    uint32_t *ent = RKOS_VMA_PTR(uint32_t *, 0x20001084u + 16u * slot);
+    uint32_t u_slot = (uint32_t)slot;
+    uint32_t *ent = RKOS_VMA_PTR(uint32_t *, (uint32_t)(0x20001084u + 16u * u_slot));
     if (ent[3] == 0u) {
-        uint32_t tag = ((slot - 5u) < 2u) ? (slot | 0x80000000u) : slot;
+        uint32_t tag = ((u_slot - 5u) < 2u) ? (u_slot | 0x80000000u) : u_slot;
         ent[0] = tag;
         ent[1] = base;
         ent[2] = size;
@@ -409,34 +476,30 @@ uint32_t rkos_mem_region_register(uint32_t slot, uint32_t base, uint32_t size)
         ent[2] = max_end - n_base;
     }
 
-    rkos_spinlock_release(0x2001DDDCu, lock_state);
+    (void)rkos_spinlock_release(0x2001DDDCu, lock_state);
     return 0u;
 }
 
 /* @provenance RVA 0x11376 sub_11376 */
-uint32_t rkos_mem_region_register_thunk(uint32_t slot, uint32_t base, uint32_t size)
+uint32_t rkos_mem_region_register_thunk(int32_t slot, uint32_t base, uint32_t size)
 {
     return rkos_mem_region_register(slot, base, size);
 }
 
-/* @shim RVA 0x11604 sub_11604 (pending_c: not shown equivalent to raw) */
+/* @provenance RVA 0x11604 sub_11604 */
 uint32_t rkos_mem_region_apply_table(void)
 {
-    uint32_t table_va = *RKOS_VMA_PTR(const uint32_t *, 0x2001DE48u);
-    if (table_va == 0u) {
-        return 0u;
-    }
     for (uint32_t off = 0u;; off += 12u) {
+        uint32_t table_va = *RKOS_VMA_PTR(const uint32_t *, 0x2001DE48u);
         const uint32_t *ent = RKOS_VMA_PTR(const uint32_t *, table_va + off);
-        if (ent[1] == 0u && ent[2] == 0u) {
-            break;
+        if ((ent[1] | ent[2]) == 0u) {
+            return 0u;
         }
-        uint32_t res = rkos_mem_region_register(ent[0], ent[1], ent[2] - ent[1]);
+        uint32_t res = rkos_mem_region_register((int32_t)ent[0], ent[1], ent[2] - ent[1]);
         if (res != 0u) {
             return res;
         }
     }
-    return 0u;
 }
 
 /* Canonical 2-byte `bx lr` nullsubs in `rkos` */

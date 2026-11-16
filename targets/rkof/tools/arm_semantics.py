@@ -148,9 +148,12 @@ def load_elf_segments_and_symbols(
 
 class FastVM:
     """
-    Reusable Cortex-M4F Unicorn VM with exact 4KB dirty-page rollback,
-    dynamic SoC MMIO aperture mapping (0x40000000..0x5FFFFFFF), full non-stack
-    RAM/MMIO write capture, and MMIO R/W trace recording.
+    Reusable Cortex-M4F Unicorn VM with exact chunk-diff rollback, dynamic SoC
+    MMIO aperture mapping (0x40000000..0x5FFFFFFF), full non-stack SRAM/TEST_RAM
+    and MMIO state comparison, and optional MMIO R/W trace recording.
+
+    Note: avoids attaching UC_HOOK_MEM_WRITE to SRAM/ROM so Unicorn 2.x never
+    splits Thumb-2 IT blocks mid-execution on predicated stores (`strbne`, etc.).
 
     Integrity invariant: when `is_elf=True`, ONLY `rkof.elf` PT_LOAD segments
     are loaded into ROM/SRAM — raw `rkof` code is NEVER mapped into the ELF VM.
@@ -168,55 +171,44 @@ class FastVM:
         self.mu = uc.Uc(uc.UC_ARCH_ARM, uc.UC_MODE_THUMB | uc.UC_MODE_MCLASS)
 
         self.mapped_4k: set[int] = set()
-        self.base_pages: dict[int, bytes] = {}
-        self.dirty_pages: set[int] = set()
+        self.dyn_mmio_64k: list[int] = []
         self.ctx: dict[str, Any] = {
             "active": False,
-            "check_all_writes": False,
             "check_mmio_trace": False,
-            "written_lines": set(),
             "mmio_trace": [],
             "mmio_seq": {},
             "mmio_idx": {},
         }
 
         self._map_region(ROM_BASE, ROM_SIZE, uc.UC_PROT_READ | uc.UC_PROT_EXEC)
-        for base, size in (
+        self.writable_spans: list[tuple[int, int]] = [
             (SCRATCH_RTSI_PAGE, SCRATCH_RTSI_SIZE),
-            (SRAM_BASE, SRAM_SIZE),
-            (TEST_RAM_BASE, TEST_RAM_SIZE),
+            (SRAM_BASE, 0x000E0000),
+            (TEST_RAM_BASE, 0x00020000),
             (REMAP_BASE, REMAP_SIZE),
             (UART_BASE, UART_SIZE),
             (PMGR_BASE, PMGR_SIZE),
             (W3_ALL_BASE, W3_ALL_SIZE),
             (SCS_BASE, SCS_SIZE),
-        ):
-            self._map_region(base, size, uc.UC_PROT_ALL)
+        ]
+        self._map_region(SCRATCH_RTSI_PAGE, SCRATCH_RTSI_SIZE, uc.UC_PROT_ALL)
+        self._map_region(SRAM_BASE, SRAM_SIZE, uc.UC_PROT_ALL)
+        self._map_region(TEST_RAM_BASE, TEST_RAM_SIZE, uc.UC_PROT_ALL)
+        self._map_region(REMAP_BASE, REMAP_SIZE, uc.UC_PROT_ALL)
+        self._map_region(UART_BASE, UART_SIZE, uc.UC_PROT_ALL)
+        self._map_region(PMGR_BASE, PMGR_SIZE, uc.UC_PROT_ALL)
+        self._map_region(W3_ALL_BASE, W3_ALL_SIZE, uc.UC_PROT_ALL)
+        self._map_region(SCS_BASE, SCS_SIZE, uc.UC_PROT_ALL)
 
-        init_blobs: list[tuple[int, bytes]] = []
         if is_elf:
-            init_blobs.extend(elf_segs)
+            for vaddr, data in elf_segs:
+                self.mu.mem_write(vaddr, data)
         else:
-            init_blobs.append((ROM_BASE, raw[:0x1F389A]))
-            init_blobs.append((SRAM_BASE, raw[0x200000 : 0x200000 + 0xF138]))
-        init_blobs.append((0xE000ED88, pack_u32(0x00F00000)))
-        init_blobs.append((STOP_ADDR, bytes.fromhex("00bf00bf")))
+            self.mu.mem_write(ROM_BASE, raw[:0x1F389A])
+            self.mu.mem_write(SRAM_BASE, raw[0x200000 : 0x200000 + 0xF138])
 
-        page_Mut: dict[int, bytearray] = {}
-        for vaddr, blob in init_blobs:
-            self.mu.mem_write(vaddr, blob)
-            end = vaddr + len(blob)
-            p = vaddr & ~0xFFF
-            while p < end:
-                buf = page_Mut.get(p)
-                if buf is None:
-                    buf = bytearray(ZERO_PAGE)
-                    page_Mut[p] = buf
-                lo = max(vaddr, p)
-                hi = min(end, p + 0x1000)
-                buf[lo - p : hi - p] = blob[lo - vaddr : hi - vaddr]
-                p += 0x1000
-        self.base_pages = {p: bytes(b) for p, b in page_Mut.items()}
+        self.mu.mem_write(0xE000ED88, pack_u32(0x00F00000))
+        self.mu.mem_write(STOP_ADDR, bytes.fromhex("00bf00bf"))
 
         if hasattr(ac, "UC_ARM_REG_FPEXC"):
             try:
@@ -224,16 +216,24 @@ class FastVM:
             except uc.UcError:
                 pass
 
+        # Snapshot clean baseline chunks (up to 64KB each) for fast memcmp rollback
+        self.base_chunks: list[tuple[int, int, bytes]] = []
+        self.base_chunk_map: dict[int, bytes] = {}
+        for base, size in self.writable_spans:
+            off = 0
+            while off < size:
+                step = min(0x10000, size - off)
+                addr = base + off
+                cb = bytes(self.mu.mem_read(addr, step))
+                self.base_chunks.append((addr, step, cb))
+                self.base_chunk_map[addr] = cb
+                off += step
+
+        self.rom_patches: list[tuple[int, bytes]] = []
+
         self.mu.hook_add(
             uc.UC_HOOK_MEM_READ_UNMAPPED | uc.UC_HOOK_MEM_WRITE_UNMAPPED,
             self._on_unmapped,
-        )
-        self.mu.hook_add(uc.UC_HOOK_MEM_WRITE, self._on_mem_write)
-        self.mu.hook_add(
-            uc.UC_HOOK_MEM_READ,
-            self._on_mmio_read,
-            begin=MMIO_DYN_LO,
-            end=MMIO_DYN_HI - 1,
         )
 
     def _map_region(self, base: int, size: int, perms: int) -> None:
@@ -241,34 +241,28 @@ class FastVM:
         for p in range(base, base + size, 0x1000):
             self.mapped_4k.add(p)
 
-    def _mark_span_dirty(self, addr: int, length: int) -> None:
-        if length <= 0:
-            return
-        p = addr & ~0xFFF
-        end_p = (addr + length - 1) & ~0xFFF
-        while p <= end_p:
-            if not (MMIO_DYN_LO <= p < MMIO_DYN_HI and p not in self.mapped_4k):
-                self.dirty_pages.add(p)
-            else:
-                self._ensure_mmio_mapped(p)
-                self.dirty_pages.add(p)
-            p += 0x1000
-
     def _ensure_mmio_mapped(self, addr: int) -> bool:
         if not (MMIO_DYN_LO <= addr < MMIO_DYN_HI):
             return False
         base64 = addr & ~0xFFFF
+        any_new = False
         p = base64
         end = base64 + 0x10000
         while p < end:
             if p not in self.mapped_4k:
+                any_new = True
                 run_start = p
                 while p < end and p not in self.mapped_4k:
                     self.mapped_4k.add(p)
                     p += 0x1000
                 self.mu.mem_map(run_start, p - run_start, uc.UC_PROT_ALL)
+                zb = b"\x00" * (p - run_start)
+                self.base_chunks.append((run_start, p - run_start, zb))
+                self.base_chunk_map[run_start] = zb
             else:
                 p += 0x1000
+        if any_new:
+            self.dyn_mmio_64k.append(base64)
         return True
 
     def _on_unmapped(
@@ -276,25 +270,11 @@ class FastVM:
     ) -> bool:
         return self._ensure_mmio_mapped(address)
 
-    def _on_mem_write(
+    def _on_mmio_write(
         self, _uc_obj: uc.Uc, _access: int, address: int, size: int, value: int, _user: Any
     ) -> None:
-        p0 = address & ~0xFFF
-        p1 = (address + size - 1) & ~0xFFF
-        self.dirty_pages.add(p0)
-        if p1 != p0:
-            self.dirty_pages.add(p1)
         ctx = self.ctx
-        if not ctx["active"]:
-            return
-        if ctx["check_all_writes"] and not (STACK_LOCAL_LO <= address < STACK_LOCAL_HI):
-            l0 = address & ~0x3F
-            l1 = (address + size - 1) & ~0x3F
-            wl = ctx["written_lines"]
-            wl.add(l0)
-            if l1 != l0:
-                wl.add(l1)
-        if ctx["check_mmio_trace"] and MMIO_DYN_LO <= address < MMIO_DYN_HI:
+        if ctx["active"] and ctx["check_mmio_trace"]:
             mask = (1 << (size * 8)) - 1
             ctx["mmio_trace"].append(("W", address, size, value & mask))
 
@@ -314,28 +294,30 @@ class FastVM:
             ctx["mmio_idx"][address] = nxt_idx
             nxt_val = seq[nxt_idx] if nxt_idx < len(seq) else seq[-1]
             uc_obj.mem_write(address, pack_u32(nxt_val))
-            self.dirty_pages.add(address & ~0xFFF)
 
-    def baseline_64b(self, line_addr: int, mem_writes: list[tuple[int, bytes]]) -> bytes:
-        p = line_addr & ~0xFFF
-        off = line_addr - p
-        base = bytearray(self.base_pages.get(p, ZERO_PAGE)[off : off + 64])
-        for w_addr, payload in mem_writes:
-            w_end = w_addr + len(payload)
-            lo = max(line_addr, w_addr)
-            hi = min(line_addr + 64, w_end)
-            if lo < hi:
-                base[lo - line_addr : hi - line_addr] = payload[lo - w_addr : hi - w_addr]
-        return bytes(base)
+    def _write_host(self, addr: int, payload: bytes) -> None:
+        if not payload:
+            return
+        if MMIO_DYN_LO <= addr < MMIO_DYN_HI:
+            self._ensure_mmio_mapped(addr)
+        if addr < ROM_SIZE:
+            orig = bytes(self.mu.mem_read(addr, len(payload)))
+            self.rom_patches.append((addr, orig))
+        self.mu.mem_write(addr, payload)
+        if addr < ROM_SIZE:
+            self.mu.ctl_flush_tb()
 
     def rollback(self) -> None:
-        if not self.dirty_pages:
-            return
         mu = self.mu
-        bp = self.base_pages
-        for p in self.dirty_pages:
-            mu.mem_write(p, bp.get(p, ZERO_PAGE))
-        self.dirty_pages.clear()
+        had_rom_patch = bool(self.rom_patches)
+        for addr, orig in reversed(self.rom_patches):
+            mu.mem_write(addr, orig)
+        self.rom_patches.clear()
+        if had_rom_patch:
+            mu.ctl_flush_tb()
+        for c_addr, c_len, c_base in self.base_chunks:
+            if bytes(mu.mem_read(c_addr, c_len)) != c_base:
+                mu.mem_write(c_addr, c_base)
 
     def run_case(
         self,
@@ -344,27 +326,24 @@ class FastVM:
     ) -> dict[str, Any]:
         mu = self.mu
         code_hook_handle = None
+        mmio_r_handle = None
+        mmio_w_handle = None
         try:
             for addr, payload in case.mem_writes:
-                self._mark_span_dirty(addr, len(payload))
-                mu.mem_write(addr, payload)
+                self._write_host(addr, payload)
 
             for mm_addr, seq in case.mmio_read_seq.items():
                 if seq:
-                    self._mark_span_dirty(mm_addr, 4)
-                    mu.mem_write(mm_addr, pack_u32(seq[0]))
+                    self._write_host(mm_addr, pack_u32(seq[0]))
 
             if patch_bytes is not None:
-                p_addr, p_blob = patch_bytes
-                self._mark_span_dirty(p_addr, len(p_blob))
-                mu.mem_write(p_addr, p_blob)
+                self._write_host(patch_bytes[0], patch_bytes[1])
 
             sp = INITIAL_SP
             if case.stack_args:
                 stack_blob = pack_u32(*case.stack_args)
                 sp -= (len(stack_blob) + 7) & ~7
-                self._mark_span_dirty(sp, len(stack_blob))
-                mu.mem_write(sp, stack_blob)
+                self._write_host(sp, stack_blob)
 
             callees = {
                 ac.UC_ARM_REG_R4: 0x44440004,
@@ -382,7 +361,9 @@ class FastVM:
             mu.reg_write(ac.UC_ARM_REG_R12, 0)
             mu.reg_write(ac.UC_ARM_REG_SP, sp)
             mu.reg_write(ac.UC_ARM_REG_MSP, sp)
+            mu.reg_write(ac.UC_ARM_REG_PSP, 0)
             mu.reg_write(ac.UC_ARM_REG_LR, STOP_ADDR | 1)
+            mu.reg_write(ac.UC_ARM_REG_XPSR, 0x01000000)
             mu.reg_write(ac.UC_ARM_REG_APSR, 0)
             mu.reg_write(ac.UC_ARM_REG_FPSCR, 0)
             mu.reg_write(ac.UC_ARM_REG_FAULTMASK, 0)
@@ -410,10 +391,7 @@ class FastVM:
 
             trace: list[tuple[Any, ...]] = []
             hook_map: dict[int, StubHook] = {}
-            has_py_cb = False
             for stub in case.stubs:
-                if stub.on_call is not None:
-                    has_py_cb = True
                 if self.is_elf and stub.elf_sym:
                     target_pc = self.elf_syms[stub.elf_sym] & ~1
                 else:
@@ -471,23 +449,28 @@ class FastVM:
 
                 code_hook_handle = mu.hook_add(uc.UC_HOOK_CODE, _code_hook)
 
-            if has_py_cb:
-                # Python stub callbacks may write guest scratch/output ranges via uc_obj.mem_write
-                self._mark_span_dirty(0x20100000, 0x10000)
-                for c_addr, c_len in case.compare_ranges:
-                    self._mark_span_dirty(c_addr, c_len)
-
-            written_lines: set[int] = set()
             mmio_trace: list[tuple[Any, ...]] = []
             self.ctx = {
                 "active": True,
-                "check_all_writes": case.check_all_writes,
                 "check_mmio_trace": case.check_mmio_trace,
-                "written_lines": written_lines,
                 "mmio_trace": mmio_trace,
                 "mmio_seq": case.mmio_read_seq,
                 "mmio_idx": {},
             }
+            if case.check_mmio_trace or case.mmio_read_seq:
+                mmio_r_handle = mu.hook_add(
+                    uc.UC_HOOK_MEM_READ,
+                    self._on_mmio_read,
+                    begin=MMIO_DYN_LO,
+                    end=MMIO_DYN_HI - 1,
+                )
+            if case.check_mmio_trace:
+                mmio_w_handle = mu.hook_add(
+                    uc.UC_HOOK_MEM_WRITE,
+                    self._on_mmio_write,
+                    begin=MMIO_DYN_LO,
+                    end=MMIO_DYN_HI - 1,
+                )
 
             start_pc = self.elf_syms[case.symbol] if self.is_elf else case.ref_rva
             until_pc = case.stop_pc if case.stop_pc is not None else STOP_ADDR
@@ -512,11 +495,20 @@ class FastVM:
                 idx: (mu.reg_read(ac.UC_ARM_REG_D0 + idx) & 0xFFFFFFFFFFFFFFFF)
                 for idx in case.check_d_regs
             }
-            wl_snap = (
-                {la: bytes(mu.mem_read(la, 64)) for la in sorted(written_lines)}
-                if case.check_all_writes
-                else {}
-            )
+
+            # When check_all_writes is True, capture every modified chunk outside local stack
+            wl_snap: dict[int, bytes] = {}
+            if case.check_all_writes:
+                # 1) TEST_RAM non-stack arena 0x20100000..0x2010B000 (44 KB)
+                arena_b = bytes(mu.mem_read(0x20100000, STACK_LOCAL_LO - 0x20100000))
+                wl_snap[0x20100000] = arena_b
+                # 2) Any modified SRAM (.data/.bss) or MMIO/SCS chunk
+                for c_addr, c_len, c_base in self.base_chunks:
+                    if c_addr == 0x20100000 or c_addr == 0x20110000:
+                        continue
+                    cur_b = bytes(mu.mem_read(c_addr, c_len))
+                    if cur_b != c_base:
+                        wl_snap[c_addr] = cur_b
 
             out: dict[str, Any] = {
                 "r0": mu.reg_read(ac.UC_ARM_REG_R0),
@@ -545,6 +537,11 @@ class FastVM:
                 ),
                 "callee_preserved": callee_ok if not did_early_stop else True,
                 "early_stop": did_early_stop,
+                "reached_stop_pc": (
+                    ((mu.reg_read(ac.UC_ARM_REG_PC) & ~1) == (case.stop_pc & ~1))
+                    if case.stop_pc is not None
+                    else True
+                ),
                 "trace": trace,
                 "mem": [
                     bytes(mu.mem_read(addr, length))
@@ -556,11 +553,12 @@ class FastVM:
             return out
         finally:
             self.ctx["active"] = False
-            if code_hook_handle is not None:
-                try:
-                    mu.hook_del(code_hook_handle)
-                except uc.UcError:
-                    pass
+            for h in (code_hook_handle, mmio_r_handle, mmio_w_handle):
+                if h is not None:
+                    try:
+                        mu.hook_del(h)
+                    except uc.UcError:
+                        pass
             self.rollback()
 
 
@@ -2878,6 +2876,11 @@ def compare_outcomes(
                 f"BASEPRI ref=0x{ref_out['basepri']:x} != elf=0x{elf_out['basepri']:x}"
             )
 
+    if ref_out.get("reached_stop_pc", True) != elf_out.get("reached_stop_pc", True):
+        diffs.append(
+            f"reached_stop_pc ref={ref_out.get('reached_stop_pc')} != elf={elf_out.get('reached_stop_pc')}"
+        )
+
     if ref_out["trace"] != elf_out["trace"]:
         diffs.append(f"stub trace ref={ref_out['trace']} != elf={elf_out['trace']}")
 
@@ -2901,29 +2904,24 @@ def compare_outcomes(
     if case.check_all_writes:
         rwl: dict[int, bytes] = ref_out.get("written_lines", {})
         ewl: dict[int, bytes] = elf_out.get("written_lines", {})
-        all_lines = sorted(set(rwl.keys()) | set(ewl.keys()))
-        for la in all_lines:
-            rb = rwl.get(la)
-            if rb is None:
-                rb = (
-                    ref_vm.baseline_64b(la, case.mem_writes)
-                    if ref_vm is not None
-                    else b"\x00" * 64
-                )
-            eb = ewl.get(la)
-            if eb is None:
-                eb = (
-                    elf_vm.baseline_64b(la, case.mem_writes)
-                    if elf_vm is not None
-                    else b"\x00" * 64
-                )
+        all_chunks = sorted(set(rwl.keys()) | set(ewl.keys()))
+        for ca in all_chunks:
+            rb = rwl.get(ca)
+            eb = ewl.get(ca)
+            if rb is None and ref_vm is not None:
+                rb = ref_vm.base_chunk_map.get(ca)
+            if eb is None and elf_vm is not None:
+                eb = elf_vm.base_chunk_map.get(ca)
             if rb != eb:
-                for off in range(64):
-                    if rb[off] != eb[off]:
-                        diffs.append(
-                            f"write_mem[0x{la + off:08x}] ref=0x{rb[off]:02x} != elf=0x{eb[off]:02x}"
-                        )
-                        break
+                if rb is not None and eb is not None and len(rb) == len(eb):
+                    for off in range(len(rb)):
+                        if rb[off] != eb[off]:
+                            diffs.append(
+                                f"write_mem[0x{ca + off:08x}] ref=0x{rb[off]:02x} != elf=0x{eb[off]:02x}"
+                            )
+                            break
+                else:
+                    diffs.append(f"write_chunk[0x{ca:08x}] mismatch")
                 break
 
     return diffs

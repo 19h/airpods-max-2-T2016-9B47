@@ -112,7 +112,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_decode_ex",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_decode_ex_bad_short",
+    "der_decode_ex_nonmin_len",
+    "der_decode_ex_seq_with_len"
+   ]
   },
   {
    "rva": "0x712",
@@ -123,7 +127,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_decode_raw",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_decode_raw_high_tag_ok",
+    "der_decode_raw_trunc_allowed",
+    "der_decode_raw_trunc_disallowed"
+   ]
   },
   {
    "rva": "0x876",
@@ -134,7 +142,13 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_parse_u32",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_parse_u32_empty_err",
+    "der_parse_u32_neg_rejected",
+    "der_parse_u32_u32_val",
+    "der_parse_u32_u64_lead0",
+    "der_parse_u32_zero"
+   ]
   },
   {
    "rva": "0x8c8",
@@ -145,7 +159,13 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_parse_u64",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_parse_u64_empty_err",
+    "der_parse_u64_neg_rejected",
+    "der_parse_u64_u32_val",
+    "der_parse_u64_u64_lead0",
+    "der_parse_u64_zero"
+   ]
   },
   {
    "rva": "0x8f0",
@@ -165,7 +185,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_slice_to_bounds",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_slice_to_bounds_ok"
+   ]
   },
   {
    "rva": "0x950",
@@ -176,7 +198,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_next_tlv",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_next_tlv_end_reached",
+    "der_next_tlv_first_elem"
+   ]
   },
   {
    "rva": "0x9c0",
@@ -187,7 +212,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_parse_sequence",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_parse_sequence_valid_unsigned",
+    "der_parse_sequence_wrong_outer_tag"
+   ]
   },
   {
    "rva": "0xa46",
@@ -198,7 +226,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_parse_sequence_body",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_parse_seq_body_missing_req",
+    "der_parse_seq_body_valid_2elems"
+   ]
   },
   {
    "rva": "0xc08",
@@ -209,7 +240,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_der_find_tag_in_bounds",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "der_find_tag_hit_4",
+    "der_find_tag_miss_99"
+   ]
   },
   {
    "rva": "0xc50",
@@ -220,7 +254,12 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_cmp_fourcc",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_cmp_fourcc_eq",
+    "img4_cmp_fourcc_gt",
+    "img4_cmp_fourcc_lt",
+    "img4_cmp_fourcc_short"
+   ]
   },
   {
    "rva": "0xc8c",
@@ -231,7 +270,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_decode_im4m_signed",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "rkos_img4_decode_im4m_signed_ok",
+    "rkos_img4_decode_im4m_signed_wrong4cc"
+   ]
   },
   {
    "rva": "0xcac",
@@ -242,7 +284,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_decode_typed_seq",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_decode_typed_seq_null",
+    "img4_decode_typed_seq_ok"
+   ]
   },
   {
    "rva": "0xd00",
@@ -253,7 +298,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_decode_im4m_unsigned",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "rkos_img4_decode_im4m_unsigned_ok",
+    "rkos_img4_decode_im4m_unsigned_wrong4cc"
+   ]
   },
   {
    "rva": "0xd20",
@@ -264,7 +312,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_decode_im4c_signed",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "rkos_img4_decode_im4c_signed_ok",
+    "rkos_img4_decode_im4c_signed_wrong4cc"
+   ]
   },
   {
    "rva": "0xd40",
@@ -275,7 +326,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_decode_im4c_unsigned",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "rkos_img4_decode_im4c_unsigned_ok",
+    "rkos_img4_decode_im4c_unsigned_wrong4cc"
+   ]
   },
   {
    "rva": "0xd60",
@@ -286,7 +340,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_parse_prop_entry",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_parse_prop_mismatch",
+    "img4_parse_prop_ok"
+   ]
   },
   {
    "rva": "0xde4",
@@ -297,7 +354,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_find_prop_in_bounds",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_find_prop_bounds_mismatch",
+    "img4_find_prop_bounds_ok"
+   ]
   },
   {
    "rva": "0xe0e",
@@ -308,7 +368,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_find_prop_in_slice",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_find_prop_slice_mismatch",
+    "img4_find_prop_slice_ok"
+   ]
   },
   {
    "rva": "0xe38",
@@ -319,7 +382,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_get_manb_and_manp",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_get_manb_manp_null",
+    "img4_get_manb_manp_ok"
+   ]
   },
   {
    "rva": "0xf32",
@@ -339,7 +405,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_lookup_obj_prop",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_lookup_obj_prop_miss_xxxx",
+    "img4_lookup_obj_prop_rkos_hit"
+   ]
   },
   {
    "rva": "0xfd0",
@@ -350,7 +419,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_get_obj_octet_prop",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_get_obj_octet_miss_xxxx",
+    "img4_get_obj_octet_rkos_hit"
+   ]
   },
   {
    "rva": "0x101c",
@@ -361,7 +433,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_init_im4m_signed",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_init_im4m_signed_null",
+    "img4_init_im4m_signed_ok"
+   ]
   },
   {
    "rva": "0x1034",
@@ -372,7 +447,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_init_manifest_ctx",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_init_manifest_ctx_bad4cc",
+    "img4_init_manifest_ctx_im4c"
+   ]
   },
   {
    "rva": "0x10f8",
@@ -401,7 +479,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_img4_zero_item32",
    "source_file": "src/img4/img4_der.c",
-   "evidence": []
+   "evidence": [
+    "img4_zero_item32"
+   ]
   },
   {
    "rva": "0x112c",
@@ -430,7 +510,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_stack_guard_init",
    "source_file": "src/rtkit/boot.c",
-   "evidence": []
+   "evidence": [
+    "stack_guard_init"
+   ]
   },
   {
    "rva": "0x1158",
@@ -441,7 +523,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "__stack_chk_fail",
    "source_file": "src/rtkit/boot.c",
-   "evidence": []
+   "evidence": [
+    "stack_chk_fail"
+   ]
   },
   {
    "rva": "0x1168",
@@ -884,7 +968,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_cbc_decrypt",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_cbc_decrypt_2blk"
+   ]
   },
   {
    "rva": "0x190c",
@@ -895,7 +981,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_cbc_encrypt",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_cbc_encrypt_2blk"
+   ]
   },
   {
    "rva": "0x1988",
@@ -906,7 +994,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_enc",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_enc_128"
+   ]
   },
   {
    "rva": "0x1b80",
@@ -917,7 +1007,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_enc128",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_enc128"
+   ]
   },
   {
    "rva": "0x1b8c",
@@ -928,7 +1020,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_enc192",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_enc192"
+   ]
   },
   {
    "rva": "0x1b98",
@@ -939,7 +1033,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_enc256",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_enc256"
+   ]
   },
   {
    "rva": "0x1ba4",
@@ -950,7 +1046,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_dec",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_dec_128"
+   ]
   },
   {
    "rva": "0x1c08",
@@ -961,7 +1059,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_dec128",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_dec128"
+   ]
   },
   {
    "rva": "0x1c20",
@@ -972,7 +1072,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_dec192",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_dec192"
+   ]
   },
   {
    "rva": "0x1c38",
@@ -983,7 +1085,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_key_expand_dec256",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_key_expand_dec256"
+   ]
   },
   {
    "rva": "0x1c50",
@@ -994,7 +1098,13 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_setup_enc",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_setup_enc_128",
+    "rkos_aes_setup_enc_16",
+    "rkos_aes_setup_enc_17",
+    "rkos_aes_setup_enc_24",
+    "rkos_aes_setup_enc_32"
+   ]
   },
   {
    "rva": "0x1c8c",
@@ -1005,7 +1115,13 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_setup_dec",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_setup_dec_128",
+    "rkos_aes_setup_dec_16",
+    "rkos_aes_setup_dec_17",
+    "rkos_aes_setup_dec_24",
+    "rkos_aes_setup_dec_32"
+   ]
   },
   {
    "rva": "0x1cc8",
@@ -1016,7 +1132,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_ccm_decrypt",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_ccm_decrypt_2blk"
+   ]
   },
   {
    "rva": "0x1dd4",
@@ -1027,7 +1145,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_ctr_crypt",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_ctr_crypt_2blk"
+   ]
   },
   {
    "rva": "0x1e50",
@@ -1038,7 +1158,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_decrypt_block",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_decrypt_block_badctx",
+    "rkos_aes_decrypt_block_ok"
+   ]
   },
   {
    "rva": "0x2080",
@@ -1049,7 +1172,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_add",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_add_c4_0",
+    "rkos_ccn_add_c4_2"
+   ]
   },
   {
    "rva": "0x20ec",
@@ -1060,7 +1186,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_add1",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_add1_s0",
+    "rkos_ccn_add1_s255",
+    "rkos_ccn_add1_s7"
+   ]
   },
   {
    "rva": "0x2118",
@@ -1071,7 +1201,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_addmul1",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_addmul1_s0",
+    "rkos_ccn_addmul1_s255",
+    "rkos_ccn_addmul1_s7"
+   ]
   },
   {
    "rva": "0x2204",
@@ -1082,7 +1216,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_cmp",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_cmp_eq",
+    "rkos_ccn_cmp_gt",
+    "rkos_ccn_cmp_lt"
+   ]
   },
   {
    "rva": "0x2234",
@@ -1093,7 +1231,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_sub1",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_sub1_s0",
+    "rkos_ccn_sub1_s255",
+    "rkos_ccn_sub1_s7"
+   ]
   },
   {
    "rva": "0x2264",
@@ -1104,7 +1246,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_mul1",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_mul1_s0",
+    "rkos_ccn_mul1_s255",
+    "rkos_ccn_mul1_s7"
+   ]
   },
   {
    "rva": "0x2304",
@@ -1115,7 +1261,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_n",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_n_three",
+    "rkos_ccn_n_zero"
+   ]
   },
   {
    "rva": "0x2328",
@@ -1126,7 +1275,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_set",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_set_4"
+   ]
   },
   {
    "rva": "0x235c",
@@ -1137,7 +1288,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_sub",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_sub_c4_0",
+    "rkos_ccn_sub_c4_2"
+   ]
   },
   {
    "rva": "0x23d0",
@@ -1148,7 +1302,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ccn_shift_right",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_ccn_shift_right_0",
+    "rkos_ccn_shift_right_19",
+    "rkos_ccn_shift_right_5"
+   ]
   },
   {
    "rva": "0x2468",
@@ -1159,7 +1317,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_ccm_encrypt",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_ccm_encrypt_2blk"
+   ]
   },
   {
    "rva": "0x256c",
@@ -1170,7 +1330,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_aes_encrypt_block",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_aes_encrypt_block_badctx",
+    "rkos_aes_encrypt_block_ok"
+   ]
   },
   {
    "rva": "0x279c",
@@ -1193,7 +1356,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_mark_allocated",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_mark_and_unmark_alloc"
+   ]
   },
   {
    "rva": "0x2cac",
@@ -1204,7 +1369,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "heap_free_impl",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_free_impl_tracked"
+   ]
   },
   {
    "rva": "0x2d84",
@@ -1215,7 +1382,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "heap_alloc_or_coalesce",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_alloc_or_coalesce_pass"
+   ]
   },
   {
    "rva": "0x2f3c",
@@ -1257,7 +1426,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_unmark_allocated",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_unmark_allocated"
+   ]
   },
   {
    "rva": "0x2f94",
@@ -1268,7 +1439,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_mark_free",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_mark_free_blk"
+   ]
   },
   {
    "rva": "0x3030",
@@ -1279,7 +1452,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_freelist_unlink",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_freelist_unlink"
+   ]
   },
   {
    "rva": "0x30a0",
@@ -1290,7 +1465,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_coalesce_pair",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_coalesce_pair"
+   ]
   },
   {
    "rva": "0x30dc",
@@ -1301,7 +1478,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_freelist_insert",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_freelist_insert_second"
+   ]
   },
   {
    "rva": "0x3154",
@@ -1312,7 +1491,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_unmark_free",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_unmark_free"
+   ]
   },
   {
    "rva": "0x31b8",
@@ -1338,7 +1519,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_range_in_regions",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_range_in_regions_hit",
+    "heap_range_in_regions_miss"
+   ]
   },
   {
    "rva": "0x31e8",
@@ -1349,7 +1533,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "heap_alloc_impl",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_alloc_impl_64"
+   ]
   },
   {
    "rva": "0x32c4",
@@ -1360,7 +1546,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "heap_free_blk",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_free_blk_after_alloc"
+   ]
   },
   {
    "rva": "0x32cc",
@@ -1398,7 +1586,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_primask_disable_if_enabled",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "primask_disable_pm0",
+    "primask_disable_pm1"
+   ]
   },
   {
    "rva": "0x349a",
@@ -1409,7 +1600,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_irq_enable_all",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "irq_enable_all_pm0",
+    "irq_enable_all_pm1"
+   ]
   },
   {
    "rva": "0x34a8",
@@ -1458,7 +1652,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rtkit_sched_switch",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "rtkit_sched_switch_r0",
+    "rtkit_sched_switch_r1"
+   ]
   },
   {
    "rva": "0x357c",
@@ -1497,7 +1694,38 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_nvic_set_enable",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "rkos_nvic_set_enable_v14_e0",
+    "rkos_nvic_set_enable_v14_e1",
+    "rkos_nvic_set_enable_v15_e0",
+    "rkos_nvic_set_enable_v15_e1",
+    "rkos_nvic_set_enable_v16_e0",
+    "rkos_nvic_set_enable_v16_e1",
+    "rkos_nvic_set_enable_v18_e0",
+    "rkos_nvic_set_enable_v18_e1",
+    "rkos_nvic_set_enable_v200_e0",
+    "rkos_nvic_set_enable_v200_e1",
+    "rkos_nvic_set_enable_v21_e0",
+    "rkos_nvic_set_enable_v21_e1",
+    "rkos_nvic_set_enable_v24_e0",
+    "rkos_nvic_set_enable_v24_e1",
+    "rkos_nvic_set_enable_v2_e0",
+    "rkos_nvic_set_enable_v2_e1",
+    "rkos_nvic_set_enable_v3_e0",
+    "rkos_nvic_set_enable_v3_e1",
+    "rkos_nvic_set_enable_v48_e0",
+    "rkos_nvic_set_enable_v48_e1",
+    "rkos_nvic_set_enable_v63_e0",
+    "rkos_nvic_set_enable_v63_e1",
+    "rkos_nvic_set_enable_v66_e0",
+    "rkos_nvic_set_enable_v66_e1",
+    "rkos_nvic_set_enable_v81_e0",
+    "rkos_nvic_set_enable_v81_e1",
+    "rkos_nvic_set_enable_v87_e0",
+    "rkos_nvic_set_enable_v87_e1",
+    "rkos_nvic_set_enable_v88_e0",
+    "rkos_nvic_set_enable_v88_e1"
+   ]
   },
   {
    "rva": "0x35bc",
@@ -1508,7 +1736,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_nvic_set_enable_state",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "nvic_set_enable_state_e0",
+    "nvic_set_enable_state_e1"
+   ]
   },
   {
    "rva": "0x3620",
@@ -1545,7 +1776,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "IRQ_CommonHandler",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "irq_common_dispatched",
+    "irq_common_unhandled"
+   ]
   },
   {
    "rva": "0x373c",
@@ -1650,7 +1884,15 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_nvic_drv_op",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "nvic_drv_init_op1",
+    "nvic_drv_noop_op2",
+    "nvic_drv_oob_op99",
+    "nvic_drv_restore_op5",
+    "nvic_drv_save_op4",
+    "nvic_drv_unsupported_op6",
+    "nvic_drv_vtbl_op8"
+   ]
   },
   {
    "rva": "0x3988",
@@ -1729,7 +1971,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_crit_lock_once",
    "source_file": "src/rtkit/boot.c",
-   "evidence": []
+   "evidence": [
+    "crit_lock_once_0",
+    "crit_lock_once_5"
+   ]
   },
   {
    "rva": "0x3b58",
@@ -1740,7 +1985,12 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_unwind_frame",
    "source_file": "src/rtkit/boot.c",
-   "evidence": []
+   "evidence": [
+    "unwind_frame_cur_sp",
+    "unwind_frame_exc_walk",
+    "unwind_frame_max0",
+    "unwind_frame_max1"
+   ]
   },
   {
    "rva": "0x3eac",
@@ -1751,7 +2001,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_unwind_callsite_pc",
    "source_file": "src/rtkit/boot.c",
-   "evidence": []
+   "evidence": [
+    "unwind_callsite_bl32_code",
+    "unwind_callsite_unmapped_lr"
+   ]
   },
   {
    "rva": "0x3ee0",
@@ -2511,7 +2764,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_kernel_heap_add_region",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "kernel_heap_add_region_extra"
+   ]
   },
   {
    "rva": "0x50b4",
@@ -2522,7 +2777,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "crit_enter",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "crit_enter_init"
+   ]
   },
   {
    "rva": "0x5124",
@@ -2533,7 +2790,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "crit_exit",
    "source_file": "src/rtkit/irq.c",
-   "evidence": []
+   "evidence": [
+    "crit_exit_0",
+    "crit_exit_131074"
+   ]
   },
   {
    "rva": "0x5134",
@@ -2544,7 +2804,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_heap_disable_checks",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "heap_disable_checks"
+   ]
   },
   {
    "rva": "0x515c",
@@ -2568,7 +2830,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_realloc",
    "source_file": "src/kernel/heap.c",
-   "evidence": []
+   "evidence": [
+    "rkos_realloc_inplace_grow",
+    "rkos_realloc_null_alloc"
+   ]
   },
   {
    "rva": "0x5304",
@@ -2618,7 +2883,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_strtoull_scanner",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "strtoull_scanner_hex64",
+    "strtoull_scanner_neg_dec",
+    "strtoull_scanner_ovfl"
+   ]
   },
   {
    "rva": "0x54bc",
@@ -2629,7 +2898,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_strtol_parse_base",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "strtol_parse_base_auto_hex",
+    "strtol_parse_base_dec_plus",
+    "strtol_parse_base_octal"
+   ]
   },
   {
    "rva": "0x5568",
@@ -2656,7 +2929,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_printf",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "printf_variadic"
+   ]
   },
   {
    "rva": "0x55b0",
@@ -2667,7 +2942,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_vprintf",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "vprintf_rich"
+   ]
   },
   {
    "rva": "0x55d4",
@@ -2678,7 +2955,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_console_putc",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "console_putc_char",
+    "console_putc_nul"
+   ]
   },
   {
    "rva": "0x55e0",
@@ -2689,7 +2969,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_vprintf_core",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "vprintf_core_rich"
+   ]
   },
   {
    "rva": "0x5ae8",
@@ -2746,7 +3028,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_snprintf_putc",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "snprintf_putc_0",
+    "snprintf_putc_65"
+   ]
   },
   {
    "rva": "0x5bf8",
@@ -2823,7 +3108,11 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_word_copy32",
    "source_file": "src/libc/string.c",
-   "evidence": []
+   "evidence": [
+    "word_copy32_0",
+    "word_copy32_20",
+    "word_copy32_68"
+   ]
   },
   {
    "rva": "0x5d34",
@@ -2850,7 +3139,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_memset_chk_fail",
    "source_file": "src/libc/string.c",
-   "evidence": []
+   "evidence": [
+    "memset_chk_fail"
+   ]
   },
   {
    "rva": "0x5d4c",
@@ -2904,7 +3195,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_console_mux_putc",
    "source_file": "src/libc/printf_stdlib.c",
-   "evidence": []
+   "evidence": [
+    "console_mux_putc_ok"
+   ]
   },
   {
    "rva": "0x5e48",
@@ -7272,7 +7565,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_unwind_task",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "unwind_task_null_task",
+    "unwind_task_other_task"
+   ]
   },
   {
    "rva": "0x1091e",
@@ -7283,7 +7579,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_unwind_frames_cnt",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "unwind_frames_cnt_exc"
+   ]
   },
   {
    "rva": "0x10930",
@@ -7294,7 +7592,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_spinlock_release",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "spinlock_release_0",
+    "spinlock_release_131074"
+   ]
   },
   {
    "rva": "0x10938",
@@ -7318,7 +7619,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_task_clear_yield_check_preempt",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "task_clear_yield_no_preempt",
+    "task_clear_yield_preempt"
+   ]
   },
   {
    "rva": "0x1099c",
@@ -7329,7 +7633,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_task_recalc_priority",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "task_recalc_prio_25",
+    "task_recalc_prio_4"
+   ]
   },
   {
    "rva": "0x109d0",
@@ -7340,7 +7647,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_sched_tailq_remove",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "sched_tailq_remove_last"
+   ]
   },
   {
    "rva": "0x10a10",
@@ -7639,7 +7948,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_mem_region_register",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "mem_region_register_badslot",
+    "mem_region_register_ok"
+   ]
   },
   {
    "rva": "0x11528",
@@ -7663,7 +7975,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_mem_region_apply_table",
    "source_file": "src/kernel/sched_sync.c",
-   "evidence": []
+   "evidence": [
+    "mem_region_apply_table_2ents"
+   ]
   },
   {
    "rva": "0x11634",
@@ -7728,7 +8042,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_ref_mutex_dec_unlock",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "ref_mutex_dec_1",
+    "ref_mutex_dec_2"
+   ]
   },
   {
    "rva": "0x118c4",
@@ -7739,7 +8056,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_crypto_fips_abort",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "crypto_fips_abort"
+   ]
   },
   {
    "rva": "0x118d0",
@@ -7853,7 +8172,12 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_cchmac_init",
    "source_file": "src/kernel/crypto_der.c",
-   "evidence": []
+   "evidence": [
+    "cchmac_init_32_200",
+    "cchmac_init_32_4",
+    "cchmac_init_64_200",
+    "cchmac_init_64_4"
+   ]
   },
   {
    "rva": "0x11db8",
@@ -7864,7 +8188,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_crypto_panic_str",
    "source_file": "src/kernel/crypto_der.c",
-   "evidence": []
+   "evidence": [
+    "crypto_panic_str_msg",
+    "crypto_panic_str_null"
+   ]
   },
   {
    "rva": "0x11dc8",
@@ -7927,7 +8254,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_hmac_init",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "drbg_hmac_init_ok",
+    "drbg_hmac_init_short_ent"
+   ]
   },
   {
    "rva": "0x123f4",
@@ -7938,7 +8268,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_hmac_generate",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "drbg_hmac_generate_48b",
+    "drbg_hmac_generate_reseed_req"
+   ]
   },
   {
    "rva": "0x12520",
@@ -7949,7 +8282,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_hmac_reseed",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_drbg_hmac_reseed_ok",
+    "rkos_drbg_hmac_reseed_short"
+   ]
   },
   {
    "rva": "0x12526",
@@ -7960,7 +8296,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_hmac_reseed_body",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "rkos_drbg_hmac_reseed_body_ok",
+    "rkos_drbg_hmac_reseed_body_short"
+   ]
   },
   {
    "rva": "0x1256c",
@@ -7971,7 +8310,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_clear",
    "source_file": "src/kernel/crypto_der.c",
-   "evidence": []
+   "evidence": [
+    "drbg_clear"
+   ]
   },
   {
    "rva": "0x125a8",
@@ -7982,7 +8323,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_need_reseed",
    "source_file": "src/kernel/crypto_der.c",
-   "evidence": []
+   "evidence": [
+    "drbg_need_reseed_expired",
+    "drbg_need_reseed_fresh"
+   ]
   },
   {
    "rva": "0x125cc",
@@ -7993,7 +8337,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_drbg_hmac_update",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "drbg_hmac_update_1in"
+   ]
   },
   {
    "rva": "0x12700",
@@ -8121,7 +8467,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_take_and_dec_field58",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "take_and_dec_field58"
+   ]
   },
   {
    "rva": "0x127c0",
@@ -8141,7 +8489,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_bzero32",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "bzero32"
+   ]
   },
   {
    "rva": "0x127d0",
@@ -8359,7 +8709,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_bzero_len",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "bzero_len_20"
+   ]
   },
   {
    "rva": "0x12904",
@@ -8523,7 +8875,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_bitmap_shift_word",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "bitmap_shift_word_3",
+    "bitmap_shift_word_37"
+   ]
   },
   {
    "rva": "0x129c6",
@@ -8597,7 +8952,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_umul_u32_u64",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "umul_u32_u64"
+   ]
   },
   {
    "rva": "0x12a24",
@@ -8662,7 +9019,10 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_is_zero_u32",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "is_zero_u32_0",
+    "is_zero_u32_42"
+   ]
   },
   {
    "rva": "0x12a6e",
@@ -8700,7 +9060,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_memcpy16",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "memcpy16"
+   ]
   },
   {
    "rva": "0x12a9c",
@@ -8711,7 +9073,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_pack_low2_and_idx",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "pack_low2_and_idx"
+   ]
   },
   {
    "rva": "0x12aa6",
@@ -8740,7 +9104,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_const_256",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "const_256"
+   ]
   },
   {
    "rva": "0x12abe",
@@ -8760,7 +9126,9 @@
    "classification": "reconstructed_c",
    "c_symbol": "rkos_deref_table_slot",
    "source_file": "src/crypto/aes_ccn_drbg.c",
-   "evidence": []
+   "evidence": [
+    "deref_table_slot"
+   ]
   },
   {
    "rva": "0x12ad8",

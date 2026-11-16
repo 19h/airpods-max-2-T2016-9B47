@@ -127,6 +127,27 @@ RKOS_EARLY_TEXT void *rkos_memset(void *dst, int c, size_t n)
     uint8_t *d = (uint8_t *)dst;
     uint8_t fill = (uint8_t)(c & 0xFF);
 
+    while (((uintptr_t)d & 3u) != 0u && n > 0u) {
+        *d++ = fill;
+        n--;
+    }
+    if (n >= 4u) {
+        uint32_t fill32 = (uint32_t)fill * 0x01010101u;
+        uint32_t *dw = (uint32_t *)(void *)d;
+        while (n >= 16u) {
+            dw[0] = fill32;
+            dw[1] = fill32;
+            dw[2] = fill32;
+            dw[3] = fill32;
+            dw += 4;
+            n -= 16u;
+        }
+        while (n >= 4u) {
+            *dw++ = fill32;
+            n -= 4u;
+        }
+        d = (uint8_t *)(void *)dw;
+    }
     while (n > 0u) {
         *d++ = fill;
         n--;

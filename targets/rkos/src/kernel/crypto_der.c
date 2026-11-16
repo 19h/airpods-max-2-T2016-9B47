@@ -445,10 +445,10 @@ uint32_t rkos_drbg_clear(uint32_t drbg_va)
     (void)rkos_memset(ctx + 0x04u, 0, 0x40u);
     (void)rkos_memset(ctx + 0x44u, 0, 0x40u);
 #else
-    uint32_t fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x200008A0u);
-    (void)rkos_call_fn3(0x200008A0u, fn_va, drbg_va + 0x04u, 0u, 0x40u);
-    fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x200008A0u);
-    (void)rkos_call_fn3(0x200008A0u, fn_va, drbg_va + 0x44u, 0u, 0x40u);
+    uint32_t fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x000160C0u);
+    (void)rkos_call_fn3(0x000160C0u, fn_va, drbg_va + 0x04u, 0u, 0x40u);
+    fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x000160C0u);
+    (void)rkos_call_fn3(0x000160C0u, fn_va, drbg_va + 0x44u, 0u, 0x40u);
 #endif
     *(uint32_t *)(void *)(ctx + 0x8Cu) = 0xFFFFFFFFu;
     *(uint32_t *)(void *)(ctx + 0x88u) = 0xFFFFFFFFu;

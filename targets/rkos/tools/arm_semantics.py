@@ -261,7 +261,11 @@ class CortexM4Pair:
                 r2 = uc_in.reg_read(UC_ARM_REG_R2) & 0xFFFFFFFF
                 r3 = uc_in.reg_read(UC_ARM_REG_R3) & 0xFFFFFFFF
                 if capture_str:
-                    stub_calls.append((hex(pend_rva), _read_cstr_bounded(uc_in, r0), r1))
+                    fmt_s = _read_cstr_bounded(uc_in, r0)
+                    if "%" in fmt_s:
+                        stub_calls.append((hex(pend_rva), fmt_s, r1))
+                    else:
+                        stub_calls.append((hex(pend_rva), fmt_s))
                 else:
                     stub_calls.append((hex(pend_rva), r0, r1, r2, r3))
                 if ret_val is None:
@@ -1048,7 +1052,10 @@ def build_test_suites(pair: CortexM4Pair) -> list[dict[str, Any]]:
         uc.reg_write(UC_ARM_REG_IPSR, ipsr_val)
     nvic_regions = [(0xE000E100, 0x10), (0xE000E180, 0x10), (0xE000E200, 0x10), (0xE000E280, 0x10)]
     for vec in (15, 24, 18, 2, 3, 14, 16, 21, 48, 63, 66, 81, 87, 88, 200):
-        for rva, sym in [(0x359C, "rkos_nvic_is_enabled"), (0x373C, "rkos_nvic_is_pending"),
+        for en in (0, 1):
+            safe("coverage", f"rkos_nvic_set_enable_v{vec}_e{en}", 0x359C, "rkos_nvic_set_enable",
+                 lambda uc, v=vec, e=en: (nvic(uc), [0x20000F00, v, e])[1], nvic_regions)
+        for rva, sym in [(0x373C, "rkos_nvic_is_pending"),
                          (0x3988, "rkos_nvic_is_active"), (0x37D0, "rkos_nvic_set_pending"),
                          (0x3788, "rkos_nvic_clear_pending")]:
             safe("coverage", f"{sym}_v{vec}", rva, sym, lambda uc, v=vec: (nvic(uc), [0x20000F00, v])[1], nvic_regions)
@@ -1101,6 +1108,9 @@ def build_test_suites(pair: CortexM4Pair) -> list[dict[str, Any]]:
                 return [init_args[0], 0x02001000, 0x02000800]
             safe("coverage", f"cchmac_final_{iv_len}_{klen}", 0x11C5C, "rkos_cchmac_final", hf_setup,
                  [(0x02000800, 64)], check_r0=False)
+
+    from suites_p2_b1 import add_batch1_cases
+    add_batch1_cases(pair, safe, wr, fn_target)
 
     return results
 

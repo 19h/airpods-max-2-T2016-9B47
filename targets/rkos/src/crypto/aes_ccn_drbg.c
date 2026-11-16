@@ -713,8 +713,8 @@ static inline void rkos_secure_zero_buf(void *buf, size_t len)
 #ifdef RKOS_HOST
     (void)rkos_memset(buf, 0, len);
 #else
-    uint32_t fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x200008A0u);
-    (void)rkos_call_fn3(0x200008A0u, fn_va, (uint32_t)(uintptr_t)buf, 0u, (uint32_t)len);
+    uint32_t fn_va = *RKOS_VMA_PTR(const uint32_t *, 0x000160C0u);
+    (void)rkos_call_fn3(0x000160C0u, fn_va, (uint32_t)(uintptr_t)buf, 0u, (uint32_t)len);
 #endif
 }
 
